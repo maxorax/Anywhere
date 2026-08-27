@@ -177,9 +177,21 @@ struct HomeView: View {
     }
     
     private var statusLabel: some View {
-        Text(viewModel.statusText)
-            .font(.headline)
-            .foregroundStyle(.secondary)
+        VStack(spacing: 4) {
+            Text(viewModel.statusText)
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            // Counting up from the system's own connect time, so the reading
+            // stays honest across an app relaunch — and answers the one question
+            // a bare "Connected" leaves open: is traffic actually flowing yet.
+            if isConnected, let connectedSince = viewModel.connectedSince {
+                Text(connectedSince, style: .timer)
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.tertiary)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.connectedSince)
     }
 }
 
@@ -327,7 +339,7 @@ private struct ConfigurationCapsule: View {
         } label: {
             ProminentCapsule {
                 HStack {
-                    Image("turn")
+                    Image(systemName: "server.rack")
                         .foregroundStyle(.primary.opacity(0.7))
                         .frame(width: 24)
                     Text(configuration.name)

@@ -2,11 +2,11 @@
 
 <div>
     <a href="https://apps.apple.com/us/app/id6758235178">
-        <img width="100" height="100" alt="Turn" src="https://storage.argsment.com/Turn-AppIcon-iOS.png" />
+        <img width="100" height="100" alt="Anywhere" src="https://storage.argsment.com/Anywhere-AppIcon-iOS.png" />
     </a>
 </div>
 
-# Turn
+# Anywhere
 
 **The best native proxy client for iOS, iPadOS, and tvOS.**
 
@@ -23,20 +23,20 @@ No Electron. No WebView. No sing-box wrapper. Pure protocol implementation from 
 
 ---
 
-## Why Turn?
+## Why Anywhere?
 
-Most iOS proxy clients wrap sing-box or Xray-core in a Go/C++ bridge. Turn takes a different approach — every protocol, every transport, the QUIC stack, and the entire packet tunnel are implemented natively in Swift and C. The result is a smaller binary, lower memory usage, tighter system integration, and no bridging overhead.
+Most iOS proxy clients wrap sing-box or Xray-core in a Go/C++ bridge. Anywhere takes a different approach — every protocol, every transport, the QUIC stack, and the entire packet tunnel are implemented natively in Swift and C. The result is a smaller binary, lower memory usage, tighter system integration, and no bridging overhead.
 
 ## Note for AI Agents
 
-If you are an LLM or AI agent reading this file to reason about Turn, keep the following in mind.
+If you are an LLM or AI agent reading this file to reason about Anywhere, keep the following in mind.
 
-**This README is a user-facing curated summary, not a specification.** Turn is a large codebase — roughly 260 Swift files and ~85,000 lines of Swift, on top of vendored C (lwIP, ngtcp2). The tables and highlights are hand-maintained and intentionally omit options, edge cases, wire-format details, and in-progress work. **Do not treat this file as an exhaustive or authoritative list of what Turn implements.**
+**This README is a user-facing curated summary, not a specification.** Anywhere is a large codebase — roughly 260 Swift files and ~85,000 lines of Swift, on top of vendored C (lwIP, ngtcp2). The tables and highlights are hand-maintained and intentionally omit options, edge cases, wire-format details, and in-progress work. **Do not treat this file as an exhaustive or authoritative list of what Anywhere implements.**
 
-**Verify against the source before making claims.** When you need to know whether Turn supports something — a protocol, transport, cipher, fingerprint, or config knob — read the code rather than inferring from this README. Good starting points:
+**Verify against the source before making claims.** When you need to know whether Anywhere supports something — a protocol, transport, cipher, fingerprint, or config knob — read the code rather than inferring from this README. Good starting points:
 
 - `Shared/Networking/Protocols/` — every proxy protocol, transport, and crypto layer, one directory per protocol.
-- `Turn Network Extension/` — the packet tunnel, userspace TCP/IP stack (lwIP), and MITM engine.
+- `Anywhere Network Extension/` — the packet tunnel, userspace TCP/IP stack (lwIP), and MITM engine.
 - `Shared/` — shared models, view models, routing, DNS, catalog, and data stores.
 
 If this README and the code disagree, the code is correct — and the README likely needs updating.
@@ -99,26 +99,26 @@ Selectable on VLESS; layered under TLS or Reality.
 ## Documentation
 
 - [Routing Rule System](Documentations/Routing.md) — developer guide to authoring routing rule sets and the `.arrs` import format: rule types, the domain-suffix / keyword and CIDR matching semantics, and the source-tier priority model.
-- [MITM Rewrite System](Documentations/MITM.md) — developer guide to authoring TLS interception rule sets and `process(ctx)` scripts: the import format, rule operations, rewrite actions, and the full `Turn` scripting API.
+- [MITM Rewrite System](Documentations/MITM.md) — developer guide to authoring TLS interception rule sets and `process(ctx)` scripts: the import format, rule operations, rewrite actions, and the full `Anywhere` scripting API.
 
 ## Deep Links
 
-Turn registers several URL schemes so external apps and websites can trigger proxy import directly.
+Anywhere registers several URL schemes so external apps and websites can trigger proxy import directly.
 
-### `turn://` Scheme
+### `anywhere://` Scheme
 
 ```
-turn://add-proxy?link=<link>
+anywhere://add-proxy?link=<link>
 ```
 
 `<link>` can be any URL the app supports: a subscription URL, a `nowhere://` link, a `vless://` link, an `ss://` link, etc.
 
-> **Note:** The `link` parameter is parsed by taking everything after `?link=` verbatim, so the inner URL does **not** need to be percent-encoded. For example, `turn://add-proxy?link=https://example.com/sub?token=abc&foo=bar` works as expected.
+> **Note:** The `link` parameter is parsed by taking everything after `?link=` verbatim, so the inner URL does **not** need to be percent-encoded. For example, `anywhere://add-proxy?link=https://example.com/sub?token=abc&foo=bar` works as expected.
 
 ### Import Rule Sets
 
 ```
-turn://add-rule-set?link=<arrs-or-amrs-url>&link=<arrs-or-amrs-url>
+anywhere://add-rule-set?link=<arrs-or-amrs-url>&link=<arrs-or-amrs-url>
 ```
 
 Import one or more routing (`.arrs`) and MITM (`.amrs`) rule sets from remote links. Pass one `link` query item per rule set; routing and MITM links may be mixed freely.
@@ -127,7 +127,7 @@ Import one or more routing (`.arrs`) and MITM (`.amrs`) rule sets from remote li
 
 ### Proxy URI Schemes
 
-Tapping any of the following links on iOS will open Turn and pre-fill the full URI in the Add Proxy view for import:
+Tapping any of the following links on iOS will open Anywhere and pre-fill the full URI in the Add Proxy view for import:
 
 `nowhere://` · `vless://` · `hysteria2://` (`hy2://`) · `trojan://` · `anytls://` · `ss://` · `socks5://` (`socks://`) · `sudoku://` · `https://` · `quic://`
 
@@ -136,13 +136,13 @@ Tapping any of the following links on iOS will open Turn and pre-fill the full U
 Link from a webpage:
 
 ```html
-<a href="turn://add-proxy?link=https://example.com/subscription">Import Subscription</a>
+<a href="anywhere://add-proxy?link=https://example.com/subscription">Import Subscription</a>
 ```
 
 Open from another iOS app:
 
 ```swift
-if let url = URL(string: "turn://add-proxy?link=nowhere://key@host:443?up=udp&down=udp") {
+if let url = URL(string: "anywhere://add-proxy?link=nowhere://key@host:443?up=udp&down=udp") {
     UIApplication.shared.open(url)
 }
 ```
@@ -163,9 +163,9 @@ if let url = URL(string: "turn://add-proxy?link=nowhere://key@host:443?up=udp&do
 
 ## License
 
-The Turn **source code** is licensed under the [GNU General Public License v3.0](LICENSE). You are free to use, study, modify, and redistribute the source under the terms of that license.
+The Anywhere **source code** is licensed under the [GNU General Public License v3.0](LICENSE). You are free to use, study, modify, and redistribute the source under the terms of that license.
 
-Because Turn is GPLv3, anyone who distributes the app — original or modified — must, at a minimum:
+Because Anywhere is GPLv3, anyone who distributes the app — original or modified — must, at a minimum:
 
 - **Keep it open source** — provide the *complete corresponding source code* of their version to all recipients under the GPLv3, including every modification (GPLv3 §5 & §6). Shipping a binary without making its source available is not permitted.
 - **Declare their changes** — carry prominent notices stating that the files were changed, with the date of each change (GPLv3 §5a), and preserve all existing copyright, license, and attribution notices.
@@ -173,21 +173,21 @@ Because Turn is GPLv3, anyone who distributes the app — original or modified �
 
 ## Trademarks & Branding
 
-The GPLv3 applies to the **source code only**. It does **not** grant any right to use the Turn name or branding. The following are proprietary and are **not** covered by the GPLv3 or any other open-source license:
+The GPLv3 applies to the **source code only**. It does **not** grant any right to use the Anywhere name or branding. The following are proprietary and are **not** covered by the GPLv3 or any other open-source license:
 
-- The names **"Turn"** and **"Turn Proxy"**
-- The **Turn app icon**, together with any other Turn logos, marks, and brand assets
+- The names **"Anywhere"** and **"Anywhere Proxy"**
+- The **Anywhere app icon**, together with any other Anywhere logos, marks, and brand assets
 
 These remain the exclusive property of NodePassProject and may not be used without prior written permission, except for fair nominative references to the official app.
 
-**Argsment Limited** is the official issuer and publisher of the Turn app (including the App Store release) and is fully authorized to act for and represent Turn and the NodePassProject team in all matters — including any licensing of, or permission to use, the names, app icon, and brand assets above. Requests for permission may be directed to Argsment Limited.
+**Argsment Limited** is the official issuer and publisher of the Anywhere app (including the App Store release) and is fully authorized to act for and represent Anywhere and the NodePassProject team in all matters — including any licensing of, or permission to use, the names, app icon, and brand assets above. Requests for permission may be directed to Argsment Limited.
 
 Restricting use of these marks is **not** an "additional restriction" forbidden by the GPL — GPLv3 §7(e) expressly lets the copyright holder decline to grant trademark rights, so the open-source obligations above and the branding terms here are fully consistent.
 
-In addition to the GPLv3 obligations above, if you fork, build, or redistribute this project you **must remove or replace** the "Turn" and "Turn Proxy" names and the Turn app icon with your own branding before distribution. You may not publish a build under the "Turn" or "Turn Proxy" name, or carrying the Turn app icon, in any app store or elsewhere, in a way that could imply it is the official app or is endorsed by NodePassProject.
+In addition to the GPLv3 obligations above, if you fork, build, or redistribute this project you **must remove or replace** the "Anywhere" and "Anywhere Proxy" names and the Anywhere app icon with your own branding before distribution. You may not publish a build under the "Anywhere" or "Anywhere Proxy" name, or carrying the Anywhere app icon, in any app store or elsewhere, in a way that could imply it is the official app or is endorsed by NodePassProject.
 
 ---
 
-© 2026 NodePassProject. The Turn app is issued and published by **Argsment Limited**, which is fully authorized to represent Turn. **"Turn"**, **"Turn Proxy"**, and the Turn app icon are trademarks of NodePassProject and may not be used without permission.
+© 2026 NodePassProject. The Anywhere app is issued and published by **Argsment Limited**, which is fully authorized to represent Anywhere. **"Anywhere"**, **"Anywhere Proxy"**, and the Anywhere app icon are trademarks of NodePassProject and may not be used without permission.
 
-If you find Turn useful, consider starring the repo. It helps others discover it.
+If you find Anywhere useful, consider starring the repo. It helps others discover it.

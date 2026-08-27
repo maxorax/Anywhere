@@ -12,12 +12,14 @@ fileprivate enum Method: String, CaseIterable, Identifiable {
 
     case qrCode = "qrCode"
     case link = "link"
+    case json = "json"
     case manual = "manual"
 
     var image: String {
         switch self {
         case .qrCode: "qrcode.viewfinder"
         case .link: "link"
+        case .json: "curlybraces"
         case .manual: "hand.point.up.left"
         }
     }
@@ -26,6 +28,7 @@ fileprivate enum Method: String, CaseIterable, Identifiable {
         switch self {
         case .qrCode: String(localized: "QR Code")
         case .link: String(localized: "Link")
+        case .json: String("JSON")
         case .manual: String(localized: "Manual")
         }
     }
@@ -42,6 +45,7 @@ struct AddProxyView: View {
     @State private var selectedMethod: Method?
     @State private var showingQRScanner = false
     @State private var linkURL = ""
+    @State private var jsonBody = ""
     @State private var isLoading = false
     @State private var showingError = false
     @State private var errorMessage = ""
@@ -70,6 +74,12 @@ struct AddProxyView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                         .geometryGroup()
                 }
+
+                if selectedMethod == .json {
+                    jsonInputField
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .geometryGroup()
+                }
             }
             
             continueButton
@@ -79,6 +89,9 @@ struct AddProxyView: View {
         .onChange(of: selectedMethod) {
             if selectedMethod == .link && linkURL.isEmpty {
                 checkClipboard()
+            }
+            if selectedMethod == .json && jsonBody.isEmpty {
+                checkClipboardForJSON()
             }
         }
         .qrScanner(isScanning: $showingQRScanner) { code in
@@ -102,6 +115,7 @@ struct AddProxyView: View {
     private var isContinueDisabled: Bool {
         switch selectedMethod {
         case .link: linkURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading
+        case .json: jsonBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading
         case nil: true
         default: false
         }
@@ -188,6 +202,25 @@ struct AddProxyView: View {
         .padding(.top, 12)
     }
     
+    // MARK: - JSON Input
+
+    private var jsonInputField: some View {
+        VStack(alignment: .leading) {
+            TextEditor(text: $jsonBody)
+                .font(.system(.footnote, design: .monospaced))
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .scrollContentBackground(.hidden)
+                .padding(12)
+                .frame(height: 180)
+                .background(.gray.opacity(0.1), in: .rect(cornerRadius: 16))
+            Text("Paste a sing-box config. A turn block, if present, attaches a VK relay to each server.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.top, 12)
+    }
+
     // MARK: - Continue Button
     @ViewBuilder
     private var continueButton: some View {
@@ -246,6 +279,8 @@ struct AddProxyView: View {
             showingQRScanner = true
         case .link:
             importFromString(linkURL)
+        case .json:
+            importFromJSON(jsonBody)
         case .manual:
             showingManualAddSheet = true
             dismiss()
@@ -275,6 +310,37 @@ struct AddProxyView: View {
                 return
             }
             fetchSubscription(url: trimmedURL, withRemnawaveHWID: requiresRemnawaveHWID)
+        }
+    }
+
+    private func checkClipboardForJSON() {
+        guard let clip = UIPasteboard.general.string?.trimmingCharacters(in: .whitespacesAndNewlines),
+              TurnSubscription.looksLikeSingBox(clip) else { return }
+        jsonBody = clip
+    }
+
+    /// Adds the outbounds of a pasted sing-box config as their own group.
+    ///
+    /// It still becomes a subscription, just one with no URL: the grouping, the
+    /// collapse state and the relay all hang off a subscription, and a flat pile
+    /// of servers is no way to present a seven-server config. Having no URL only
+    /// means it cannot refresh itself — the auto-updater skips it.
+    private func importFromJSON(_ body: String) {
+        do {
+            let parsed = try TurnSubscription.parse(json: body)
+            let subscription = Subscription(
+                name: parsed.suggestedName ?? String(localized: "Imported Config"),
+                url: "",
+                lastUpdate: Date()
+            )
+            subscriptionStore.add(subscription, configurations: parsed.configurations)
+            if let first = parsed.configurations.first {
+                viewModel.selectIfNone(first)
+            }
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showingError = true
         }
     }
 

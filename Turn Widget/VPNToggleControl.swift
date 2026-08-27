@@ -13,7 +13,7 @@ import WidgetKit
 struct VPNToggleControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(
-            kind: "com.argsment.Turn.Widget.VPNToggle",
+            kind: "com.maxorax.turn.Widget.VPNToggle",
             provider: VPNStatusProvider()
         ) { isOn in
             ControlWidgetToggle(
@@ -23,7 +23,7 @@ struct VPNToggleControl: ControlWidget {
             ) { isOn in
                 Label(
                     isOn ? "Connected" : "Disconnected",
-                    image: "turn"
+                    image: "anywhere"
                 )
             }
         }
@@ -32,12 +32,12 @@ struct VPNToggleControl: ControlWidget {
     }
 }
 
-private let turnNEBundleIdentifier = "com.argsment.Turn.Network-Extension"
+private let anywhereNEBundleIdentifier = "com.maxorax.turn.Network-Extension"
 
 private func loadManager() async throws -> NETunnelProviderManager? {
     let managers = try await NETunnelProviderManager.loadAllFromPreferences()
     return managers.first {
-        ($0.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == turnNEBundleIdentifier
+        ($0.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == anywhereNEBundleIdentifier
     }
 }
 

@@ -22,9 +22,17 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
     private let rootTask = Mutex<Task<Void, Never>?>(nil)
 
+    /// The selected proxy as the app sent it — before any relay redirect. Kept so
+    /// a network change can re-run the relay decision from the original.
+    private let baseConfiguration = Mutex<ProxyConfiguration?>(nil)
+
     // MARK: - Tunnel Lifecycle
     
     override func startTunnel(options: [String : NSObject]? = nil) async throws {
+        // Before anything else, so bringing the TURN relay up is narrated in the
+        // journal rather than only in the system log.
+        tunnelStack.installLogSink()
+
         guard let configuration = resolveStartConfiguration(options: options) else {
             let error = TurnError.tunnel(.invalidConfiguration)
             logger.report("[VPN] Start failed", error: error)
@@ -42,10 +50,27 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         }
 
 #if os(iOS)
-        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
+        ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
 #endif
 
-        await tunnelStack.start(packetFlow: packetFlow, configuration: configuration)
+        // Seed the network context before the first relay decision. The path
+        // monitor starts with `run()` below, and `updateNetworkContext` drops
+        // anything that arrives before the stack is up — so without this,
+        // `shouldRelay` would classify every cold start as an unidentified
+        // network and probe the direct path even on Wi-Fi.
+        if let path = await pathMonitorBridge.firstPath(timeout: .seconds(2)) {
+            let context = await networkContext(for: path)
+            await tunnelStack.seedNetworkContext(
+                isWiFi: context.isWiFi,
+                isCellular: context.isCellular,
+                ssid: context.ssid
+            )
+        } else {
+            logger.warning("[VPN] Path monitor did not report in time — deciding on an unidentified network")
+        }
+
+        let effective = await prepared(configuration)
+        await tunnelStack.start(packetFlow: packetFlow, configuration: effective)
         
         rootTask.withLock { task in
             guard task == nil else { return }
@@ -200,7 +225,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
     override func stopTunnel(with reason: NEProviderStopReason) async {
 #if os(iOS)
-        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
+        ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
 #endif
         
         statsRecorder.stop()
@@ -214,6 +239,124 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         logTunnelStop(reason: reason)
         
         await tunnelStack.stop()
+        await TurnCore.shared.deactivate()
+    }
+
+    // MARK: - TURN
+
+    /// Brings the VK TURN relay up when the configuration asks for it and returns
+    /// a copy pointed at the relay's local listener. The TLS/Reality server name
+    /// lives in `outbound` and is untouched, so the handshake still runs
+    /// end-to-end against the real server.
+    ///
+    /// A relay that fails to start degrades to a direct connection rather than to
+    /// no connection at all — the log says which path was taken.
+    private func prepared(_ configuration: ProxyConfiguration) async -> ProxyConfiguration {
+        let target = "\(configuration.serverAddress):\(configuration.serverPort)"
+        logger.info("[TURN] Selected proxy \"\(configuration.name)\" → \(target), "
+                    + "protocol=\(configuration.outboundProtocol.rawValue), "
+                    + "relay=\(configuration.turn == nil ? "none" : "configured")")
+
+        // Remembered un-redirected, so a later network change can re-decide from
+        // the original rather than from an address already pointed at the relay.
+        baseConfiguration.withLock { $0 = configuration }
+
+        guard let turn = configuration.turn else {
+            logger.warning("[TURN] No relay for \"\(configuration.name)\" — connecting DIRECTLY to \(target). "
+                           + "The subscription carries no turn entry for this server.")
+            await TurnCore.shared.deactivate()
+            return configuration
+        }
+
+        guard await shouldRelay(configuration) else {
+            await TurnCore.shared.deactivate()
+            return configuration
+        }
+
+        // A link the user entered in Settings replaces the subscription's, so an
+        // exhausted or expired call can be swapped without reissuing the
+        // subscription.
+        var relay = turn
+        let ownLink = AWCore.getTurnVKLink()
+        if !ownLink.isEmpty, ownLink != relay.link {
+            relay.link = ownLink
+            logger.info("[TURN] Using the VK call link from Settings"
+                        + (turn.link.isEmpty ? "" : " instead of the subscription's"))
+        }
+
+        // The relay is useless without a call to borrow credentials from, and a
+        // subscription may ship one without a link on purpose, expecting the user
+        // to supply their own.
+        guard !relay.link.isEmpty else {
+            logger.warning("[TURN] No VK call link — neither the subscription nor Settings has one. "
+                           + "Connecting DIRECTLY to \(target). Add a link in Settings → VK TURN.")
+            await TurnCore.shared.deactivate()
+            return configuration
+        }
+
+        // Captcha handling is the user's choice, not the subscription's.
+        relay.manualCaptcha = !AWCore.getTurnAutoCaptcha()
+        relay.captchaSolver = AWCore.getTurnCaptchaSolver()
+        logger.info("[TURN] Captcha: \(relay.manualCaptcha ? "manual only" : "automatic (\(relay.captchaSolver)) then manual")")
+
+        // Stream count is the user's dial too: the subscription only suggests one.
+        relay.streams = AWCore.getTurnStreams()
+        logger.info("[TURN] Streams: \(relay.streams)")
+
+        do {
+            let endpoint = try await TurnCore.shared.activate(relay)
+            let redirected = configuration.withRedirectedServer(address: endpoint.host, port: endpoint.port)
+            logger.info("[TURN] Dialling \(endpoint.host):\(endpoint.port) instead of \(target); "
+                        + "TLS server name stays \(redirected.xraySecurityLayer.serverName(fallback: configuration.serverAddress))")
+            return redirected
+        } catch {
+            logger.report("[TURN] Relay unavailable — FALLING BACK to a direct connection to \(target)", error: error)
+            return configuration
+        }
+    }
+
+    /// Decides whether this connection is worth relaying.
+    ///
+    /// Relaying costs a VK call and a detour, so `auto` spends it only where the
+    /// direct path is actually broken: Wi-Fi goes straight out, and anything else
+    /// is probed first. An unknown interface is treated as worth probing — the
+    /// path monitor has not necessarily reported in yet when the tunnel starts,
+    /// and the probe is the more truthful signal anyway.
+    private func shouldRelay(_ configuration: ProxyConfiguration) async -> Bool {
+        switch AWCore.getTurnMode() {
+        case .off:
+            logger.info("[TURN] Relay turned off in Settings — connecting directly")
+            return false
+
+        case .always:
+            logger.info("[TURN] Relay set to always in Settings")
+            return true
+
+        case .auto:
+            let network = await tunnelStack.networkContext
+            if network.isWiFi {
+                let where_ = network.ssid.map { " (\($0))" } ?? ""
+                logger.info("[TURN] On Wi-Fi\(where_) — connecting directly, no relay needed")
+                return false
+            }
+
+            let interface = network.isCellular ? "cellular" : "an unidentified network"
+            logger.info("[TURN] On \(interface) — probing the direct path before relaying")
+
+            // LatencyTester rebuilds the configuration from scratch and keeps no
+            // relay, so this measures the direct path even for a relayed proxy.
+            switch await LatencyTester.test(configuration) {
+            case .success(let milliseconds):
+                logger.info("[TURN] Direct path answered in \(milliseconds) ms — no relay needed")
+                return false
+            case .insecure:
+                logger.info("[TURN] Direct path answered but failed verification — relaying")
+                return true
+            case .failed, .testing:
+                logger.warning("[TURN] Direct path unreachable on \(interface) — switching to the VK relay")
+                return true
+            }
+        }
     }
 
     // MARK: - App Messages
@@ -229,7 +372,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         switch message {
         case .setConfiguration(let configuration):
-            await tunnelStack.switchConfiguration(configuration)
+            await tunnelStack.switchConfiguration(await prepared(configuration))
             return nil
 
         case .testLatency(let configuration):
@@ -244,6 +387,9 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         case .fetchRequests:
             return encodeReply(RequestsResponse(requests: tunnelStack.requestLog.snapshot()))
+
+        case .fetchTurnState:
+            return encodeReply(TurnStateResponse(state: await TurnCore.shared.state))
         }
     }
     
@@ -299,20 +445,46 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
     // MARK: - Path Monitoring
 
-    private func resolveAndUpdateNetworkContext(_ path: Network.NWPath) async {
-        DNSResolver.shared.flush()
-
+    /// Classifies a path into the context the relay decision and the
+    /// trusted-network policy both read.
+    private func networkContext(for path: Network.NWPath) async -> NetworkContext {
         let primaryType = path.availableInterfaces.first?.type
         let isWiFi = primaryType == .wifi
         let isCellular = primaryType == .cellular
 #if os(iOS)
         if isWiFi {
-            let ssid = await pathMonitorBridge.currentWiFiSSID()
-            await tunnelStack.updateNetworkContext(isWiFi: true, isCellular: false, ssid: ssid)
-            return
+            return NetworkContext(isWiFi: true, isCellular: false, ssid: await pathMonitorBridge.currentWiFiSSID())
         }
 #endif
-        await tunnelStack.updateNetworkContext(isWiFi: isWiFi, isCellular: isCellular, ssid: nil)
+        return NetworkContext(isWiFi: isWiFi, isCellular: isCellular, ssid: nil)
+    }
+
+    private func resolveAndUpdateNetworkContext(_ path: Network.NWPath) async {
+        DNSResolver.shared.flush()
+
+        let previous = await tunnelStack.networkContext
+        let context = await networkContext(for: path)
+        await tunnelStack.updateNetworkContext(
+            isWiFi: context.isWiFi,
+            isCellular: context.isCellular,
+            ssid: context.ssid
+        )
+        await reevaluateRelay(previous: previous)
+    }
+
+    /// Re-runs the relay decision when the device moves between Wi-Fi and
+    /// cellular. Walking out of Wi-Fi range is exactly the moment the direct path
+    /// stops working, and the point of `auto` is to notice without being asked.
+    private func reevaluateRelay(previous: NetworkContext) async {
+        guard AWCore.getTurnMode() == .auto else { return }
+
+        let current = await tunnelStack.networkContext
+        guard current.isWiFi != previous.isWiFi || current.isCellular != previous.isCellular else { return }
+        guard let base = baseConfiguration.withLock({ $0 }), base.turn != nil else { return }
+
+        let where_ = current.isWiFi ? "Wi-Fi" : current.isCellular ? "cellular" : "an unidentified network"
+        logger.info("[TURN] Network changed to \(where_) — re-deciding whether to relay")
+        await tunnelStack.switchConfiguration(await prepared(base))
     }
 
     private func logTunnelStop(reason: NEProviderStopReason) {

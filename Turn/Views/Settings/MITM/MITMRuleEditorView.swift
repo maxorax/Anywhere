@@ -122,7 +122,7 @@ struct MITMRuleEditorView: View {
                     switch rewriteMode {
                     case .transparent, .redirect302:
                         LabeledContent {
-                            TextField(String("https://argsment.com/turn"), text: $rewriteURL)
+                            TextField(String("https://argsment.com/anywhere"), text: $rewriteURL)
                                 .autocorrectionDisabled()
                                 .textInputAutocapitalization(.never)
                                 .multilineTextAlignment(.trailing)

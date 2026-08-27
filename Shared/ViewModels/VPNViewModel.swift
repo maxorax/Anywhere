@@ -18,6 +18,13 @@ class VPNViewModel {
     static let shared = VPNViewModel()
 
     var vpnStatus: NEVPNStatus = .disconnected
+
+    /// When the tunnel came up, as the system recorded it.
+    ///
+    /// Taken from `NEVPNConnection.connectedDate` rather than stamped in the app:
+    /// the tunnel outlives the app, so a locally started clock would restart at
+    /// zero every time the user comes back to a connection that never dropped.
+    private(set) var connectedSince: Date?
     var selectedConfiguration: ProxyConfiguration? {
         didSet {
             if !_suppressSelectionPersistence {
@@ -354,7 +361,8 @@ class VPNViewModel {
             resolvedIP: resolved,
             subscriptionId: configuration.subscriptionId,
             outbound: configuration.outbound,
-            chain: configuration.chain
+            chain: configuration.chain,
+            turn: configuration.turn
         )
     }
 
@@ -395,6 +403,7 @@ class VPNViewModel {
     /// Applies a tunnel status to `vpnStatus` and drives the stats-polling side effects.
     private func applyStatus(_ status: NEVPNStatus, on connection: NEVPNConnection) {
         vpnStatus = status
+        connectedSince = status == .connected ? connection.connectedDate : nil
         let stats = ConnectionStatsModel.shared
         if status == .connected {
             if let session = connection as? NETunnelProviderSession {
@@ -412,7 +421,7 @@ class VPNViewModel {
         }
     }
 
-    private static let providerBundleIdentifier = "com.argsment.Turn.Network-Extension"
+    private static let providerBundleIdentifier = "com.maxorax.turn.Network-Extension"
 
     private func setupVPNManager() {
         Task {
@@ -422,6 +431,9 @@ class VPNViewModel {
             }) ?? managers?.first {
                 self.vpnManager = manager
                 self.vpnStatus = manager.connection.status
+                self.connectedSince = manager.connection.status == .connected
+                    ? manager.connection.connectedDate
+                    : nil
                 if manager.connection.status == .connected,
                    let session = manager.connection as? NETunnelProviderSession {
                     ConnectionStatsModel.shared.startPolling(session: session)
@@ -456,7 +468,7 @@ class VPNViewModel {
             let resolvedIP = await VPNViewModel.resolveServerAddress(configuration.serverAddress)
 
             let tunnelProtocol = NETunnelProviderProtocol()
-            tunnelProtocol.providerBundleIdentifier = "com.argsment.Turn.Network-Extension"
+            tunnelProtocol.providerBundleIdentifier = "com.maxorax.turn.Network-Extension"
             tunnelProtocol.serverAddress = "Turn"
             #if !os(tvOS)
             tunnelProtocol.includeAllNetworks = AWCore.getTunnelIncludeAllNetworks()

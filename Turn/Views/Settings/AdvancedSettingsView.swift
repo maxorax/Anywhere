@@ -17,9 +17,6 @@ struct AdvancedSettingsView: View {
         List {
             Section("App") {
                 Toggle("Experimental Features", isOn: $settings.experimentalEnabled)
-                NavigationLink("Public Beta") {
-                    JoinBetaView()
-                }
             }
 
             Section("VPN") {

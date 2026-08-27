@@ -362,7 +362,7 @@ actor UDPPlane {
         }
 
         guard qtype == 1 || qtype == 28 else {
-            if destination == .turnResolver {
+            if destination == .anywhereResolver {
                 if forwardToUpstreamResolver(datagram, domain: domain, qtype: qtype) {
                     return true
                 }

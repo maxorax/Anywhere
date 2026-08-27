@@ -15,7 +15,13 @@ extension TunnelStack {
 
     // MARK: - Lifecycle
     
-    func start(packetFlow: NEPacketTunnelFlow, configuration: ProxyConfiguration) async {
+    /// Routes `TurnLogger` into the user-facing journal.
+    ///
+    /// Split out of `start` because work that happens before the stack comes up —
+    /// bringing the VK TURN relay online, above all — has to be visible too, and
+    /// anything logged before this runs reaches only the system log.
+    /// Installing twice is harmless; the sink is simply replaced.
+    nonisolated func installLogSink() {
         TurnLogger.installLogSink { [weak self] message, level in
             let logLevel: TunnelLogLevel
             switch level {
@@ -25,6 +31,10 @@ extension TunnelStack {
             }
             self?.appendLog(message, level: logLevel)
         }
+    }
+
+    func start(packetFlow: NEPacketTunnelFlow, configuration: ProxyConfiguration) async {
+        installLogSink()
         self.packetFlow = packetFlow
         self.configuration = configuration
 
@@ -113,6 +123,14 @@ extension TunnelStack {
     }
     
     func switchConfiguration(_ newConfiguration: ProxyConfiguration) {
+        // Both callers reach here through `prepared`, which hands back the very
+        // same configuration whenever the relay decision has not moved.
+        // Restarting on that tears down every open connection only to rebuild an
+        // identical stack.
+        guard newConfiguration != configuration else {
+            logger.debug("[VPN] Configuration unchanged — keeping the stack up")
+            return
+        }
         logger.info("[VPN] Configuration switched")
         restartStack(configuration: newConfiguration)
     }
@@ -131,6 +149,17 @@ extension TunnelStack {
         reclaimInstanceTransports(rebuildMultiplexerPool: false)
     }
     
+    /// Seeds the network context before the stack comes up.
+    ///
+    /// `updateNetworkContext` deliberately ignores anything arriving before the
+    /// stack runs, and the path monitor only starts after `start` — so without
+    /// this both the first relay decision and the initial proxy mode are made
+    /// against a default context that claims neither Wi-Fi nor cellular.
+    func seedNetworkContext(isWiFi: Bool, isCellular: Bool, ssid: String?) {
+        guard !running.load(ordering: .relaxed) else { return }
+        networkContext = NetworkContext(isWiFi: isWiFi, isCellular: isCellular, ssid: ssid)
+    }
+
     func updateNetworkContext(isWiFi: Bool, isCellular: Bool, ssid: String?) {
         guard running.load(ordering: .relaxed), let configuration else { return }
 

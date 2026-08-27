@@ -58,7 +58,7 @@
 #include "lwip/mld6.h"
 #include "lwip/api.h"
 
-/* Turn patch: PPP headers removed — PPP_SUPPORT=0 and PPP_NUM_TIMEOUTS=0 defined in lwipopts.h */
+/* Anywhere patch: PPP headers removed — PPP_SUPPORT=0 and PPP_NUM_TIMEOUTS=0 defined in lwipopts.h */
 
 #ifndef LWIP_SKIP_PACKING_CHECK
 

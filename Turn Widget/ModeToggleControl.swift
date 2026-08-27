@@ -12,7 +12,7 @@ import WidgetKit
 struct ModeToggleControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(
-            kind: "com.argsment.Turn.Widget.ModeToggle",
+            kind: "com.maxorax.turn.Widget.ModeToggle",
             provider: ProxyModeProvider()
         ) { isGlobal in
             ControlWidgetToggle(
@@ -22,7 +22,7 @@ struct ModeToggleControl: ControlWidget {
             ) { isGlobal in
                 Label(
                     isGlobal ? "Global Mode" : "Proxy Mode",
-                    image: isGlobal ? "turn.global" : "turn.proxy"
+                    image: isGlobal ? "anywhere.global" : "anywhere.proxy"
                 )
             }
         }

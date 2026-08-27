@@ -66,7 +66,7 @@
 #endif
 
 /** Initial CWND calculation as defined RFC 2581 */
-/* Turn patch: added #ifndef guard so lwipopts.h can override (e.g. IW10 per RFC 6928) */
+/* Anywhere patch: added #ifndef guard so lwipopts.h can override (e.g. IW10 per RFC 6928) */
 #ifndef LWIP_TCP_CALC_INITIAL_CWND
 #define LWIP_TCP_CALC_INITIAL_CWND(mss) ((tcpwnd_size_t)LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U)))
 #endif
@@ -360,7 +360,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
       prev = lpcb_prev;
     }
 #endif /* SO_REUSE */
-    /* Turn patch: fallback to wildcard listener with local_port == 0 */
+    /* Anywhere patch: fallback to wildcard listener with local_port == 0 */
     if (lpcb == NULL) {
       for (lpcb = tcp_listen_pcbs.listen_pcbs; lpcb != NULL; lpcb = lpcb->next) {
         if (lpcb->local_port == 0 &&
@@ -564,7 +564,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
         if (tcp_input_delayed_close(pcb)) {
           goto aborted;
         }
-        /* --- BEGIN Turn Patch: defer per-segment tcp_output during input batch ---
+        /* --- BEGIN Anywhere Patch: defer per-segment tcp_output during input batch ---
          * Original: tcp_output(pcb);
          *
          * The bridge processes a kernel readPackets batch as a tight
@@ -577,12 +577,12 @@ tcp_input(struct pbuf *p, struct netif *inp)
          * pcb->unsent that the freed snd_buf opened up. TF_ACK_NOW is
          * idempotent, so no ACK is dropped — only deferred by the
          * (sub-ms) duration of one input batch.
-         * See lwip/TURN_PATCHES.md.
+         * See lwip/ANYWHERE_PATCHES.md.
          */
-        if (!lwip_turn_input_batch_mode) {
+        if (!lwip_anywhere_input_batch_mode) {
           tcp_output(pcb);
         }
-        /* --- END Turn Patch --- */
+        /* --- END Anywhere Patch --- */
 #if TCP_INPUT_DEBUG
 #if TCP_DEBUG
         tcp_debug_print_state(pcb->state);
@@ -675,7 +675,7 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
   /* In the LISTEN state, we check for incoming SYN segments,
      creates a new PCB, and responds with a SYN|ACK. */
   if (flags & TCP_ACK) {
-    /* --- BEGIN Turn Patch: stray-segment filter ---
+    /* --- BEGIN Anywhere Patch: stray-segment filter ---
      * A non-SYN segment here matched no active pcb. After a reject-marked
      * connection is silently abandoned (tcp_accept_cb / pressure flush),
      * the app's in-flight data segments land exactly here; answering RST
@@ -683,7 +683,7 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
      * the RST for everything else — stragglers of normally closed
      * connections rely on it to clear dead client state quickly.
      */
-    if (lwip_turn_tcp_stray_filter != NULL) {
+    if (lwip_anywhere_tcp_stray_filter != NULL) {
       u8_t src_bytes[16], dst_bytes[16];
       int is_ipv6 = 0;
 #if LWIP_IPV6
@@ -697,21 +697,21 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
         SMEMCPY(src_bytes, ip_2_ip4(ip_current_src_addr()), 4);
         SMEMCPY(dst_bytes, ip_2_ip4(ip_current_dest_addr()), 4);
       }
-      int verdict = lwip_turn_tcp_stray_filter(src_bytes, tcphdr->src,
+      int verdict = lwip_anywhere_tcp_stray_filter(src_bytes, tcphdr->src,
                                                     dst_bytes, tcphdr->dest,
                                                     is_ipv6);
-      if (verdict == LWIP_TURN_SYN_DROP) {
+      if (verdict == LWIP_ANYWHERE_SYN_DROP) {
         return;
       }
     }
-    /* --- END Turn Patch --- */
+    /* --- END Anywhere Patch --- */
     /* For incoming segments with the ACK flag set, respond with a
        RST. */
     LWIP_DEBUGF(TCP_RST_DEBUG, ("tcp_listen_input: ACK in LISTEN, sending reset\n"));
     tcp_rst_netif(ip_data.current_input_netif, ackno, seqno + tcplen, ip_current_dest_addr(),
             ip_current_src_addr(), tcphdr->dest, tcphdr->src);
   } else if (flags & TCP_SYN) {
-    /* --- BEGIN Turn Patch: SYN admission filter ---
+    /* --- BEGIN Anywhere Patch: SYN admission filter ---
      * Let the host shed a SYN before a pcb is allocated and a SYN-ACK
      * is enqueued, so a burst it has no flow budget for costs nothing.
      *
@@ -719,7 +719,7 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
      *   PASS  — passthrough, fall through to the normal code path
      *   DROP  — return silently, no SYN-ACK; client times out
      */
-    if (lwip_turn_tcp_syn_filter != NULL) {
+    if (lwip_anywhere_tcp_syn_filter != NULL) {
       u8_t src_bytes[16], dst_bytes[16];
       int is_ipv6 = 0;
 #if LWIP_IPV6
@@ -733,14 +733,14 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
         SMEMCPY(src_bytes, ip_2_ip4(ip_current_src_addr()), 4);
         SMEMCPY(dst_bytes, ip_2_ip4(ip_current_dest_addr()), 4);
       }
-      int verdict = lwip_turn_tcp_syn_filter(src_bytes, tcphdr->src,
+      int verdict = lwip_anywhere_tcp_syn_filter(src_bytes, tcphdr->src,
                                                   dst_bytes, tcphdr->dest,
                                                   is_ipv6);
-      if (verdict == LWIP_TURN_SYN_DROP) {
+      if (verdict == LWIP_ANYWHERE_SYN_DROP) {
         return;
       }
     }
-    /* --- END Turn Patch --- */
+    /* --- END Anywhere Patch --- */
     LWIP_DEBUGF(TCP_DEBUG, ("TCP connection request %"U16_F" -> %"U16_F".\n", tcphdr->src, tcphdr->dest));
 #if TCP_LISTEN_BACKLOG
     if (pcb->accepts_pending >= pcb->backlog) {
@@ -767,7 +767,7 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
     /* Set up the new PCB. */
     ip_addr_copy(npcb->local_ip, *ip_current_dest_addr());
     ip_addr_copy(npcb->remote_ip, *ip_current_src_addr());
-    /* Turn patch: use actual destination port from SYN when listener is wildcard (port 0) */
+    /* Anywhere patch: use actual destination port from SYN when listener is wildcard (port 0) */
     npcb->local_port = (pcb->local_port == 0) ? tcphdr->dest : pcb->local_port;
     npcb->remote_port = tcphdr->src;
     npcb->state = SYN_RCVD;
@@ -2181,7 +2181,7 @@ tcp_add_sack(struct tcp_pcb *pcb, u32_t left, u32_t right)
   }
 
   /* Now 'unused_idx' is the index of the first invalid SACK entry,
-     turn between 0 (no valid entries) and LWIP_TCP_MAX_SACK_NUM (all entries are valid).
+     anywhere between 0 (no valid entries) and LWIP_TCP_MAX_SACK_NUM (all entries are valid).
      We want to clear this and all following SACKs.
      However, we will be adding another one in the front (and shifting everything else back).
      So let's just iterate from the back, and set each entry to the one to the left if it's valid,

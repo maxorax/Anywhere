@@ -23,7 +23,7 @@ nonisolated final class LegacyQUICDatagramEngine: QUICDatagramEngine, Sendable {
 
     private let connection: NWConnection
     private let obfuscator: QUICPacketObfuscator?
-    private let queue = DispatchQueue(label: "com.argsment.Turn.QUICDatagramCarrier", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.maxorax.turn.QUICDatagramCarrier", qos: .userInitiated)
 
     private let terminated = TerminationLatch()
 

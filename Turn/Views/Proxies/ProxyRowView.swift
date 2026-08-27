@@ -40,6 +40,9 @@ struct ProxyRowView: View {
                         if item.isVision {
                             TagBadge(text: "Vision", color: .purple)
                         }
+                        if item.hasTurn {
+                            TagBadge(text: String("TURN"), color: .green)
+                        }
                     }
                 }
 

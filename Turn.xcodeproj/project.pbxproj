@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7870E4302FF89000006C0F14 /* Turn Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7870E41A2FF88ED5006C0F14 /* Turn Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB1C107A2F23B82F00B74CD8 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB1C10792F23B82F00B74CD8 /* NetworkExtension.framework */; };
 		CB1C10822F23B82F00B74CD8 /* Turn Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB2B54B22F6C3E2800F24AC2 /* Turn Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -16,16 +15,10 @@
 		CB71CDD42F837D11002B9E1D /* Turn Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB71CDC32F837D11002B9E1D /* Turn Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CBFA0DE000000000000000C1 /* TurnRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B1 /* TurnRules */; };
 		CBFA0DE000000000000000C2 /* TurnRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B2 /* TurnRules */; };
+		CBFA0DE000000000000000C3 /* Mobile in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B3 /* Mobile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		7870E4322FF89000006C0F14 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = CB1C105D2F23B81500B74CD8 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7870E4192FF88ED5006C0F14;
-			remoteInfo = "Turn Watch App";
-		};
 		78B6DF9E2FE7B70D0084897A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CB1C105D2F23B81500B74CD8 /* Project object */;
@@ -57,17 +50,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		7870E4312FF89000006C0F14 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				7870E4302FF89000006C0F14 /* Turn Watch App.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CB1C10872F23B82F00B74CD8 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -103,6 +85,7 @@
 		CB71CDC32F837D11002B9E1D /* Turn Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Turn Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB71CDC42F837D11002B9E1D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CB71CDC62F837D11002B9E1D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		CBFA0DE0000000000000FF01 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Version.xcconfig; path = Config/Version.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -123,9 +106,10 @@
 		7870E4262FF88FDC006C0F14 /* Exceptions for "Shared" folder in "Turn Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				AppIcons/AppIcon.icon,
 				Localizable.xcstrings,
 				Models/WatchBridge.swift,
+				"Utilities/Color+init.swift",
+				"Utilities/Color+Theme.swift",
 				Utilities/TurnLogger.swift,
 				Utilities/VPNStatus.swift,
 			);
@@ -387,6 +371,7 @@
 				Networking/Routing/FlatLabelTrie.swift,
 				Networking/Routing/TieredRouteMatcher.swift,
 				Networking/RuleResolver.swift,
+				Networking/SubscriptionRefreshInterval.swift,
 				Networking/Transport/ByteTransport.swift,
 				Networking/Transport/ByteTransportAdapters.swift,
 				Networking/Transport/DialDeadline.swift,
@@ -400,11 +385,14 @@
 				Networking/Transport/UDPTransport.swift,
 				"Networking/Transport/UDPTransport+Compatibility.swift",
 				Networking/TunnelLimits.swift,
+				Networking/Turn/TurnConfiguration.swift,
+				Networking/Turn/TurnMode.swift,
+				Networking/Turn/TurnState.swift,
+				Networking/Turn/TurnSubscription.swift,
 				Protocols/SoftDeletable.swift,
-				Utilities/TurnError.swift,
-				Utilities/TurnLogger.swift,
 				Utilities/Bridges/BridgeContext.swift,
 				Utilities/Bridges/BridgeExecutor.swift,
+				Utilities/Bridges/DarwinNotificationConcurrencyBridge.swift,
 				Utilities/Bridges/DNSSyscallConcurrencyBridge.swift,
 				Utilities/Bridges/NGTCP2ConcurrencyBridge.swift,
 				Utilities/Bridges/SwiftRegexConcurrencyBridge.swift,
@@ -414,6 +402,8 @@
 				Utilities/MonotonicClock.swift,
 				"Utilities/String+init.swift",
 				Utilities/SubscriptionDomainHelper.swift,
+				Utilities/TurnError.swift,
+				Utilities/TurnLogger.swift,
 				"Utilities/UUID+VLESSString.swift",
 				Utilities/VPNStatus.swift,
 			);
@@ -435,9 +425,11 @@
 				Models/DNSMode.swift,
 				Models/ProxyMode.swift,
 				Models/QUICPolicy.swift,
+				Networking/SubscriptionRefreshInterval.swift,
+				Networking/Turn/TurnMode.swift,
+				Utilities/Bridges/SwiftRegexConcurrencyBridge.swift,
 				Utilities/TurnError.swift,
 				Utilities/TurnLogger.swift,
-				Utilities/Bridges/SwiftRegexConcurrencyBridge.swift,
 			);
 			target = CB71CDC22F837D11002B9E1D /* Turn Widget */;
 		};
@@ -550,6 +542,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBFA0DE000000000000000C3 /* Mobile in Frameworks */,
 				CB1C107A2F23B82F00B74CD8 /* NetworkExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -577,6 +570,7 @@
 		CB1C105C2F23B81500B74CD8 = {
 			isa = PBXGroup;
 			children = (
+				CBFA0DE0000000000000FF02 /* Config */,
 				CB7A00022F65700100C85E4A /* Shared */,
 				CB1C10672F23B81500B74CD8 /* Turn */,
 				7870E41B2FF88ED5006C0F14 /* Turn Watch App */,
@@ -610,6 +604,14 @@
 				CB71CDC62F837D11002B9E1D /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CBFA0DE0000000000000FF02 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				CBFA0DE0000000000000FF01 /* Version.xcconfig */,
+			);
+			name = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -668,14 +670,12 @@
 				CB1C10622F23B81500B74CD8 /* Frameworks */,
 				CB1C10632F23B81500B74CD8 /* Resources */,
 				CB1C10872F23B82F00B74CD8 /* Embed Foundation Extensions */,
-				7870E4312FF89000006C0F14 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				CB1C10812F23B82F00B74CD8 /* PBXTargetDependency */,
 				CB71CDD32F837D11002B9E1D /* PBXTargetDependency */,
-				7870E4332FF89000006C0F14 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CB1C10672F23B81500B74CD8 /* Turn */,
@@ -807,7 +807,8 @@
 			mainGroup = CB1C105C2F23B81500B74CD8;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */,
+				CBFA0DE000000000000000A1 /* XCLocalSwiftPackageReference "LocalPackages/TurnRules" */,
+				CBFA0DE000000000000000A2 /* XCLocalSwiftPackageReference "LocalPackages/TurnCore" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB1C10662F23B81500B74CD8 /* Products */;
@@ -915,11 +916,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		7870E4332FF89000006C0F14 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7870E4192FF88ED5006C0F14 /* Turn Watch App */;
-			targetProxy = 7870E4322FF89000006C0F14 /* PBXContainerItemProxy */;
-		};
 		78B6DF9F2FE7B70D0084897A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CB1C10642F23B81500B74CD8 /* Turn */;
@@ -950,19 +946,19 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Turn Watch App/Turn Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Turn;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.maxorax.turn;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.watchkitapp;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = watchos;
@@ -985,19 +981,19 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Turn Watch App/Turn Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Turn;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.maxorax.turn;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.watchkitapp;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = watchos;
@@ -1018,8 +1014,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1038,8 +1034,8 @@
 					"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Tests;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1061,8 +1057,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1081,8 +1077,8 @@
 					"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Tests;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1101,6 +1097,7 @@
 		};
 		CB1C106E2F23B81600B74CD8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CBFA0DE0000000000000FF01 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1135,7 +1132,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1169,6 +1166,7 @@
 		};
 		CB1C106F2F23B81600B74CD8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CBFA0DE0000000000000FF01 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1203,7 +1201,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1236,8 +1234,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Turn/Turn.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_PREVIEWS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -1256,7 +1254,7 @@
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
 				INFOPLIST_FILE = Turn/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
@@ -1271,8 +1269,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -1293,8 +1291,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Turn/Turn.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				ENABLE_PREVIEWS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -1313,7 +1311,7 @@
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
 				INFOPLIST_FILE = Turn/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
@@ -1328,8 +1326,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -1348,8 +1346,8 @@
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Turn Network Extension/Turn Network Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1368,7 +1366,7 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 				);
 				INFOPLIST_FILE = "Turn Network Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Turn Network Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "MTurn Network Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1376,8 +1374,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Turn.Network-Extension";
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.maxorax.turn.Network-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1400,8 +1398,8 @@
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Turn Network Extension/Turn Network Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1420,7 +1418,7 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 				);
 				INFOPLIST_FILE = "Turn Network Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Turn Network Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "MTurn Network Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1428,8 +1426,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Turn.Network-Extension";
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.maxorax.turn.Network-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1453,8 +1451,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Turn TV/Turn TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1472,7 +1470,7 @@
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
 				INFOPLIST_FILE = "Turn TV/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -1482,8 +1480,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1505,8 +1503,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Turn TV/Turn TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"HAVE_CONFIG_H=1",
@@ -1524,7 +1522,7 @@
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
 				INFOPLIST_FILE = "Turn TV/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Turn;
+				INFOPLIST_KEY_CFBundleDisplayName = MTurn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -1534,8 +1532,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1557,11 +1555,11 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Turn Widget/Turn Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Turn Widget/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Turn Widget";
+				INFOPLIST_KEY_CFBundleDisplayName = "MTurn Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1569,8 +1567,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Widget;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.WidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1589,11 +1587,11 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Turn Widget/Turn Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 340;
-				DEVELOPMENT_TEAM = C7AS5D38Q8;
+				CURRENT_PROJECT_VERSION = "$(APP_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 8WAN8RL33Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Turn Widget/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Turn Widget";
+				INFOPLIST_KEY_CFBundleDisplayName = "MTurn Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1601,8 +1599,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Widget;
+				MARKETING_VERSION = "$(APP_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.maxorax.turn.WidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1682,27 +1680,29 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hiDandelion/TurnRules.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		CBFA0DE000000000000000A1 /* XCLocalSwiftPackageReference "LocalPackages/TurnRules" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = LocalPackages/TurnRules;
 		};
-/* End XCRemoteSwiftPackageReference section */
+		CBFA0DE000000000000000A2 /* XCLocalSwiftPackageReference "LocalPackages/TurnCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = LocalPackages/TurnCore;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		CBFA0DE000000000000000B1 /* TurnRules */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */;
 			productName = TurnRules;
 		};
 		CBFA0DE000000000000000B2 /* TurnRules */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */;
 			productName = TurnRules;
+		};
+		CBFA0DE000000000000000B3 /* Mobile */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Mobile;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

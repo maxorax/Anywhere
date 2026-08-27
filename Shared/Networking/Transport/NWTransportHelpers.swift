@@ -11,7 +11,7 @@ import Network
 // MARK: - NWError
 
 extension NWError {
-    nonisolated func turnError(operation: TurnError.Transport.Operation) -> TurnError {
+    nonisolated func anywhereError(operation: TurnError.Transport.Operation) -> TurnError {
         switch self {
         case .posix(let code):
             return .transport(.posix(operation, errno: code.rawValue))
@@ -24,7 +24,7 @@ extension NWError {
     
     nonisolated func legacyEngineError(operation: TurnError.Transport.Operation) -> any Error {
         if case .posix(.ECANCELED) = self { return CancellationError() }
-        return turnError(operation: operation)
+        return anywhereError(operation: operation)
     }
     
     nonisolated var connectWaitingDescription: String {
@@ -45,8 +45,8 @@ extension NWError {
 extension TurnError {
     nonisolated static func networkFailure(_ error: Error, operation: Transport.Operation) -> TurnError {
         if error is CancellationError { return .transport(.terminated) }
-        if let nwError = error as? NWError { return nwError.turnError(operation: operation) }
-        if let turnError = error as? TurnError { return turnError }
+        if let nwError = error as? NWError { return nwError.anywhereError(operation: operation) }
+        if let anywhereError = error as? TurnError { return anywhereError }
         return .transport(.connectionFailed(endpoint: nil, detail: error.localizedDescription))
     }
     

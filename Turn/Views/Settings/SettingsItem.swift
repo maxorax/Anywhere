@@ -10,6 +10,7 @@ import SwiftUI
 enum SettingsItem: String {
     case iCloudSync
     case personalization
+    case subscriptionUpdate
     case alwaysOn
     case globalMode
     case adBlocking
@@ -18,16 +19,19 @@ enum SettingsItem: String {
     case allowInsecure
     case trustedCertificates
     case trustedNetwork
+    case turn
     case purify
     case reflection
     case mitm
     case logs
     case requests
+    case about
 
     private var title: String.LocalizationValue {
         switch self {
         case .iCloudSync: "iCloud Sync"
         case .personalization: "Personalization"
+        case .subscriptionUpdate: "Update Subscriptions"
         case .alwaysOn: "Always On"
         case .globalMode: "Global Mode"
         case .adBlocking: "AD Blocking"
@@ -36,11 +40,13 @@ enum SettingsItem: String {
         case .allowInsecure: "Allow Insecure"
         case .trustedCertificates: "Trusted Certificates"
         case .trustedNetwork: "Trusted Network"
+        case .turn: "VK TURN"
         case .purify: "Purify"
         case .reflection: "Reflection"
         case .mitm: "MITM"
         case .logs: "Logs"
         case .requests: "Requests"
+        case .about: "About"
         }
     }
 
@@ -48,6 +54,7 @@ enum SettingsItem: String {
         switch self {
         case .iCloudSync: "icloud.fill"
         case .personalization: "paintpalette.fill"
+        case .subscriptionUpdate: "arrow.clockwise"
         case .alwaysOn: "poweron"
         case .globalMode: "arrow.merge"
         case .adBlocking: "shield.checkered"
@@ -56,6 +63,7 @@ enum SettingsItem: String {
         case .allowInsecure: "exclamationmark.shield.fill"
         case .trustedCertificates: "checkmark.seal.fill"
         case .trustedNetwork: "wifi"
+        case .turn: "phone.arrow.up.right.fill"
         case .purify: "drop.fill"
         case .reflection: "arrow.turn.up.left"
         case .mitm: "key.horizontal.fill"
@@ -66,6 +74,7 @@ enum SettingsItem: String {
                 "info"
             }
         case .requests: "mail.fill"
+        case .about: "info.circle.fill"
         }
     }
 
@@ -80,6 +89,7 @@ enum SettingsItem: String {
         switch self {
         case .iCloudSync: .white
         case .personalization: .pink
+        case .subscriptionUpdate: .teal
         case .alwaysOn: .green
         case .globalMode: .orange
         case .adBlocking: .red
@@ -88,11 +98,13 @@ enum SettingsItem: String {
         case .allowInsecure: .red
         case .trustedCertificates: .green
         case .trustedNetwork: .blue
+        case .turn: .indigo
         case .purify: .blue
         case .reflection: .pink
         case .mitm: .mint
         case .logs: .blue
         case .requests: .blue
+        case .about: .gray
         }
     }
 

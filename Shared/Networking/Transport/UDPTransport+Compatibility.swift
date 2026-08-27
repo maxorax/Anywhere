@@ -10,7 +10,7 @@ import Network
 
 nonisolated final class LegacyUDPEngine: UDPTransportEngine, Sendable {
     private let connection: NWConnection
-    private let queue = DispatchQueue(label: "com.argsment.Turn.UDPTransport", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.maxorax.turn.UDPTransport", qos: .userInitiated)
 
     init(endpoint: NWEndpoint) {
         connection = NWConnection(to: endpoint, using: .udp)

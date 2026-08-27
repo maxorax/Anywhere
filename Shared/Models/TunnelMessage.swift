@@ -26,9 +26,20 @@ nonisolated enum TunnelMessage: Codable, Sendable {
 
     /// Query the recent request log. Reply: `RequestsResponse`.
     case fetchRequests
+
+    /// Query what the VK TURN relay is doing. Reply: `TurnStateResponse`.
+    ///
+    /// The relay runs in the extension, which cannot present a captcha, so the
+    /// app asks for this after a `turnStateChanged` notification and puts a
+    /// WebView on the page the core is waiting on.
+    case fetchTurnState
 }
 
 // MARK: - Responses
+
+nonisolated struct TurnStateResponse: Codable, Sendable {
+    var state: TurnState
+}
 
 nonisolated struct RouteTrafficEntry: Codable, Sendable, Identifiable, Hashable {
     var target: RouteTarget

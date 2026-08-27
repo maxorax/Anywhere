@@ -72,7 +72,7 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.argsment.Turn"
+         BundleIdentifier = "com.maxorax.turn"
          RemotePath = "/var/containers/Bundle/Application/67DE49ED-C4A8-48AB-B1B4-F554C500182A/Turn.app">
       </RemoteRunnable>
       <MacroExpansion>
@@ -95,7 +95,7 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.argsment.Turn"
+         BundleIdentifier = "com.maxorax.turn"
          RemotePath = "/var/containers/Bundle/Application/42B10ED2-2E0D-467C-869A-89030C07D222/Turn.app">
       </RemoteRunnable>
    </ProfileAction>

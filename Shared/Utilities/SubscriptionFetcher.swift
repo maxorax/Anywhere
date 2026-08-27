@@ -25,7 +25,7 @@ nonisolated struct SubscriptionFetcher {
         }
 
         var request = URLRequest(url: url)
-        request.setValue("Turn", forHTTPHeaderField: "User-Agent")
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
         if withRemnawaveHWID {
             request.setValue(AWCore.getRemnawaveHWID(), forHTTPHeaderField: "x-hwid")
         }
@@ -66,6 +66,27 @@ nonisolated struct SubscriptionFetcher {
             throw TurnError.subscription(.noConfigurations)
         }
 
+        // A sing-box body carries the `turn` block that pairs each outbound with
+        // its relay, so it has to be parsed before the share-link path.
+        if TurnSubscription.looksLikeSingBox(bodyString) {
+            let parsed = try TurnSubscription.parse(json: bodyString)
+            let relayed = parsed.configurations.filter { $0.turn != nil }.count
+            logger.info("Parsed \(parsed.configurations.count) sing-box outbound(s), \(relayed) with a VK TURN relay")
+            let configurations = await pinCallLink(
+                in: parsed.configurations,
+                endpoint: parsed.linkEndpoint,
+                subscriptionURL: url
+            )
+            return Result(
+                configurations: configurations,
+                name: profileTitle ?? parsed.suggestedName,
+                upload: userInfo.upload,
+                download: userInfo.download,
+                total: userInfo.total,
+                expire: userInfo.expire
+            )
+        }
+
         if bodyString.contains("proxies:") {
             let result = try ClashProxyParser.parse(yaml: bodyString)
             guard !result.configurations.isEmpty else {
@@ -100,6 +121,74 @@ nonisolated struct SubscriptionFetcher {
             expire: userInfo.expire
         )
     }
+
+    // MARK: - Per-subscriber call link
+
+    private struct PinnedLink: Decodable {
+        let vk_link: String
+    }
+
+    /// Replaces the subscription's shared `vk_link` with the one pinned to this
+    /// subscriber, when the subscription points at a pool service.
+    ///
+    /// One invite shared by everybody does not hold up: each relay stream joins
+    /// the VK call as its own participant, so a few users on one call means
+    /// constant captchas. Asking here — rather than in the tunnel — keeps the
+    /// network extension free of an extra request it would have to make while
+    /// bringing the tunnel up.
+    ///
+    /// Any failure leaves the configurations untouched, so the shared link from
+    /// the subscription still works.
+    private static func pinCallLink(
+        in configurations: [ProxyConfiguration],
+        endpoint: String?,
+        subscriptionURL: URL
+    ) async -> [ProxyConfiguration] {
+        guard let endpoint, !endpoint.isEmpty,
+              configurations.contains(where: { $0.turn != nil })
+        else { return configurations }
+
+        let subscriber = subscriptionURL.lastPathComponent
+        guard !subscriber.isEmpty,
+              var components = URLComponents(string: endpoint)
+        else { return configurations }
+        components.queryItems = [URLQueryItem(name: "sub", value: subscriber)]
+        guard let requestURL = components.url else { return configurations }
+
+        var request = URLRequest(url: requestURL)
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+        request.timeoutInterval = 15
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard status == 200 else {
+                // 409 means the pool ran dry; the user can still paste their own
+                // link in Settings, so this is worth saying out loud but is not
+                // a failure of the subscription.
+                logger.warning("Call-link endpoint answered \(status); keeping the subscription's shared link")
+                return configurations
+            }
+            let pinned = try JSONDecoder().decode(PinnedLink.self, from: data)
+            guard !pinned.vk_link.isEmpty else { return configurations }
+
+            logger.info("Pinned a VK call link for this subscription")
+            return configurations.map { $0.withTurnLink(pinned.vk_link) }
+        } catch {
+            logger.warning("Call-link endpoint unreachable (\(error.localizedDescription)); keeping the subscription's shared link")
+            return configurations
+        }
+    }
+
+    /// How the app identifies itself when fetching a subscription.
+    ///
+    /// The panel keys its response rules off this: a rule matching "Turn" hands
+    /// back the sing-box template carrying the VK TURN block, while every other
+    /// client keeps getting the ordinary config it understands.
+    private static let userAgent: String = {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return "Turn/\(version ?? "1.0")"
+    }()
 
     // MARK: - Configured DNS
     

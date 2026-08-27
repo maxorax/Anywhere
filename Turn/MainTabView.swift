@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @Environment(VoyagerStore.self) private var voyagerStore
     @Environment(AppSettings.self) private var settings
     @Environment(VPNViewModel.self) private var viewModel
     @Environment(ConfigurationStore.self) private var configStore
     @Environment(RoutingRuleSetStore.self) private var ruleSetStore
     @Environment(DeepLinkManager.self) private var deepLinkManager
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var captchaModel = TurnCaptchaModel.shared
     @State private var selectedTab: AppTab = .home
     @State private var showingDeepLinkAddSheet = false
     @State private var showingManualAddSheet = false
@@ -60,19 +61,57 @@ struct MainTabView: View {
             .sheet(isPresented: $showingImportRuleSetsSheet, onDismiss: { pendingRuleSetLinks = [] }) {
                 ImportRuleSetsView(links: pendingRuleSetLinks)
             }
+            // Bringing the tunnel up through a VK relay is several seconds of
+            // invisible work; the toast narrates it and doubles as the way back
+            // into a captcha the user closed.
+            .overlay(alignment: .top) {
+                ConnectionStageToast(
+                    stage: ConnectionStage.current(
+                        vpn: viewModel.status,
+                        relay: captchaModel.lastState
+                    )
+                ) {
+                    captchaModel.present()
+                }
+            }
             .alert(String(localized: "Routing Rules Updated"), isPresented: showOrphanedAlert) {
                 Button(String(localized: "OK")) {}
             } message: {
                 let names = ruleSetStore.orphanedRuleSetNames.joined(separator: ", ")
                 Text("The proxy used by the following routing rules was deleted. They have been reset to Default: \(names)")
             }
-            .fullScreenCover(isPresented: Binding(
-                get: { voyagerStore.isPresentingVoyagerView },
-                set: { voyagerStore.isPresentingVoyagerView = $0 }
-            )) {
-                TurnVoyagerView()
-                    .environment(voyagerStore)
+            // The VK TURN relay cannot show its own captcha — it runs in the
+            // tunnel process — so the app presents the page it raised.
+            .sheet(item: Binding(
+                get: { captchaModel.captchaURL.map(IdentifiedURL.init) },
+                set: { if $0 == nil { captchaModel.dismiss() } }
+            )) { identified in
+                TurnCaptchaView(url: identified.url) {
+                    // Solving the captcha is the only way this connection
+                    // completes, so closing it is giving up on the attempt —
+                    // take the tunnel down rather than leave it spinning behind
+                    // a sheet the user just dismissed.
+                    captchaModel.dismiss()
+                    viewModel.disconnectVPN()
+                }
             }
+            .task {
+                captchaModel.start()
+                SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // iOS grants a VPN app no reliable periodic wake-up, so coming
+                // back to the foreground is the moment to catch up.
+                if phase == .active {
+                    SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
+                }
+            }
+    }
+
+    /// `sheet(item:)` needs identity; a URL alone has none.
+    private struct IdentifiedURL: Identifiable {
+        let url: URL
+        var id: String { url.absoluteString }
     }
 
     @ViewBuilder
@@ -88,7 +127,7 @@ struct MainTabView: View {
                             )
                     }
                 } label: {
-                    Image("turn")
+                    Image("TabIcon")
                 }
                 
                 Tab(value: .proxies) {
@@ -115,7 +154,7 @@ struct MainTabView: View {
                     }
                     .colorScheme(settings.homeColorScheme == .light ? .light : .dark)
                 } label: {
-                    Label("Home", image: "turn")
+                    Label("Home", image: "TabIcon")
                 }
                 
                 Tab(value: .proxies) {

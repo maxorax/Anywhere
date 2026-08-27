@@ -1,6 +1,6 @@
 # MITM Rewrite System — Developer Guide
 
-Turn can intercept the HTTP traffic of selected domains — terminating TLS
+Anywhere can intercept the HTTP traffic of selected domains — terminating TLS
 for HTTPS, or reading plain HTTP directly — then inspect, rewrite, and forward
 it to the upstream: a man-in-the-middle (MITM) on traffic you control. This
 guide covers everything needed to author rules and scripts. It is
@@ -8,7 +8,7 @@ reference-level and assumes you are comfortable with HTTP, regular expressions,
 and JavaScript. It does **not** cover the settings UI.
 
 > **Prerequisite (HTTPS only).** Intercepting **HTTPS** works only for clients
-> that trust Turn's generated root CA. Install and trust it first. Apps that
+> that trust Anywhere's generated root CA. Install and trust it first. Apps that
 > pin certificates cannot be intercepted (their TLS handshake to the minted leaf
 > certificate will fail) — this is expected, not a bug. Plain **HTTP** carries no
 > certificate, so it needs no CA trust.
@@ -22,7 +22,7 @@ and JavaScript. It does **not** cover the settings UI.
 - [Scripting: `script`](#scripting-script)
 - [Scripting: `stream-script`](#scripting-stream-script)
 - [The `ctx` object](#the-ctx-object)
-- [The `Turn` API](#the-turn-api)
+- [The `Anywhere` API](#the-anywhere-api)
 - [Single-rule semantics](#single-rule-semantics)
 - [Limits and safety](#limits-and-safety)
 - [Worked examples](#worked-examples)
@@ -33,7 +33,7 @@ and JavaScript. It does **not** cover the settings UI.
 ## How it works
 
 An **HTTPS** connection is intercepted when its TLS ClientHello SNI host matches
-a configured rule set. Turn then:
+a configured rule set. Anywhere then:
 
 1. Mints a leaf certificate for the requested host (cached) and completes the
    **inner** TLS handshake with the client, negotiating ALPN from the client's
@@ -50,7 +50,7 @@ a configured rule set. Turn then:
    opposite leg.
 
 **Plain HTTP** (no TLS) is intercepted the same way, gated on the request host
-instead of the SNI. When a connection isn't TLS, Turn reads the first
+instead of the SNI. When a connection isn't TLS, Anywhere reads the first
 request's authority — the DNS-resolved name for a fake-IP route, otherwise the
 `Host` header — and intercepts it when that matches a rule set. No certificate is
 minted and neither leg runs a handshake (the upstream is dialed in cleartext
@@ -84,7 +84,7 @@ free. Scope `hostname` as tightly as you can.
 > doesn't cover a running loop; a separate hard-cap watchdog crashes and
 > relaunches the extension after ~30 s, so a runaway self-recovers rather than
 > wedging for the process's life). Keep scripts bounded. (Awaiting an
-> [`Turn.http`](#turnhttp) fetch is the
+> [`Anywhere.http`](#anywherehttp) fetch is the
 > exception: while it is in flight the connection is parked but the shared
 > runtime is **free**, so other connections' scripts keep running — only
 > CPU-bound work monopolizes the runtime.)
@@ -100,7 +100,7 @@ A rule set is the unit of configuration:
 | `name`           | Display name. Required, non-empty.                                      |
 | `domainSuffixes` | Hosts to intercept, matched by **suffix**. `example.com` covers `www.example.com`. No wildcards. |
 | `rules`          | Ordered list of rewrite rules. Redirect / reject / host-rewrite are per-rule via the [`rewrite` operation](#rewrite-0--request-only). |
-| `parameters`     | Optional user-editable values exposed read-only to scripts via [`Turn.params`](#turnparams). See [Parameter lines](#parameter-lines). |
+| `parameters`     | Optional user-editable values exposed read-only to scripts via [`Anywhere.params`](#anywhereparams). See [Parameter lines](#parameter-lines). |
 
 Suffix matching is **most-specific-win**: if both `example.com` and
 `api.example.com` are configured, a request to `api.example.com` uses only the
@@ -133,7 +133,7 @@ hostname    = example.com, api.example.org
 # request: transparently rewrite the whole URL to a new host (dials it + rewrites Host)
 0, 0, ^https://example\.com/old, 0, https://upstream.example.com/new
 # request: add a header on /api/ paths
-0, 1, ^/api/, X-Powered-By, Turn
+0, 1, ^/api/, X-Powered-By, Anywhere
 ```
 
 ### Header lines
@@ -215,7 +215,7 @@ can be matched by the same URL pattern.
 ### Parameter lines
 
 Parameters let a rule set expose a few user-editable values that its scripts read
-at runtime via [`Turn.params`](#turnparams) — a country code, a feature
+at runtime via [`Anywhere.params`](#anywhereparams) — a country code, a feature
 flag, an API token, and so on. Declare them under a `[Parameter]` section; the app
 renders an editor for each, and the chosen values are surfaced **read-only** to
 the set's scripts.
@@ -230,7 +230,7 @@ Shape:
 | --------------- | ------- |
 | `type`          | Editor to show: `0` = free-text input, `1` = picker (pick from a fixed list). |
 | `data-type`     | Value type: `0` = string. Reserved for future types; only string is supported today. |
-| `name`          | Lookup key for `Turn.params.get("<name>")`. ASCII letters, digits and `_`; unique within the set. |
+| `name`          | Lookup key for `Anywhere.params.get("<name>")`. ASCII letters, digits and `_`; unique within the set. |
 | `label`         | Human-readable label shown in the editor. Optional — falls back to `name` when empty. |
 | `description`   | Help text rendered as the editor's section footer. Optional. |
 | `default`       | Value used until the user changes it. |
@@ -294,12 +294,12 @@ dialed — to the rewritten host when one is set, otherwise the original. A `302
 reject sub-mode answers on the inner leg and never dials. (Consequence: the
 inner ALPN is client-driven, and the upstream protocol is negotiated separately on
 the first dial. If the client negotiates `h2` but the upstream speaks only
-HTTP/1.1, Turn **bridges** the two — translating the client's HTTP/2 to the
+HTTP/1.1, Anywhere **bridges** the two — translating the client's HTTP/2 to the
 HTTP/1.1 upstream (one short-lived upstream connection per request stream) and the
 responses back — so no downgrade or client retry is needed. For an HTTP/1.1
 connection the single upstream leg is fixed by the first request, so a later
 request whose transparent rewrite resolves a *different* host/port can't be reached
-on the already-dialed leg. If that leg is idle (no response in flight), Turn
+on the already-dialed leg. If that leg is idle (no response in flight), Anywhere
 reconnects it to the new target transparently, so the client sees no drop; if a
 response is still in flight, the connection is torn down instead and the client
 retries it on a fresh connection. A bridged HTTP/2 client commits its
@@ -327,7 +327,7 @@ block an ad path with a tiny GIF:
 Appends a header (does not replace an existing one of the same name):
 
 ```
-0, 1, .*, X-Trace-Id, turn
+0, 1, .*, X-Trace-Id, anywhere
 ```
 
 ### `header-delete` (2)
@@ -388,7 +388,7 @@ sees the fully-edited body).
 ### `body-json` (5)
 
 Declarative JSON body editing in **native code** — the same edits as the
-[`Turn.json`](#turnjson) script API, without writing any JavaScript. One
+[`Anywhere.json`](#anywherejson) script API, without writing any JavaScript. One
 rule carries one edit; its fields are `url-pattern`, an `action` token, and the
 action's own fields:
 
@@ -405,8 +405,8 @@ action's own fields:
 `path` is a JSONPath like `$.data.items[0].id` (leading `$` optional; dotted
 keys and `[index]` / `["key"]` brackets). `value` / `values` are written as JSON
 literals (`true`, `42`, `"text"`, `{"a":1}`, `["x","y"]`); a string that **isn't**
-valid JSON is taken literally, so `value = Turn` means the string
-`"Turn"`. Action tokens are case-insensitive and also accept the camelCase
+valid JSON is taken literally, so `value = Anywhere` means the string
+`"Anywhere"`. Action tokens are case-insensitive and also accept the camelCase
 spelling (`replaceRecursive`). A rule whose `path` can't be parsed is dropped.
 
 Like `script`, `body-json` is a **buffered body transform**: the rewriter
@@ -415,7 +415,7 @@ accumulates the body (auto-decoding `gzip` / `deflate` / `br`, up to the same
 contract is **total** — a body that isn't JSON, a path that doesn't resolve, or
 a non-serializable result leaves the body **unchanged** (byte-for-byte; a rule
 that matches but changes nothing never reshapes the body). A *successful* edit,
-though, re-serializes the whole document, so a JSON integer beyond 2^53 turn
+though, re-serializes the whole document, so a JSON integer beyond 2^53 anywhere
 in it can lose precision, and object members are re-serialized in an unspecified
 order (source key order is not preserved). Unlike `script`,
 **every** matching `body-json` rule fires, in rule order, so edits compose; when
@@ -459,11 +459,11 @@ JavaScript transforms. The field is base64-encoded UTF-8 source defining
 
 Use `script` whenever the rewrite needs the **whole message at once**: rewriting
 a body as a unit (JSON, protobuf, JWT, a regex over the full text) or
-short-circuiting a request with `Turn.respond(...)`. The head is read-only —
+short-circuiting a request with `Anywhere.respond(...)`. The head is read-only —
 URL and header edits have dedicated rules (`rewrite`, `header-add` /
 `header-delete` / `header-replace`), and `ctx.method` / `ctx.status` aren't
 script-writable either — so a `script` rule's job is the body (plus the
-`Turn.done` / `exit` / `respond` control directives).
+`Anywhere.done` / `exit` / `respond` control directives).
 
 The rewriter buffers the body — auto-decoding `gzip` / `deflate` / `br` — runs
 `process(ctx)` once, and re-emits with a corrected `Content-Length`. Because
@@ -473,12 +473,12 @@ wrong for live streams (pointing one at a streaming media type still runs but
 logs a warning recommending `stream-script`).
 
 `process` may be declared **`async`** and `await` an
-[`Turn.http`](#turnhttp) request mid-rewrite; the rewriter waits for the
+[`Anywhere.http`](#anywherehttp) request mid-rewrite; the rewriter waits for the
 returned Promise to settle before reading `ctx.body` back, so the connection
 parks while the fetch is in flight (the shared script runtime stays free for
 other connections). This is the one case where a `script` does more than
 transform the bytes already in hand. `stream-script` has no such facility —
-`Turn.http` is unavailable there.
+`Anywhere.http` is unavailable there.
 
 The body is held up to a **4 MiB** cap; larger Content-Length bodies fall back
 to passthrough, and chunked bodies are truncated at the cap.
@@ -574,34 +574,34 @@ the script.
 
 ---
 
-## The `Turn` API
+## The `Anywhere` API
 
-A global `Turn` object exposes helpers. **Byte convention:** functions that
+A global `Anywhere` object exposes helpers. **Byte convention:** functions that
 take "bytes" accept a `Uint8Array`, an `ArrayBuffer`, or a string (UTF-8
 encoded); functions that return bytes return a `Uint8Array`.
 
-### `Turn.codec`
+### `Anywhere.codec`
 
 Encoder/decoder pairs.
 
 | Member                          | encode                       | decode                          |
 | ------------------------------- | ---------------------------- | ------------------------------- |
-| `Turn.codec.utf8`           | `encode(string) → Uint8Array`| `decode(bytes) → string`        |
-| `Turn.codec.base64`         | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
-| `Turn.codec.base64url`      | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
-| `Turn.codec.hex`            | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
-| `Turn.codec.gzip`           | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
-| `Turn.codec.deflate`        | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
-| `Turn.codec.brotli`         | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
+| `Anywhere.codec.utf8`           | `encode(string) → Uint8Array`| `decode(bytes) → string`        |
+| `Anywhere.codec.base64`         | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
+| `Anywhere.codec.base64url`      | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
+| `Anywhere.codec.hex`            | `encode(bytes) → string`     | `decode(string) → Uint8Array`   |
+| `Anywhere.codec.gzip`           | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
+| `Anywhere.codec.deflate`        | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
+| `Anywhere.codec.brotli`         | `encode(bytes) → Uint8Array` | `decode(bytes) → Uint8Array`    |
 
 `base64url` emits unpadded RFC 4648 §5; decode accepts either alphabet, padded
 or not, and ignores embedded whitespace. The compression codecs are for payloads the pipeline doesn't already
 handle (a gzipped blob nested in a JSON field, re-compressing a body for
-`Turn.respond`, etc.) — the outer `Content-Encoding` is auto-decoded for
+`Anywhere.respond`, etc.) — the outer `Content-Encoding` is auto-decoded for
 `script` rules already. `decode` throws on malformed input or output exceeding
 the 4 MiB cap.
 
-#### `Turn.codec.protobuf`
+#### `Anywhere.codec.protobuf`
 
 Schema-free protobuf wire-format codec.
 
@@ -616,10 +616,10 @@ script picks the interpretation with a `DataView`); wire 2 (length-delimited) is
 a `Uint8Array` — recurse with `decode` for nested messages. Group wire types
 (3, 4) are rejected.
 
-### `Turn.crypto`
+### `Anywhere.crypto`
 
 Hashes and HMAC return raw digest bytes (`Uint8Array`); compose with
-`Turn.codec.hex.encode` / `base64.encode` to format.
+`Anywhere.codec.hex.encode` / `base64.encode` to format.
 
 - `md5`, `sha1`, `sha256`, `sha384`, `sha512` — `(bytes) → Uint8Array`.
 - `hmacSHA1`, `hmacSHA256`, `hmacSHA384`, `hmacSHA512` — `(key, data) → Uint8Array`.
@@ -637,7 +637,7 @@ Hashes and HMAC return raw digest bytes (`Uint8Array`); compose with
   - decrypt throws a catchable error on auth failure (wrong key, tampered data,
     mismatched AAD).
 
-### `Turn.jwt`
+### `Anywhere.jwt`
 
 JWT compact serialization (RFC 7519 / 7515). **Pure codec — no signature
 verification or `alg` enforcement;** do that yourself with the crypto helpers.
@@ -650,14 +650,14 @@ verification or `alg` enforcement;** do that yourself with the crypto helpers.
   `JSON.stringify`'d; bytes/string are used verbatim. `signature` is the raw
   signature bytes.
 
-### `Turn.json`
+### `Anywhere.json`
 
 Byte-oriented JSON editing: every method is **bytes-in / bytes-out** (first arg
 is the body; returns a fresh `Uint8Array` of re-serialized compact JSON). The
 contract is **total** — a body that isn't JSON, a path that doesn't resolve, a
 type mismatch, or a non-serializable value all yield the body **unchanged**
 (byte-for-byte) rather than throwing. A *successful* edit re-serializes the whole
-document, so a JSON integer beyond 2^53 turn in it can lose precision and its
+document, so a JSON integer beyond 2^53 anywhere in it can lose precision and its
 object members are re-serialized in an unspecified order (key order is not preserved).
 
 - `add(body, path, value)` — upsert at a JSONPath.
@@ -677,9 +677,9 @@ and `[index]` / `["key"]` brackets). Recursive methods take a bare key name.
 > For these same edits **without** a script — declared as a rule and run in
 > native code — use the [`body-json` (5)](#body-json-5) operation. A `script` is
 > only needed when the edit must be conditional, computed, or combined with
-> `Turn.respond` / control directives.
+> `Anywhere.respond` / control directives.
 
-### `Turn.store`
+### `Anywhere.store`
 
 Per-rule-set key/value state, scoped by rule-set id.
 
@@ -712,20 +712,20 @@ lists the backing you ask for. Scripts must tolerate a missing key in either.
 ```js
 // Persist a refreshed token across tunnel restarts; fall back to a fetch.
 async function process(ctx) {
-  let token = Turn.store.getString("token", true);
+  let token = Anywhere.store.getString("token", true);
   if (!token) {
-    const r = await Turn.http.get("https://api.example.com/token");
+    const r = await Anywhere.http.get("https://api.example.com/token");
     if (r.status === 200) {
-      token = Turn.codec.utf8.decode(r.body).trim();
-      try { Turn.store.set("token", token, true); }
-      catch (e) { Turn.log.warning("store full: " + e); }
+      token = Anywhere.codec.utf8.decode(r.body).trim();
+      try { Anywhere.store.set("token", token, true); }
+      catch (e) { Anywhere.log.warning("store full: " + e); }
     }
   }
   if (token) ctx.headers.push(["Authorization", "Bearer " + token]);
 }
 ```
 
-### `Turn.params`
+### `Anywhere.params`
 
 Read-only access to the rule set's [parameters](#parameter-lines) — the
 user-editable values declared in its `[Parameter]` section, scoped to the running
@@ -735,26 +735,26 @@ rule set. Each value is the user's choice, or the declared default.
 - `keys() → [string]` — the declared parameter names.
 - `all() → { [name]: string }` — every `name → value` as an object.
 
-Unlike [`Turn.store`](#turnstore), parameters have **no setter** — they
+Unlike [`Anywhere.store`](#anywherestore), parameters have **no setter** — they
 are configured by the user in the app, not the script. An undeclared name reads
 back `undefined`, so pair it with a fallback:
 
 ```js
 function process(ctx) {
   // User-chosen country, or the parameter's default; fall back if undeclared.
-  const country = Turn.params.get("country") || "US";
-  Turn.log.info("country = " + country);
-  // …then use `country` to drive a body rewrite, an Turn.http fetch, etc.
+  const country = Anywhere.params.get("country") || "US";
+  Anywhere.log.info("country = " + country);
+  // …then use `country` to drive a body rewrite, an Anywhere.http fetch, etc.
   return ctx;
 }
 ```
 
-### `Turn.log`
+### `Anywhere.log`
 
 `info(msg)`, `warning(msg)`, `error(msg)`, `debug(msg)` — written through the
 shared logger, prefixed `[MITM][JS]`. `debug` is os.log-only.
 
-### `Turn.http`
+### `Anywhere.http`
 
 Make an outbound HTTP(S) request from a script and `await` the response — to
 fetch a token, look up data to splice into the body, or call a sidecar API
@@ -763,10 +763,10 @@ result must be `await`ed, so declare `process` as `async`:
 
 ```js
 async function process(ctx) {
-  const r = await Turn.http.get("https://api.example.com/token");
+  const r = await Anywhere.http.get("https://api.example.com/token");
   if (r.status === 200) {
-    const token = Turn.codec.utf8.decode(r.body).trim();
-    ctx.body = Turn.codec.utf8.encode(JSON.stringify({ token }));
+    const token = Anywhere.codec.utf8.decode(r.body).trim();
+    ctx.body = Anywhere.codec.utf8.encode(JSON.stringify({ token }));
   }
 }
 ```
@@ -812,9 +812,9 @@ Because other invocations run during an `await`, another connection running the
 **same** rule set can mutate shared `globalThis` state between your `await` and
 its resumption — don't assume exclusive access across a suspension. Per-message
 state lives on `ctx`; cross-connection state belongs in
-[`Turn.store`](#turnstore), whose sharing semantics are already explicit.
+[`Anywhere.store`](#anywherestore), whose sharing semantics are already explicit.
 
-> **Security.** `Turn.http` requests follow the tunnel's routing rules — a
+> **Security.** `Anywhere.http` requests follow the tunnel's routing rules — a
 > `reject` rule blocks the fetch and a `proxy` rule sends it through that proxy —
 > but there is **no SSRF filtering** beyond those rules: any host not rejected is
 > reachable, including `localhost`, `*.local`, and loopback / link-local (incl.
@@ -825,15 +825,15 @@ state lives on `ctx`; cross-connection state belongs in
 
 ### Control directives
 
-- `Turn.done()` — commit the current `ctx` as the final result and skip any
+- `Anywhere.done()` — commit the current `ctx` as the final result and skip any
   remaining rules. In `stream-script`, emit this frame's body and pass every
   subsequent frame through unchanged.
-- `Turn.exit()` — discard this rule's mutations: revert to the message as it
+- `Anywhere.exit()` — discard this rule's mutations: revert to the message as it
   entered (buffered), or emit the original frame and stop scripting the stream.
-- `Turn.respond({ status, headers, body })` — **request-phase only**. Drop
+- `Anywhere.respond({ status, headers, body })` — **request-phase only**. Drop
   the request before it reaches upstream and synthesize a response straight back
   to the client. All fields optional: `status` defaults to 200 (clamped to
-  100–599), `headers` to `[]`, `body` to empty. Turn owns framing, so
+  100–599), `headers` to `[]`, `body` to empty. Anywhere owns framing, so
   `Content-Length` and hop-by-hop headers (`transfer-encoding`, `connection`,
   `keep-alive`, `upgrade`, `proxy-connection`, `te`, `trailer`) you set are
   dropped, and a `Date` is stamped when absent. Ignored (with a warning) on the
@@ -863,17 +863,17 @@ If you need composed behavior, consolidate the logic into a single
 | Limit                              | Value        | Effect on exceed |
 | ---------------------------------- | ------------ | ---------------- |
 | Buffered body (`script`)           | 4 MiB        | Content-Length → passthrough; chunked → truncated |
-| Per-scope `Turn.store` (memory)| 1 MiB        | `set` throws `capacity exceeded` |
-| Total `Turn.store` (memory)    | 16 MiB       | `set` throws `capacity exceeded` |
-| Per-scope `Turn.store` (onDisk)| 1 MiB        | `set` throws `capacity exceeded` |
-| Total `Turn.store` (onDisk)    | 16 MiB       | `set` throws `capacity exceeded` |
-| `Turn.crypto.randomBytes`      | 64 KiB       | throws |
+| Per-scope `Anywhere.store` (memory)| 1 MiB        | `set` throws `capacity exceeded` |
+| Total `Anywhere.store` (memory)    | 16 MiB       | `set` throws `capacity exceeded` |
+| Per-scope `Anywhere.store` (onDisk)| 1 MiB        | `set` throws `capacity exceeded` |
+| Total `Anywhere.store` (onDisk)    | 16 MiB       | `set` throws `capacity exceeded` |
+| `Anywhere.crypto.randomBytes`      | 64 KiB       | throws |
 | Synthesized response body          | 4 MiB        | truncated |
-| `Turn.http` timeout            | 10 s default / 30 s max | Promise rejects |
-| `Turn.http` per script         | 4 concurrent / 16 total | Promise rejects |
-| `Turn.http` concurrent requests (all scripts) | 32 | Promise rejects |
-| `Turn.http` in-flight body bytes (all scripts) | 16 MiB | Promise rejects |
-| `Turn.http` response body      | 4 MiB        | Promise rejects |
+| `Anywhere.http` timeout            | 10 s default / 30 s max | Promise rejects |
+| `Anywhere.http` per script         | 4 concurrent / 16 total | Promise rejects |
+| `Anywhere.http` concurrent requests (all scripts) | 32 | Promise rejects |
+| `Anywhere.http` in-flight body bytes (all scripts) | 16 MiB | Promise rejects |
+| `Anywhere.http` response body      | 4 MiB        | Promise rejects |
 | HTTP/1 request/response head       | 64 KiB       | fails closed — connection closed (request) / 502 (response) |
 | Body bytes pinned by suspended `async` scripts (all) | 16 MiB | new flow passes through unmodified |
 | Idle suspended `async` script      | ~60 s no progress | reverted to original, released |
@@ -893,9 +893,9 @@ Other safety properties:
   the scripts queued behind it — but a synchronous span that runs past a ~30 s
   hard cap crashes the extension so the OS relaunches it clean, rather than
   letting the wedge last the process's life. Either way, keep loops and regexes
-  bounded. (Awaiting an [`Turn.http`](#turnhttp) fetch does not
+  bounded. (Awaiting an [`Anywhere.http`](#anywherehttp) fetch does not
   monopolize the runtime — see its execution-model note.)
-- **Outbound requests.** [`Turn.http`](#turnhttp) lets a script make the
+- **Outbound requests.** [`Anywhere.http`](#anywherehttp) lets a script make the
   extension issue HTTP(S) requests — an exfiltration and pivot surface bounded by
   the per-script and global concurrency / size caps above and by the tunnel's
   routing rules (a `reject` rule blocks a fetch; a `proxy` rule routes it), but
@@ -903,7 +903,7 @@ Other safety properties:
   including loopback, link-local (incl. cloud-metadata), private, and ULA ranges,
   which are dialed directly. Only run rule sets from sources you trust.
 - **Failure is safe-by-default.** A compile failure, a missing `process`, or an
-  uncaught throw — including an unhandled `Turn.http` rejection — passes the
+  uncaught throw — including an unhandled `Anywhere.http` rejection — passes the
   original message through unchanged.
 
 ---
@@ -915,7 +915,7 @@ Other safety properties:
 ```
 name     = Add Trace
 hostname = api.example.com
-0, 1, ^/v2/, X-Trace-Id, turn
+0, 1, ^/v2/, X-Trace-Id, anywhere
 ```
 
 ### Redirect an old path, preserving the tail (transparent URL rewrite)
@@ -941,11 +941,11 @@ Source (`flag.js`):
 ```js
 function process(ctx) {
   try {
-    const obj = JSON.parse(Turn.codec.utf8.decode(ctx.body));
+    const obj = JSON.parse(Anywhere.codec.utf8.decode(ctx.body));
     obj.vip = true;
-    ctx.body = Turn.codec.utf8.encode(JSON.stringify(obj));
+    ctx.body = Anywhere.codec.utf8.encode(JSON.stringify(obj));
   } catch (e) {
-    Turn.log.warning("not JSON: " + e);
+    Anywhere.log.warning("not JSON: " + e);
   }
 }
 ```
@@ -963,11 +963,11 @@ hostname = api.example.com
 1, 100, ^/v1/profile, eyAuLi4gfQ==
 ```
 
-### Mock an endpoint without hitting upstream (`Turn.respond`)
+### Mock an endpoint without hitting upstream (`Anywhere.respond`)
 
 ```js
 function process(ctx) {
-  Turn.respond({
+  Anywhere.respond({
     status: 200,
     headers: [["Content-Type", "application/json"]],
     body: '{"enabled":true}'
@@ -979,7 +979,7 @@ function process(ctx) {
 0, 100, ^/api/feature-flags, <base64>
 ```
 
-### Enrich a response with a second request (`Turn.http`)
+### Enrich a response with a second request (`Anywhere.http`)
 
 `process` is `async` so it can `await` a fetch. Here it pulls a profile from a
 sidecar API and merges it into the JSON response body, leaving the body
@@ -988,17 +988,17 @@ unchanged if anything fails.
 ```js
 async function process(ctx) {
   try {
-    const obj = JSON.parse(Turn.codec.utf8.decode(ctx.body));
-    const r = await Turn.http.get("https://sidecar.example.com/profile/" + obj.id, {
+    const obj = JSON.parse(Anywhere.codec.utf8.decode(ctx.body));
+    const r = await Anywhere.http.get("https://sidecar.example.com/profile/" + obj.id, {
       headers: [["accept", "application/json"]],
       timeout: 3000
     });
     if (r.status === 200) {
-      obj.profile = JSON.parse(Turn.codec.utf8.decode(r.body));
-      ctx.body = Turn.codec.utf8.encode(JSON.stringify(obj));
+      obj.profile = JSON.parse(Anywhere.codec.utf8.decode(r.body));
+      ctx.body = Anywhere.codec.utf8.encode(JSON.stringify(obj));
     }
   } catch (e) {
-    Turn.log.warning("enrich failed: " + e); // body left unchanged
+    Anywhere.log.warning("enrich failed: " + e); // body left unchanged
   }
 }
 ```
@@ -1011,9 +1011,9 @@ async function process(ctx) {
 
 ```js
 function process(ctx) {
-  let text = Turn.codec.utf8.decode(ctx.body);
+  let text = Anywhere.codec.utf8.decode(ctx.body);
   text = text.replace(/Bearer [A-Za-z0-9._-]+/g, "Bearer ***");
-  ctx.body = Turn.codec.utf8.encode(text);
+  ctx.body = Anywhere.codec.utf8.encode(text);
 }
 ```
 
@@ -1023,15 +1023,15 @@ hostname = api.example.com
 1, 101, ^/events, <base64>
 ```
 
-### Count requests across connections (`Turn.store`)
+### Count requests across connections (`Anywhere.store`)
 
 ```js
 function process(ctx) {
-  const prev = Turn.store.getString("count");
+  const prev = Anywhere.store.getString("count");
   const next = (prev ? parseInt(prev, 10) : 0) + 1;
-  try { Turn.store.set("count", next.toString()); }
-  catch (e) { Turn.log.warning("store full: " + e); }
-  Turn.log.info("request #" + next + " to " + ctx.url);
+  try { Anywhere.store.set("count", next.toString()); }
+  catch (e) { Anywhere.log.warning("store full: " + e); }
+  Anywhere.log.info("request #" + next + " to " + ctx.url);
 }
 ```
 
@@ -1063,7 +1063,7 @@ function process(ctx) {
   added to a length-framed one — is dropped at emission, so a rule can't create
   the `Transfer-Encoding` + `Content-Length` pair that inbound messages are
   rejected for (RFC 9112 §6.3.3).
-- **Accept-Encoding.** Turn clamps the client's `Accept-Encoding` to the
+- **Accept-Encoding.** Anywhere clamps the client's `Accept-Encoding` to the
   codings it can decode — `gzip`, `deflate`, `br`, `identity` — dropping any
   others (notably `zstd`) *only* when a response-phase body rule (`script`,
   `stream-script`, `bodyReplace`, or `bodyJSON`) matches the request and would
@@ -1087,7 +1087,7 @@ function process(ctx) {
   `HTTP_1_1_REQUIRED`, the standard signal for the client to retry that request
   over HTTP/1.1 (a fresh connection negotiating `http/1.1`), where the tunnel
   path above applies.
-- **Pipelining order.** A request-phase `Turn.respond` on a pipelined
+- **Pipelining order.** A request-phase `Anywhere.respond` on a pipelined
   connection is held until the in-flight response ahead of it finishes, so the
   client's request/response ordering is preserved.
 - **Streaming media + `script`.** A buffered `script` on `text/event-stream`,

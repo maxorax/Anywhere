@@ -9,24 +9,33 @@ import SwiftUI
 import WidgetKit
 
 struct SettingsView: View {
+    /// Entry points held back from this release, kept wired up so a future one
+    /// turns them on by flipping a flag rather than by rebuilding the plumbing.
+    ///
+    /// `adBlocking` waits on rules to apply: the bundled `Rules.db` ships empty,
+    /// so the ADBlock set contributes nothing and the toggle only looked like it
+    /// did something.
+    private enum HeldBack {
+        static let adBlocking = false
+        static let countryBypass = false
+        static let personalization = false
+        static let security = false
+        static let utilities = false
+        static let advancedSettings = false
+    }
+
     @Environment(AppSettings.self) private var settings
     @Environment(VPNViewModel.self) private var viewModel
     @Environment(RoutingRuleSetStore.self) private var ruleSetStore
 
     @State private var adBlockEnabled = RoutingRuleSetStore.shared.adBlockRuleSet?.assignedConfigurationId == "REJECT"
-    
+
+    @State private var subscriptionRefreshInterval = AWCore.getSubscriptionRefreshInterval()
     @State private var showICloudRestartAlert = false
     @State private var showInsecureAlert = false
 
     var body: some View {
         Form {
-            if settings.showVoyagerCard {
-                Section {
-                    VoyagerSettingsCard()
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(VoyagerCardBackground())
-                }
-            }
             appSection
             vpnSection
             routingSection
@@ -69,10 +78,23 @@ struct SettingsView: View {
             Toggle(isOn: $settings.iCloudSyncEnabled) {
                 SettingsItem.iCloudSync.label
             }
-            NavigationLink {
-                PersonalizationSettingsView()
+            if HeldBack.personalization {
+                NavigationLink {
+                    PersonalizationSettingsView()
+                } label: {
+                    SettingsItem.personalization.label
+                }
+            }
+            Picker(selection: $subscriptionRefreshInterval) {
+                ForEach(SubscriptionRefreshInterval.allCases) { option in
+                    Text(option.title).tag(option)
+                }
             } label: {
-                SettingsItem.personalization.label
+                SettingsItem.subscriptionUpdate.label
+            }
+            .onChange(of: subscriptionRefreshInterval) {
+                AWCore.setSubscriptionRefreshInterval(subscriptionRefreshInterval)
+                SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
             }
         }
     }
@@ -96,13 +118,17 @@ struct SettingsView: View {
                 SettingsItem.globalMode.label
             }
             .onChange(of: settings.isGlobalMode) {
-                ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
+                ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
             }
             if !settings.isGlobalMode {
-                Toggle(isOn: $adBlockEnabled) {
-                    SettingsItem.adBlocking.label
+                if HeldBack.adBlocking {
+                    Toggle(isOn: $adBlockEnabled) {
+                        SettingsItem.adBlocking.label
+                    }
                 }
-                countryBypassPicker
+                if HeldBack.countryBypass {
+                    countryBypassPicker
+                }
                 NavigationLink {
                     RuleSetListView()
                 } label: {
@@ -127,50 +153,59 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var securitySection: some View {
-        Section("Security") {
-            Toggle(isOn: Binding(
-                get: { settings.allowInsecure },
-                set: { newValue in
-                    if newValue {
-                        showInsecureAlert = true
-                    } else {
-                        settings.allowInsecure = false
+        if HeldBack.security {
+            Section("Security") {
+                Toggle(isOn: Binding(
+                    get: { settings.allowInsecure },
+                    set: { newValue in
+                        if newValue {
+                            showInsecureAlert = true
+                        } else {
+                            settings.allowInsecure = false
+                        }
                     }
+                )) {
+                    SettingsItem.allowInsecure.label
                 }
-            )) {
-                SettingsItem.allowInsecure.label
-            }
-            .tint(.red)
-            NavigationLink {
-                TrustedCertificatesView()
-            } label: {
-                SettingsItem.trustedCertificates.label
-            }
-            NavigationLink {
-                TrustedNetworkSettingsView()
-            } label: {
-                SettingsItem.trustedNetwork.label
+                .tint(.red)
+                NavigationLink {
+                    TrustedCertificatesView()
+                } label: {
+                    SettingsItem.trustedCertificates.label
+                }
+                NavigationLink {
+                    TrustedNetworkSettingsView()
+                } label: {
+                    SettingsItem.trustedNetwork.label
+                }
+                NavigationLink {
+                    TurnSettingsView()
+                } label: {
+                    SettingsItem.turn.label
+                }
             }
         }
     }
 
     @ViewBuilder
     private var utilitiesSection: some View {
-        Section("Utilities") {
-            NavigationLink {
-                PurifySettingsView()
-            } label: {
-                SettingsItem.purify.label
-            }
-            NavigationLink {
-                ReflectionSettingsView()
-            } label: {
-                SettingsItem.reflection.label
-            }
-            NavigationLink {
-                MITMSettingsView()
-            } label: {
-                SettingsItem.mitm.label
+        if HeldBack.utilities {
+            Section("Utilities") {
+                NavigationLink {
+                    PurifySettingsView()
+                } label: {
+                    SettingsItem.purify.label
+                }
+                NavigationLink {
+                    ReflectionSettingsView()
+                } label: {
+                    SettingsItem.reflection.label
+                }
+                NavigationLink {
+                    MITMSettingsView()
+                } label: {
+                    SettingsItem.mitm.label
+                }
             }
         }
     }
@@ -194,37 +229,28 @@ struct SettingsView: View {
     @ViewBuilder
     private var aboutSection: some View {
         Section {
-            Link(destination: URL(string: "https://t.me/turn_official_group")!) {
-                HStack {
-                    TextWithColorfulIconAndCustomImage(title: "Join Telegram Group", comment: nil, imageName: "TelegramSymbol", foregroundStyle: .white, backgroundStyle: .blue.gradient)
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                        .font(.footnote.bold())
-                        .foregroundStyle(.secondary)
-                }
-            }
             NavigationLink {
-                AcknowledgementsView()
+                AboutView()
             } label: {
-                TextWithColorfulIcon(title: "Acknowledgements", comment: nil, systemName: "doc.text.fill", foregroundStyle: .white, backgroundStyle: .gray.gradient)
+                SettingsItem.about.label
             }
-        } header: {
-            Text("About")
         } footer: {
-            NavigationLink {
-                AdvancedSettingsView()
-            } label: {
-                HStack {
-                    Text("Advanced Settings")
-                        .font(.body)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.bold())
+            if HeldBack.advancedSettings {
+                NavigationLink {
+                    AdvancedSettingsView()
+                } label: {
+                    HStack {
+                        Text("Advanced Settings")
+                            .font(.body)
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.bold())
+                    }
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
                 }
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 

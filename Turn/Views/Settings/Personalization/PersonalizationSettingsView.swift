@@ -9,19 +9,10 @@ import SwiftUI
 
 struct PersonalizationSettingsView: View {
     @Environment(AppSettings.self) private var settings
-    @Environment(VoyagerStore.self) private var voyagerStore
 
     var body: some View {
         @Bindable var settings = settings
         Form {
-            if voyagerStore.isMember {
-                Section {
-                    Toggle(isOn: $settings.showVoyagerCard) {
-                        TextWithColorfulIcon(title: "Voyager Member Card", comment: nil, systemName: "creditcard.rewards.fill", foregroundStyle: .white, backgroundStyle: .indigo.gradient)
-                    }
-                }
-            }
-            
             Section {
                 NavigationLink {
                     CustomizeAppIconView()

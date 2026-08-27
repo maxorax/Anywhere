@@ -11,7 +11,7 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.argsment.Turn-Routing-Rule-Set</string>
+				<string>com.maxorax.turn-Routing-Rule-Set</string>
 			</array>
 		</dict>
 		<dict>
@@ -21,7 +21,7 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.argsment.Turn-MITM-Rule-Set</string>
+				<string>com.maxorax.turn-MITM-Rule-Set</string>
 			</array>
 		</dict>
 	</array>
@@ -31,17 +31,18 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.turn</string>
+			<string>com.maxorax.turn.scheme.turn</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>turn</string>
+				<string>anywhere</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.nowhere</string>
+			<string>com.maxorax.turn.scheme.nowhere</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>nowhere</string>
@@ -51,7 +52,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.vless</string>
+			<string>com.maxorax.turn.scheme.vless</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>vless</string>
@@ -61,7 +62,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.hysteria2</string>
+			<string>com.maxorax.turn.scheme.hysteria2</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>hysteria2</string>
@@ -71,7 +72,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.hy2</string>
+			<string>com.maxorax.turn.scheme.hy2</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>hy2</string>
@@ -81,7 +82,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.trojan</string>
+			<string>com.maxorax.turn.scheme.trojan</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>trojan</string>
@@ -91,7 +92,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.anytls</string>
+			<string>com.maxorax.turn.scheme.anytls</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>anytls</string>
@@ -101,7 +102,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.ss</string>
+			<string>com.maxorax.turn.scheme.ss</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ss</string>
@@ -111,7 +112,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Turn.scheme.sudoku</string>
+			<string>com.maxorax.turn.scheme.sudoku</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>sudoku</string>

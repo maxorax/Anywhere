@@ -93,7 +93,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCWidgetKind"
-            value = "com.argsment.Turn.Widget.ModeToggle"
+            value = "com.maxorax.turn.Widget.ModeToggle"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable

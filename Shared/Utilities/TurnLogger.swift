@@ -41,7 +41,7 @@ nonisolated struct TurnLogger {
     }
 
     init(category: String) {
-        self.osLogger = Logger(subsystem: "com.argsment.Turn", category: category)
+        self.osLogger = Logger(subsystem: "com.maxorax.turn", category: category)
     }
 
     /// os.log only; compiled out of release, where the autoclosure is never built.

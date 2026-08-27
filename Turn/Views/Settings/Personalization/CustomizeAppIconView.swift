@@ -35,15 +35,11 @@ struct AppIconOption: Identifiable {
 }
 
 struct CustomizeAppIconView: View {
-    @Environment(VoyagerStore.self) private var voyagerStore
     @State private var selectedName: String? = UIApplication.shared.alternateIconName
     @State private var errorMessage: String?
 
     var body: some View {
         Form {
-            if !voyagerStore.isMember {
-                VoyagerNotice("Custom app icons are available to Turn Voyager members.")
-            }
             Section {
                 ForEach(AppIconOption.all) { option in
                     Button {
@@ -52,7 +48,6 @@ struct CustomizeAppIconView: View {
                         row(for: option)
                     }
                     .buttonStyle(.plain)
-                    .disabled(!voyagerStore.isMember)
                 }
             }
         }
@@ -103,7 +98,7 @@ struct CustomizeAppIconView: View {
     }
 
     private func select(_ option: AppIconOption) {
-        guard voyagerStore.isMember, selectedName != option.alternateName else { return }
+        guard selectedName != option.alternateName else { return }
         let previous = selectedName
         selectedName = option.alternateName
         UIApplication.shared.setAlternateIconName(option.alternateName) { error in
@@ -121,5 +116,4 @@ struct CustomizeAppIconView: View {
     NavigationStack {
         CustomizeAppIconView()
     }
-    .environment(VoyagerStore.shared)
 }

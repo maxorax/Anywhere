@@ -15,6 +15,10 @@ actor AWNotificationCenter {
         nonisolated(unsafe) static let routingChanged = "\(AWCore.Identifier.bundle).routingChanged" as CFString
         nonisolated(unsafe) static let certificatePolicyChanged = "\(AWCore.Identifier.bundle).certificatePolicyChanged" as CFString
         nonisolated(unsafe) static let mitmChanged = "\(AWCore.Identifier.bundle).mitmChanged" as CFString
+        /// Posted by the extension when the VK TURN relay changes phase. Unlike
+        /// its siblings this one travels extension → app: the relay lives in the
+        /// tunnel process, which cannot show the captcha it is waiting on.
+        nonisolated(unsafe) static let turnStateChanged = "\(AWCore.Identifier.bundle).turnStateChanged" as CFString
     }
 
     // MARK: - Public API
@@ -33,6 +37,10 @@ actor AWNotificationCenter {
 
     static func notifyMITMChanged() {
         post(Notification.mitmChanged)
+    }
+
+    static func notifyTurnStateChanged() {
+        post(Notification.turnStateChanged)
     }
 
     // MARK: - Throttled Posting

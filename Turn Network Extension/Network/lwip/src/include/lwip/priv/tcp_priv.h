@@ -442,7 +442,7 @@ void tcp_segs_free(struct tcp_seg *seg);
 void tcp_seg_free(struct tcp_seg *seg);
 struct tcp_seg *tcp_seg_copy(struct tcp_seg *seg);
 
-/* --- BEGIN Turn Patch: disable delayed ACK for TUN deployment ---
+/* --- BEGIN Anywhere Patch: disable delayed ACK for TUN deployment ---
  * Original: stretch-ACK every other received segment; fall back to
  * tcp_fasttmr (250 ms) for the tail segment of an odd-count burst.
  *
@@ -454,44 +454,44 @@ struct tcp_seg *tcp_seg_copy(struct tcp_seg *seg);
  * short request/response flows (HTTP GET headers, TLS handshake tail).
  * Always ACK immediately; TF_ACK_DELAY still exists so the ERR_MEM
  * retry path in tcp_send_empty_ack / tcp_fasttmr keeps working.
- * See lwip/TURN_PATCHES.md.
+ * See lwip/ANYWHERE_PATCHES.md.
  */
 #define tcp_ack(pcb)  tcp_set_flags(pcb, TF_ACK_NOW)
-/* --- END Turn Patch --- */
+/* --- END Anywhere Patch --- */
 
-/* --- BEGIN Turn Patch: input batch mode flag ---
+/* --- BEGIN Anywhere Patch: input batch mode flag ---
  * Set to 1 by the bridge around a kernel readPackets batch. Read by the
  * tcp_input gating patch (`src/core/tcp_in.c`) to suppress the implicit
  * per-segment `tcp_output(pcb)` flush at the bottom of the input loop,
  * collapsing N per-segment ACKs to one end-of-batch ACK per PCB.
- * See lwip/TURN_PATCHES.md.
+ * See lwip/ANYWHERE_PATCHES.md.
  */
-extern int lwip_turn_input_batch_mode;
-/* --- END Turn Patch --- */
+extern int lwip_anywhere_input_batch_mode;
+/* --- END Anywhere Patch --- */
 
-/* --- BEGIN Turn Patch: SYN admission filter ---
+/* --- BEGIN Anywhere Patch: SYN admission filter ---
  * Hook called from `tcp_listen_input` when a SYN arrives, before the
  * new pcb is allocated and SYN-ACK is enqueued. Lets the host drop a
- * SYN it has no flow budget for. See lwip/TURN_PATCHES.md.
+ * SYN it has no flow budget for. See lwip/ANYWHERE_PATCHES.md.
  */
-extern int (*lwip_turn_tcp_syn_filter)(const void *src_ip, u16_t src_port,
+extern int (*lwip_anywhere_tcp_syn_filter)(const void *src_ip, u16_t src_port,
                                             const void *dst_ip, u16_t dst_port,
                                             int is_ipv6);
-#define LWIP_TURN_SYN_PASS  0
-#define LWIP_TURN_SYN_DROP  1
-/* --- END Turn Patch --- */
+#define LWIP_ANYWHERE_SYN_PASS  0
+#define LWIP_ANYWHERE_SYN_DROP  1
+/* --- END Anywhere Patch --- */
 
-/* --- BEGIN Turn Patch: stray-segment filter ---
+/* --- BEGIN Anywhere Patch: stray-segment filter ---
  * Hook called from `tcp_listen_input` when a non-SYN segment reaches the
  * LISTEN pcb (i.e. it matched no active connection) and lwIP would reply
  * with RST. `DROP` suppresses the RST so segments for silently-abandoned
  * reject-marked connections stay unanswered. Same signature and verdict
- * values as the SYN filter. See lwip/TURN_PATCHES.md.
+ * values as the SYN filter. See lwip/ANYWHERE_PATCHES.md.
  */
-extern int (*lwip_turn_tcp_stray_filter)(const void *src_ip, u16_t src_port,
+extern int (*lwip_anywhere_tcp_stray_filter)(const void *src_ip, u16_t src_port,
                                               const void *dst_ip, u16_t dst_port,
                                               int is_ipv6);
-/* --- END Turn Patch --- */
+/* --- END Anywhere Patch --- */
 
 #define tcp_ack_now(pcb)                           \
   tcp_set_flags(pcb, TF_ACK_NOW)

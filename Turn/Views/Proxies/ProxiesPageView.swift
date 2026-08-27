@@ -207,10 +207,19 @@ struct ProxiesPageView: View {
         )
     }
 
+    /// True while any proxy in this subscription is still being measured, so the
+    /// button reads as busy instead of inviting a second run over the same set.
+    private func isTestingLatency(_ subscription: Subscription) -> Bool {
+        configStore.configurations(for: subscription).contains { configuration in
+            if case .testing = viewModel.latencyResults[configuration.id] { return true }
+            return false
+        }
+    }
+
     @ViewBuilder
     private func subscriptionLabel(_ subscription: Subscription) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            HStack {
+            HStack(spacing: 14) {
                 Text(subscription.name)
                     .font(.body.weight(.medium))
                 if updatingSubscription?.id == subscription.id {
@@ -224,6 +233,14 @@ struct ProxiesPageView: View {
                     }
                     .buttonStyle(.borderless)
                 }
+                Button {
+                    viewModel.testLatencies(for: configStore.configurations(for: subscription))
+                } label: {
+                    Image(systemName: "waveform.path.ecg")
+                }
+                .buttonStyle(.borderless)
+                .disabled(isTestingLatency(subscription))
+                .foregroundStyle(isTestingLatency(subscription) ? Color.secondary : Color.green)
             }
             SubscriptionUsageView(subscription: subscription)
         }

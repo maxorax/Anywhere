@@ -1405,6 +1405,7 @@
       }
     },
     "A single purchase, yours to keep." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1509,6 +1510,7 @@
       }
     },
     "Acknowledgements" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2299,6 +2301,7 @@
       "shouldTranslate" : false
     },
     "All trademarks, service marks, and company names are the property of their respective owners." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2457,6 +2460,16 @@
     "ALPN" : {
       "shouldTranslate" : false
     },
+    "Always" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда"
+          }
+        }
+      }
+    },
     "Always On" : {
       "localizations" : {
         "ar" : {
@@ -2505,6 +2518,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "始终开启"
+          }
+        }
+      }
+    },
+    "Always relay through VK Calls, on any network." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда через звонки VK, в любой сети."
           }
         }
       }
@@ -2667,269 +2690,6 @@
     },
     "AnyTLS" : {
       "shouldTranslate" : false
-    },
-    "Turn" : {
-      "shouldTranslate" : false
-    },
-    "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn هو مشروع مستقل وليس تابعًا لأي من الشركات المذكورة أدناه أو معتمدًا أو مدعومًا منها."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn es un proyecto independiente y no está afiliado, respaldado ni patrocinado por ninguna de las empresas que se indican a continuación."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn یک پروژه مستقل است و هیچ‌گونه وابستگی، تأیید یا حمایت مالی از سوی شرکت‌های ذکر شده در زیر ندارد."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn — независимый проект, не связанный ни с одной из перечисленных ниже компаний и не одобренный или спонсируемый ими."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn bağımsız bir projedir ve aşağıda listelenen şirketlerin hiçbiriyle ilişkili değildir, onlar tarafından onaylanmaz veya desteklenmez."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn là một dự án độc lập, không liên kết, được xác nhận hay tài trợ bởi bất kỳ công ty nào được liệt kê dưới đây."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn 是一个独立项目，与以下列出的任何公司无关，未获其认可或赞助。"
-          }
-        }
-      }
-    },
-    "Turn MITM Rule Set URL" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رابط مجموعة قواعد Turn MITM"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn MITM Rule Set URL"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL del conjunto de reglas Turn MITM"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نشانی مجموعه قانون Turn MITM"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL набора правил Turn MITM"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn MITM Kural Seti URL'si"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL bộ quy tắc Turn MITM"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn MITM 规则列表 URL"
-          }
-        }
-      }
-    },
-    "Turn Root Certificate is installed and trusted." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "شهادة Turn الجذرية مثبتة وموثوقة."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Root Certificate is installed and trusted."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El certificado raíz de Turn está instalado y es de confianza."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "گواهی ریشه Turn نصب و مورد اعتماد است."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Корневой сертификат Turn установлен и доверен."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Kök Sertifikası yüklendi ve güveniliyor."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chứng chỉ gốc Turn đã được cài đặt và tin cậy."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Root Certificate 已安装且受信任。"
-          }
-        }
-      }
-    },
-    "Turn Routing Rule Set URL" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رابط مجموعة قواعد التوجيه Turn"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Routing Rule Set URL"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL del conjunto de reglas de enrutamiento Turn"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نشانی مجموعه قانون مسیریابی Turn"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL набора правил маршрутизации Turn"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Yönlendirme Kural Seti URL'si"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL bộ quy tắc định tuyến Turn"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn 路由规则列表 URL"
-          }
-        }
-      }
-    },
-    "Turn Voyager is currently unavailable. Please try again later." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager غير متوفر حاليًا. يُرجى المحاولة مرة أخرى لاحقًا."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager is currently unavailable. Please try again later."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager no está disponible en este momento. Inténtalo de nuevo más tarde."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager در حال حاضر در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager сейчас недоступен. Повторите попытку позже."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager hiện không khả dụng. Vui lòng thử lại sau."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn Voyager 暂不可用，请稍后重试。"
-          }
-        }
-      }
     },
     "App" : {
       "localizations" : {
@@ -3251,6 +3011,7 @@
       }
     },
     "Back" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3416,6 +3177,7 @@
       "shouldTranslate" : false
     },
     "Block ads and trackers at the network level for a cleaner browsing experience." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3884,6 +3646,7 @@
       }
     },
     "Build custom themes and use alternate icons." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4671,6 +4434,7 @@
       }
     },
     "Copy Verification Token" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4827,6 +4591,7 @@
       }
     },
     "Custom app icons are available to Turn Voyager members." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4883,6 +4648,7 @@
       "shouldTranslate" : false
     },
     "Custom themes are available to Turn Voyager members." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4933,6 +4699,9 @@
           }
         }
       }
+    },
+    "Daily" : {
+
     },
     "Dark" : {
       "localizations" : {
@@ -5398,6 +5167,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "直连"
+          }
+        }
+      }
+    },
+    "Direct on Wi-Fi. On cellular, relay only if the direct path is unreachable." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По Wi-Fi — напрямую. В мобильной сети — через реле, и только если прямой путь недоступен."
           }
         }
       }
@@ -5933,6 +5712,17 @@
         }
       }
     },
+    "Each stream joins the VK call as a separate participant. More streams carry more traffic, but the core has to fetch credentials for every one of them and waits between fetches to stay under VK's rate limit — so a high count connects slower and hits captchas more often. Default is 10." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый поток заходит в звонок VK как отдельный участник. Больше потоков — больше пропускная способность, но ядру нужно получить креды для каждого и оно выжидает между запросами, чтобы не упереться в лимит VK: при большом значении подключение идёт дольше, а капча приходит чаще. По умолчанию 10."
+          }
+        }
+      }
+    },
     "ECH" : {
       "shouldTranslate" : false
     },
@@ -6252,6 +6042,7 @@
       }
     },
     "Enable AD Blocking" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6565,6 +6356,7 @@
       }
     },
     "Enjoy Turn features with no restrictions." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6768,6 +6560,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "错误"
+          }
+        }
+      }
+    },
+    "Every 6 Hours" : {
+
+    },
+    "Every 12 Hours" : {
+
+    },
+    "Every captcha is shown to you straight away, with no automatic attempt." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждая капча сразу показывается вам, без автоматической попытки."
           }
         }
       }
@@ -7155,6 +6963,58 @@
         }
       }
     },
+    "Export Logs" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصدير السجلات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Logs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar registros"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برون‌بری گزارش‌ها"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспорт логов"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlükleri Dışa Aktar"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xuất nhật ký"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出日志"
+          }
+        }
+      }
+    },
     "Failed to export certificate." : {
       "localizations" : {
         "ar" : {
@@ -7364,6 +7224,7 @@
       }
     },
     "Family Sharing" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7423,6 +7284,7 @@
       "shouldTranslate" : false
     },
     "Full Features Unlocked" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7579,6 +7441,7 @@
       }
     },
     "Get Started" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -8539,6 +8402,9 @@
         }
       }
     },
+    "Imported Config" : {
+
+    },
     "Include All Networks" : {
       "shouldTranslate" : false
     },
@@ -8706,214 +8572,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安装描述文件并在“设置”中信任以使用 MITM。"
-          }
-        }
-      }
-    },
-    "Invalid Turn MITM Rule Set File." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ملف مجموعة قواعد Turn MITM غير صالح."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid Turn MITM Rule Set File."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Archivo del conjunto de reglas Turn MITM no válido."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فایل مجموعه قانون Turn MITM نامعتبر است."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Недействительный файл набора правил Turn MITM."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geçersiz Turn MITM Kural Seti Dosyası."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tệp bộ quy tắc Turn MITM không hợp lệ."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无效 Turn MITM 规则列表文件。"
-          }
-        }
-      }
-    },
-    "Invalid Turn MITM Rule Set URL." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رابط مجموعة قواعد Turn MITM غير صالح."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid Turn MITM Rule Set URL."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL del conjunto de reglas Turn MITM no válida."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نشانی مجموعه قانون Turn MITM نامعتبر است."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Недействительный URL набора правил Turn MITM."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geçersiz Turn MITM Kural Seti URL'si."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL bộ quy tắc Turn MITM không hợp lệ."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无效 Turn MITM 规则列表 URL。"
-          }
-        }
-      }
-    },
-    "Invalid Turn Routing Rule Set File." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ملف مجموعة قواعد التوجيه Turn غير صالح."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid Turn Routing Rule Set File."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Archivo de conjunto de reglas de enrutamiento Turn no válido."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فایل مجموعه قانون مسیریابی Turn نامعتبر است."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Недействительный файл набора правил маршрутизации Turn."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geçersiz Turn Yönlendirme Kural Seti Dosyası."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tệp bộ quy tắc định tuyến Turn không hợp lệ."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无效 Turn 路由规则列表文件。"
-          }
-        }
-      }
-    },
-    "Invalid Turn Routing Rule Set URL." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رابط مجموعة قواعد التوجيه Turn غير صالح."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid Turn Routing Rule Set URL."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL del conjunto de reglas de enrutamiento Turn no válida."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نشانی مجموعه قانون مسیریابی Turn نامعتبر است."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Недействительный URL набора правил маршрутизации Turn."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geçersiz Turn Yönlendirme Kural Seti URL'si."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL bộ quy tắc định tuyến Turn không hợp lệ."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无效 Turn 路由规则列表 URL。"
           }
         }
       }
@@ -9126,6 +8784,214 @@
         }
       }
     },
+    "Invalid Turn MITM Rule Set File." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملف مجموعة قواعد Turn MITM غير صالح."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid Turn MITM Rule Set File."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo del conjunto de reglas Turn MITM no válido."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فایل مجموعه قانون Turn MITM نامعتبر است."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недействительный файл набора правил Turn MITM."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Turn MITM Kural Seti Dosyası."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tệp bộ quy tắc Turn MITM không hợp lệ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效 Turn MITM 规则列表文件。"
+          }
+        }
+      }
+    },
+    "Invalid Turn MITM Rule Set URL." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رابط مجموعة قواعد Turn MITM غير صالح."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid Turn MITM Rule Set URL."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del conjunto de reglas Turn MITM no válida."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشانی مجموعه قانون Turn MITM نامعتبر است."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недействительный URL набора правил Turn MITM."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Turn MITM Kural Seti URL'si."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL bộ quy tắc Turn MITM không hợp lệ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效 Turn MITM 规则列表 URL。"
+          }
+        }
+      }
+    },
+    "Invalid Turn Routing Rule Set File." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملف مجموعة قواعد التوجيه Turn غير صالح."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid Turn Routing Rule Set File."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo de conjunto de reglas de enrutamiento Turn no válido."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فایل مجموعه قانون مسیریابی Turn نامعتبر است."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недействительный файл набора правил маршрутизации Turn."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Turn Yönlendirme Kural Seti Dosyası."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tệp bộ quy tắc định tuyến Turn không hợp lệ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效 Turn 路由规则列表文件。"
+          }
+        }
+      }
+    },
+    "Invalid Turn Routing Rule Set URL." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رابط مجموعة قواعد التوجيه Turn غير صالح."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid Turn Routing Rule Set URL."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del conjunto de reglas de enrutamiento Turn no válida."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشانی مجموعه قانون مسیریابی Turn نامعتبر است."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недействительный URL набора правил маршрутизации Turn."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Turn Yönlendirme Kural Seti URL'si."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL bộ quy tắc định tuyến Turn không hợp lệ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效 Turn 路由规则列表 URL。"
+          }
+        }
+      }
+    },
     "IP Rules" : {
       "localizations" : {
         "ar" : {
@@ -9286,6 +9152,7 @@
       }
     },
     "Join" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9338,6 +9205,7 @@
       }
     },
     "Join Public Beta and try new features first." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9390,6 +9258,7 @@
       }
     },
     "Join Telegram Group" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9445,7 +9314,18 @@
       "comment" : "Key for Sudoku protocol",
       "shouldTranslate" : false
     },
+    "Leave empty to use the link from your subscription. Set your own to replace it — useful when the subscription's call is exhausted." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оставьте пустым, чтобы использовалась ссылка из подписки. Своя ссылка заменит её — удобно, когда звонок из подписки исчерпан."
+          }
+        }
+      }
+    },
     "Lifetime Access" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9814,6 +9694,7 @@
       "shouldTranslate" : false
     },
     "Member %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -10501,6 +10382,16 @@
         }
       }
     },
+    "Never relay, even when the subscription offers one." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Никогда не использовать реле, даже если подписка его предлагает."
+          }
+        }
+      }
+    },
     "New Chain" : {
       "localizations" : {
         "ar" : {
@@ -10554,6 +10445,7 @@
       }
     },
     "Next" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -10710,6 +10602,7 @@
       }
     },
     "No previous purchase found to restore." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11490,6 +11383,59 @@
         }
       }
     },
+    "Open Source Libraries" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكتبات مفتوحة المصدر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Source Libraries"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas de código abierto"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کتابخانه‌های متن‌باز"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Библиотеки с открытым кодом"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık Kaynak Kütüphaneleri"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư viện mã nguồn mở"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开源库"
+          }
+        }
+      }
+    },
     "Open Turn on your iPhone to sync." : {
       "localizations" : {
         "ar" : {
@@ -11542,54 +11488,13 @@
         }
       }
     },
-    "Open Source Libraries" : {
+    "Open Turn to solve it and finish connecting through VK." : {
+      "extractionState" : "manual",
       "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مكتبات مفتوحة المصدر"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Source Libraries"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotecas de código abierto"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کتابخانه‌های متن‌باز"
-          }
-        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Библиотеки с открытым кодом"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Açık Kaynak Kütüphaneleri"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thư viện mã nguồn mở"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开源库"
+            "value" : "Откройте Turn, чтобы пройти её и завершить подключение через VK."
           }
         }
       }
@@ -11812,6 +11717,9 @@
           }
         }
       }
+    },
+    "Paste a sing-box config. A turn block, if present, attaches a VK relay to each server." : {
+
     },
     "Path" : {
       "localizations" : {
@@ -12338,6 +12246,7 @@
       }
     },
     "Privacy" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12702,6 +12611,7 @@
       }
     },
     "Public Beta" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12754,6 +12664,7 @@
       }
     },
     "Public Beta Access" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12806,6 +12717,7 @@
       }
     },
     "Public Beta is available to Turn Voyager members." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12962,6 +12874,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "净化"
+          }
+        }
+      }
+    },
+    "Purpose" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الغرض"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purpose"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propósito"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назначение"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amaç"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mục đích"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用途"
           }
         }
       }
@@ -14223,58 +14187,6 @@
         }
       }
     },
-    "Restart Turn for the change to take effect." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أعد تشغيل Turn لتطبيق التغيير."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restart Turn for the change to take effect."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reinicia Turn para que el cambio surta efecto."
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "برای اعمال تغییر، Turn را دوباره راه‌اندازی کنید."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перезапустите Turn, чтобы изменение вступило в силу."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Değişikliğin etkili olması için Turn'i yeniden başlatın."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Khởi động lại Turn để thay đổi có hiệu lực."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新启动 Turn 以使更改生效。"
-          }
-        }
-      }
-    },
     "Restart Required" : {
       "localizations" : {
         "ar" : {
@@ -14327,7 +14239,60 @@
         }
       }
     },
+    "Restart Turn for the change to take effect." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أعد تشغيل Turn لتطبيق التغيير."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart Turn for the change to take effect."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reinicia Turn para que el cambio surta efecto."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برای اعمال تغییر، Turn را دوباره راه‌اندازی کنید."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустите Turn, чтобы изменение вступило в силу."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişikliğin etkili olması için Turn'i yeniden başlatın."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khởi động lại Turn để thay đổi có hiệu lực."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新启动 Turn 以使更改生效。"
+          }
+        }
+      }
+    },
     "Restore Purchases" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14380,6 +14345,7 @@
       }
     },
     "Reverify Membership" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14641,6 +14607,7 @@
       }
     },
     "Route traffic to your home country directly, bypassing the proxy for faster local access." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15793,6 +15760,7 @@
       "shouldTranslate" : false
     },
     "Share Voyager membership with family." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15906,10 +15874,31 @@
     "SOCKS5" : {
       "shouldTranslate" : false
     },
+    "Solve Automatically" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Решать автоматически"
+          }
+        }
+      }
+    },
+    "Solver" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Решатель"
+          }
+        }
+      }
+    },
     "SSID" : {
       "shouldTranslate" : false
     },
     "Start Journey" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16070,6 +16059,17 @@
     },
     "Stream Up" : {
       "shouldTranslate" : false
+    },
+    "Streams" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потоки"
+          }
+        }
+      }
     },
     "Subscribe" : {
       "localizations" : {
@@ -16335,6 +16335,7 @@
       "shouldTranslate" : false
     },
     "Support Open Source" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16702,6 +16703,7 @@
       "shouldTranslate" : false
     },
     "Terms" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16857,6 +16859,16 @@
         }
       }
     },
+    "The core tries the solver, then a slider, and only shows you the page if both fail." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ядро пробует решатель, затем слайдер, и показывает вам страницу, только если оба не справились."
+          }
+        }
+      }
+    },
     "The proxy used by the following routing rules was deleted. They have been reset to Default: %@" : {
       "localizations" : {
         "ar" : {
@@ -16910,6 +16922,7 @@
       }
     },
     "The road is long. Walk it with us." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17009,6 +17022,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "主题"
+          }
+        }
+      }
+    },
+    "This app was created for educational purposes — to demonstrate how network tunnels work." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُنشئ هذا التطبيق لأغراض تعليمية — لتوضيح كيفية عمل أنفاق الشبكة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This app was created for educational purposes — to demonstrate how network tunnels work."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta app se creó con fines educativos: para demostrar cómo funcionan los túneles de red."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "این برنامه با هدف آموزشی ساخته شده است — برای نشان دادن نحوهٔ کار تونل‌های شبکه."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение создано в учебных целях — чтобы показать, как работают сетевые туннели."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulama eğitim amacıyla, ağ tünellerinin nasıl çalıştığını göstermek için oluşturuldu."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ứng dụng này được tạo ra với mục đích học tập — để minh hoạ cách các đường hầm mạng hoạt động."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本应用出于教学目的而创建，用于演示网络隧道的工作原理。"
           }
         }
       }
@@ -17381,6 +17446,7 @@
       }
     },
     "Trademarks" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17852,6 +17918,271 @@
         }
       }
     },
+    "Turn" : {
+      "shouldTranslate" : false
+    },
+    "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn هو مشروع مستقل وليس تابعًا لأي من الشركات المذكورة أدناه أو معتمدًا أو مدعومًا منها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn es un proyecto independiente y no está afiliado, respaldado ni patrocinado por ninguna de las empresas que se indican a continuación."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn یک پروژه مستقل است و هیچ‌گونه وابستگی، تأیید یا حمایت مالی از سوی شرکت‌های ذکر شده در زیر ندارد."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn — независимый проект, не связанный ни с одной из перечисленных ниже компаний и не одобренный или спонсируемый ими."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn bağımsız bir projedir ve aşağıda listelenen şirketlerin hiçbiriyle ilişkili değildir, onlar tarafından onaylanmaz veya desteklenmez."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn là một dự án độc lập, không liên kết, được xác nhận hay tài trợ bởi bất kỳ công ty nào được liệt kê dưới đây."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn 是一个独立项目，与以下列出的任何公司无关，未获其认可或赞助。"
+          }
+        }
+      }
+    },
+    "Turn MITM Rule Set URL" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رابط مجموعة قواعد Turn MITM"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn MITM Rule Set URL"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del conjunto de reglas Turn MITM"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشانی مجموعه قانون Turn MITM"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL набора правил Turn MITM"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn MITM Kural Seti URL'si"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL bộ quy tắc Turn MITM"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn MITM 规则列表 URL"
+          }
+        }
+      }
+    },
+    "Turn Root Certificate is installed and trusted." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شهادة Turn الجذرية مثبتة وموثوقة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Root Certificate is installed and trusted."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El certificado raíz de Turn está instalado y es de confianza."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "گواهی ریشه Turn نصب و مورد اعتماد است."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Корневой сертификат Turn установлен и доверен."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Kök Sertifikası yüklendi ve güveniliyor."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chứng chỉ gốc Turn đã được cài đặt và tin cậy."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Root Certificate 已安装且受信任。"
+          }
+        }
+      }
+    },
+    "Turn Routing Rule Set URL" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رابط مجموعة قواعد التوجيه Turn"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Routing Rule Set URL"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del conjunto de reglas de enrutamiento Turn"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشانی مجموعه قانون مسیریابی Turn"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL набора правил маршрутизации Turn"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Yönlendirme Kural Seti URL'si"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL bộ quy tắc định tuyến Turn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn 路由规则列表 URL"
+          }
+        }
+      }
+    },
+    "Turn Voyager is currently unavailable. Please try again later." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager غير متوفر حاليًا. يُرجى المحاولة مرة أخرى لاحقًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager is currently unavailable. Please try again later."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager no está disponible en este momento. Inténtalo de nuevo más tarde."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager در حال حاضر در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager сейчас недоступен. Повторите попытку позже."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager hiện không khả dụng. Vui lòng thử lại sau."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Voyager 暂不可用，请稍后重试。"
+          }
+        }
+      }
+    },
     "Type" : {
       "localizations" : {
         "ar" : {
@@ -18064,6 +18395,7 @@
       }
     },
     "Unlock Voyager — %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18270,6 +18602,9 @@
           }
         }
       }
+    },
+    "Update Subscriptions" : {
+
     },
     "Upload" : {
       "localizations" : {
@@ -18802,19 +19137,100 @@
         }
       }
     },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإصدار %1$@ (%2$@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión %1$@ (%2$@)"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخهٔ %1$@ (%2$@)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия %1$@ (%2$@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürüm %1$@ (%2$@)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phiên bản %1$@ (%2$@)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %1$@（%2$@）"
+          }
+        }
+      }
+    },
     "Vision" : {
       "shouldTranslate" : false
+    },
+    "VK Call Link" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ссылка на звонок VK"
+          }
+        }
+      }
+    },
+    "VK Captcha" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Капча VK"
+          }
+        }
+      }
+    },
+    "VK captcha required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно пройти капчу VK"
+          }
+        }
+      }
+    },
+    "VK TURN" : {
+
     },
     "VLESS" : {
       "shouldTranslate" : false
     },
-    "Voyager" : {
-      "shouldTranslate" : false
-    },
-    "Voyager Member Card" : {
-      "shouldTranslate" : false
-    },
     "Voyager Only" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19077,6 +19493,9 @@
     "WebSocket" : {
       "shouldTranslate" : false
     },
+    "Weekly" : {
+
+    },
     "When connected to a trusted SSID, enable Direct Mode." : {
       "localizations" : {
         "ar" : {
@@ -19125,6 +19544,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "连接到受信任的 SSID 时，启用直连模式。"
+          }
+        }
+      }
+    },
+    "When to Relay" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда использовать реле"
           }
         }
       }
@@ -19336,6 +19765,380 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你将需要重新生成证书以再次使用 MITM。"
+          }
+        }
+      }
+    },
+    "Your link is in use. The subscription's link is ignored while this is set." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используется ваша ссылка. Пока поле заполнено, ссылка из подписки игнорируется."
+          }
+        }
+      }
+    },
+    "Connecting through VK" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ الاتصال عبر VK"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting through VK"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectando a través de VK"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "در حال اتصال از طریق VK"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение через VK"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK üzerinden bağlanılıyor"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kết nối qua VK"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在通过 VK 连接"
+          }
+        }
+      }
+    },
+    "Fetching relay credentials." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ جلب بيانات اعتماد المُرحِّل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetching relay credentials."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obteniendo credenciales del repetidor."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "در حال دریافت اعتبارنامه‌های بازپخش."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Получение данных ретранслятора."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarma kimlik bilgileri alınıyor."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang lấy thông tin xác thực của bộ chuyển tiếp."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在获取中继凭据。"
+          }
+        }
+      }
+    },
+    "Tap to solve it." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط لحلّها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to solve it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para resolverla."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برای حل آن ضربه بزنید."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите, чтобы пройти."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çözmek için dokunun."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chạm để giải."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按以完成验证。"
+          }
+        }
+      }
+    },
+    "VK relay failed" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فشل مُرحِّل VK"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK relay failed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error del repetidor de VK"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بازپخش VK ناموفق بود"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбой ретранслятора VK"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK aktarması başarısız"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bộ chuyển tiếp VK thất bại"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK 中继失败"
+          }
+        }
+      }
+    },
+    "Connecting directly instead." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتم الاتصال مباشرةً بدلاً من ذلك."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting directly instead."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectando directamente en su lugar."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "در عوض اتصال مستقیم برقرار می‌شود."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключаемся напрямую."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bunun yerine doğrudan bağlanılıyor."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kết nối trực tiếp thay thế."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "改为直接连接。"
+          }
+        }
+      }
+    },
+    "Relay ready" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المُرحِّل جاهز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relay ready"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetidor listo"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بازپخش آماده است"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ретранслятор готов"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktarma hazır"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bộ chuyển tiếp đã sẵn sàng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中继就绪"
+          }
+        }
+      }
+    },
+    "Traffic goes through the VK relay." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمر حركة البيانات عبر مُرحِّل VK."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traffic goes through the VK relay."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tráfico pasa por el repetidor de VK."
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترافیک از طریق بازپخش VK عبور می‌کند."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трафик идёт через ретранслятор VK."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trafik VK aktarması üzerinden geçiyor."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lưu lượng đi qua bộ chuyển tiếp VK."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流量经由 VK 中继传输。"
           }
         }
       }

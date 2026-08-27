@@ -16,7 +16,7 @@ final class DeepLinkManager {
 
     func handle(url: URL) {
         switch url.scheme?.lowercased() {
-        case "turn":
+        case "turn", "anywhere":
             handleTurnScheme(url)
         case "nowhere", "vless", "hysteria2", "hy2", "trojan", "anytls", "ss", "quic", "sudoku":
             self.url = url.absoluteString

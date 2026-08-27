@@ -16,7 +16,7 @@ nonisolated final class MITMCertificateStore: Sendable {
     
     private static let accessGroup = AWCore.Identifier.appGroupSuite
     
-    private static let service = "com.argsment.Turn.MITM"
+    private static let service = "com.maxorax.turn.MITM"
 
     private static let privateKeyTag = "\(service).caPrivateKey".data(using: .utf8)!
     private static let certAccount = "\(service).caCertificate"
@@ -76,7 +76,7 @@ nonisolated final class MITMCertificateStore: Sendable {
             return false
         }
 
-        let testHost = "turn-mitm-trust-check.invalid"
+        let testHost = "anywhere-mitm-trust-check.invalid"
         let leafKey = P256.Signing.PrivateKey()
         let now = Date()
 
@@ -118,7 +118,7 @@ nonisolated final class MITMCertificateStore: Sendable {
     func exportMobileConfig() -> Data? {
         guard let (caKey, certDER) = loadCA() else { return nil }
 
-        let identifier = "com.argsment.Turn.mitm.root"
+        let identifier = "com.maxorax.turn.mitm.root"
         let payloadIdentifier = "\(identifier).payload"
         let payloadUUID = UUID().uuidString
         let outerUUID = UUID().uuidString

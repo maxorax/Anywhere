@@ -828,7 +828,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
     }
 
     fileprivate var preparedConnectionsEnabled: Bool {
-        ProcessInfo.processInfo.environment["TURN_SUDOKU_DISABLE_PRECONNECT"] != "1"
+        ProcessInfo.processInfo.environment["ANYWHERE_SUDOKU_DISABLE_PRECONNECT"] != "1"
             && supportsPreparedConnections
     }
 

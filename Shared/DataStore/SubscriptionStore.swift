@@ -167,7 +167,8 @@ extension SubscriptionStore {
                 id: configuration.id, name: configuration.name,
                 serverAddress: configuration.serverAddress, serverPort: configuration.serverPort,
                 subscriptionId: subscription.id,
-                outbound: configuration.outbound
+                outbound: configuration.outbound,
+                turn: configuration.turn
             )
         }
         ConfigurationStore.shared.replaceConfigurations(for: subscription.id, with: tagged)
@@ -198,7 +199,8 @@ extension SubscriptionStore {
                 id: id, name: configuration.name,
                 serverAddress: configuration.serverAddress, serverPort: configuration.serverPort,
                 subscriptionId: subscription.id,
-                outbound: configuration.outbound
+                outbound: configuration.outbound,
+                turn: configuration.turn
             ))
         }
 

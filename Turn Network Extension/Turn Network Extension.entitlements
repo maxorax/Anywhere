@@ -6,15 +6,13 @@
 	<array>
 		<string>packet-tunnel-provider</string>
 	</array>
-	<key>com.apple.developer.networking.wifi-info</key>
-	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.argsment.Turn</string>
+		<string>group.com.maxorax.turn</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)group.com.argsment.Turn</string>
+		<string>$(AppIdentifierPrefix)group.com.maxorax.turn</string>
 	</array>
 </dict>
 </plist>

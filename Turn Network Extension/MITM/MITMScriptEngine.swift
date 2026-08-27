@@ -584,17 +584,17 @@ actor MITMScriptEngine {
     // MARK: - Turn globals
 
     nonisolated private func installTurnGlobals(context: JSContext) {
-        let turn = JSValue(newObjectIn: context)!
-        installCodecGlobals(on: turn, context: context)
-        installCryptoGlobals(on: turn, context: context)
-        installJWTGlobals(on: turn, context: context)
-        installJSONGlobals(on: turn, context: context)
-        installStoreGlobals(on: turn, context: context)
-        installParamsGlobals(on: turn, context: context)
-        installLogGlobals(on: turn, context: context)
-        installControlGlobals(on: turn, context: context)
-        installHTTPGlobals(on: turn, context: context)
-        context.setObject(turn, forKeyedSubscript: "Turn" as NSString)
+        let anywhere = JSValue(newObjectIn: context)!
+        installCodecGlobals(on: anywhere, context: context)
+        installCryptoGlobals(on: anywhere, context: context)
+        installJWTGlobals(on: anywhere, context: context)
+        installJSONGlobals(on: anywhere, context: context)
+        installStoreGlobals(on: anywhere, context: context)
+        installParamsGlobals(on: anywhere, context: context)
+        installLogGlobals(on: anywhere, context: context)
+        installControlGlobals(on: anywhere, context: context)
+        installHTTPGlobals(on: anywhere, context: context)
+        context.setObject(anywhere, forKeyedSubscript: "Turn" as NSString)
         // Must follow Turn install: the shim captures Turn.codec.utf8.
         installTextCodecGlobals(context: context)
     }
@@ -630,7 +630,7 @@ actor MITMScriptEngine {
         }
     }
 
-    nonisolated private func installCodecGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installCodecGlobals(on anywhere: JSValue, context: JSContext) {
         let codec = JSValue(newObjectIn: context)!
 
         let utf8 = JSValue(newObjectIn: context)!
@@ -780,7 +780,7 @@ actor MITMScriptEngine {
         installCompressionCodec(on: codec, named: "deflate", codec: .deflate, context: context)
         installCompressionCodec(on: codec, named: "brotli", codec: .brotli, context: context)
 
-        turn.setObject(codec, forKeyedSubscript: "codec" as NSString)
+        anywhere.setObject(codec, forKeyedSubscript: "codec" as NSString)
     }
     
     nonisolated private func installCompressionCodec(on codecNamespace: JSValue, named name: String, codec codecKind: MITMBodyCodec.Codec, context: JSContext) {
@@ -823,7 +823,7 @@ actor MITMScriptEngine {
         codecNamespace.setObject(object, forKeyedSubscript: name as NSString)
     }
 
-    nonisolated private func installCryptoGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installCryptoGlobals(on anywhere: JSValue, context: JSContext) {
         let crypto = JSValue(newObjectIn: context)!
         let md5Block: @convention(block) (JSValue) -> JSValue = { val in
             let context = JSContext.current()!
@@ -1039,10 +1039,10 @@ actor MITMScriptEngine {
         aesGCM.setObject(aesGCMEncryptBlock, forKeyedSubscript: "encrypt" as NSString)
         aesGCM.setObject(aesGCMDecryptBlock, forKeyedSubscript: "decrypt" as NSString)
         crypto.setObject(aesGCM, forKeyedSubscript: "aesGCM" as NSString)
-        turn.setObject(crypto, forKeyedSubscript: "crypto" as NSString)
+        anywhere.setObject(crypto, forKeyedSubscript: "crypto" as NSString)
     }
     
-    nonisolated private func installJWTGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installJWTGlobals(on anywhere: JSValue, context: JSContext) {
         let jwt = JSValue(newObjectIn: context)!
         let jwtDecodeBlock: @convention(block) (String) -> JSValue = { token in
             let context = JSContext.current()!
@@ -1133,10 +1133,10 @@ actor MITMScriptEngine {
         }
         jwt.setObject(jwtDecodeBlock, forKeyedSubscript: "decode" as NSString)
         jwt.setObject(jwtEncodeBlock, forKeyedSubscript: "encode" as NSString)
-        turn.setObject(jwt, forKeyedSubscript: "jwt" as NSString)
+        anywhere.setObject(jwt, forKeyedSubscript: "jwt" as NSString)
     }
     
-    nonisolated private func installJSONGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installJSONGlobals(on anywhere: JSValue, context: JSContext) {
         let json = JSValue(newObjectIn: context)!
         
         let addBlock: @convention(block) (JSValue, String, JSValue) -> JSValue = { body, path, value in
@@ -1236,7 +1236,7 @@ actor MITMScriptEngine {
         json.setObject(deleteRecursiveBlock, forKeyedSubscript: "deleteRecursive" as NSString)
         json.setObject(removeWhereKeyExistsBlock, forKeyedSubscript: "removeWhereKeyExists" as NSString)
         json.setObject(removeWhereFieldInBlock, forKeyedSubscript: "removeWhereFieldIn" as NSString)
-        turn.setObject(json, forKeyedSubscript: "json" as NSString)
+        anywhere.setObject(json, forKeyedSubscript: "json" as NSString)
     }
 
     // MARK: - Turn.json internals
@@ -1275,7 +1275,7 @@ actor MITMScriptEngine {
         return []
     }
 
-    nonisolated private func installStoreGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installStoreGlobals(on anywhere: JSValue, context: JSContext) {
         let store = JSValue(newObjectIn: context)!
         let storeGet: @convention(block) (String, Bool) -> JSValue = { [weak self] key, onDisk in
             let context = JSContext.current()!
@@ -1326,10 +1326,10 @@ actor MITMScriptEngine {
         store.setObject(storeSet, forKeyedSubscript: "set" as NSString)
         store.setObject(storeDelete, forKeyedSubscript: "delete" as NSString)
         store.setObject(storeKeys, forKeyedSubscript: "keys" as NSString)
-        turn.setObject(store, forKeyedSubscript: "store" as NSString)
+        anywhere.setObject(store, forKeyedSubscript: "store" as NSString)
     }
     
-    nonisolated private func installParamsGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installParamsGlobals(on anywhere: JSValue, context: JSContext) {
         let params = JSValue(newObjectIn: context)!
         let paramsGet: @convention(block) (String) -> JSValue = { [weak self] key in
             let context = JSContext.current()!
@@ -1349,10 +1349,10 @@ actor MITMScriptEngine {
         params.setObject(paramsGet, forKeyedSubscript: "get" as NSString)
         params.setObject(paramsKeys, forKeyedSubscript: "keys" as NSString)
         params.setObject(paramsAll, forKeyedSubscript: "all" as NSString)
-        turn.setObject(params, forKeyedSubscript: "params" as NSString)
+        anywhere.setObject(params, forKeyedSubscript: "params" as NSString)
     }
 
-    nonisolated private func installLogGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installLogGlobals(on anywhere: JSValue, context: JSContext) {
         let log = JSValue(newObjectIn: context)!
         let logInfo: @convention(block) (String) -> Void = { msg in
             logger.info("[MITM][JS] \(msg)")
@@ -1370,18 +1370,18 @@ actor MITMScriptEngine {
         log.setObject(logWarning, forKeyedSubscript: "warning" as NSString)
         log.setObject(logError, forKeyedSubscript: "error" as NSString)
         log.setObject(logDebug, forKeyedSubscript: "debug" as NSString)
-        turn.setObject(log, forKeyedSubscript: "log" as NSString)
+        anywhere.setObject(log, forKeyedSubscript: "log" as NSString)
     }
 
-    nonisolated private func installControlGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installControlGlobals(on anywhere: JSValue, context: JSContext) {
         let doneBlock: @convention(block) () -> Void = { [weak self] in
             self?.setActiveDirective(.done)
         }
         let exitBlock: @convention(block) () -> Void = { [weak self] in
             self?.setActiveDirective(.exit)
         }
-        turn.setObject(doneBlock, forKeyedSubscript: "done" as NSString)
-        turn.setObject(exitBlock, forKeyedSubscript: "exit" as NSString)
+        anywhere.setObject(doneBlock, forKeyedSubscript: "done" as NSString)
+        anywhere.setObject(exitBlock, forKeyedSubscript: "exit" as NSString)
 
         let respondBlock: @convention(block) (JSValue) -> Void = { [weak self] spec in
             guard let self else { return }
@@ -1423,12 +1423,12 @@ actor MITMScriptEngine {
                 SynthesizedResponse(status: status, headers: headers, body: body)
             ))
         }
-        turn.setObject(respondBlock, forKeyedSubscript: "respond" as NSString)
+        anywhere.setObject(respondBlock, forKeyedSubscript: "respond" as NSString)
     }
 
     // MARK: - Turn.http
     
-    nonisolated private func installHTTPGlobals(on turn: JSValue, context: JSContext) {
+    nonisolated private func installHTTPGlobals(on anywhere: JSValue, context: JSContext) {
         let http = JSValue(newObjectIn: context)!
         let getBlock: @convention(block) (JSValue, JSValue) -> JSValue = { [weak self] urlVal, optsVal in
             let context = JSContext.current()!
@@ -1450,7 +1450,7 @@ actor MITMScriptEngine {
         http.setObject(getBlock, forKeyedSubscript: "get" as NSString)
         http.setObject(postBlock, forKeyedSubscript: "post" as NSString)
         http.setObject(requestBlock, forKeyedSubscript: "request" as NSString)
-        turn.setObject(http, forKeyedSubscript: "http" as NSString)
+        anywhere.setObject(http, forKeyedSubscript: "http" as NSString)
     }
 
     private func startHTTP(defaultMethod: String, urlVal: JSValue, optsVal: JSValue, in ctx: JSContext) -> JSValue {

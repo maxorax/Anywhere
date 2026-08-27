@@ -235,6 +235,9 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
     let outbound: Outbound
     /// Proxies to chain through, outermost first; `nil` or empty means a direct connection.
     let chain: [ProxyConfiguration]?
+    /// Relay this outbound through VK Calls TURN instead of dialling the server
+    /// directly; `nil` means dial normally. See `TurnConfiguration`.
+    let turn: TurnConfiguration?
     var updatedAt: Date
     var deletedAt: Date? = nil
 
@@ -369,6 +372,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         subscriptionId: UUID? = nil,
         outbound: Outbound,
         chain: [ProxyConfiguration]? = nil,
+        turn: TurnConfiguration? = nil,
         updatedAt: Date = .now
     ) {
         self.id = id
@@ -379,6 +383,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         self.subscriptionId = subscriptionId
         self.outbound = outbound
         self.chain = chain
+        self.turn = turn
         self.updatedAt = updatedAt
     }
 
@@ -386,7 +391,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         ProxyConfiguration(
             id: id, name: name, serverAddress: serverAddress, serverPort: serverPort,
             resolvedIP: resolvedIP, subscriptionId: subscriptionId,
-            outbound: outbound, chain: chain, updatedAt: updatedAt
+            outbound: outbound, chain: chain, turn: turn, updatedAt: updatedAt
         )
     }
 
@@ -394,16 +399,44 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         ProxyConfiguration(
             id: id, name: name, serverAddress: serverAddress, serverPort: serverPort,
             resolvedIP: resolvedIP, subscriptionId: subscriptionId,
-            outbound: outbound, chain: chain, updatedAt: updatedAt
+            outbound: outbound, chain: chain, turn: turn, updatedAt: updatedAt
         )
     }
     
+    /// Points the outbound at a different endpoint while leaving everything else
+    /// alone — used to send it through the local TURN listener. The TLS/Reality
+    /// server name was resolved at parse time and lives in `outbound`, so the
+    /// handshake still runs against the real server.
+    func withRedirectedServer(address: String, port: UInt16) -> ProxyConfiguration {
+        ProxyConfiguration(
+            id: id, name: name, serverAddress: address, serverPort: port,
+            resolvedIP: nil, subscriptionId: subscriptionId,
+            outbound: outbound, chain: chain, turn: turn, updatedAt: updatedAt
+        )
+    }
+
+    /// The same proxy with its relay pointed at a different VK call.
+    ///
+    /// A subscription may ship one invite for everybody while a pool service
+    /// hands each subscriber their own; this swaps the former for the latter
+    /// without disturbing anything else about the relay.
+    func withTurnLink(_ link: String) -> ProxyConfiguration {
+        guard var relay = turn else { return self }
+        relay.link = link
+        return ProxyConfiguration(
+            id: id, name: name, serverAddress: serverAddress, serverPort: serverPort,
+            resolvedIP: resolvedIP, subscriptionId: subscriptionId,
+            outbound: outbound, chain: chain, turn: relay, updatedAt: updatedAt
+        )
+    }
+
     func contentEquals(_ other: ProxyConfiguration) -> Bool {
         name == other.name &&
         serverAddress == other.serverAddress &&
         serverPort == other.serverPort &&
         outbound == other.outbound &&
-        chain == other.chain
+        chain == other.chain &&
+        turn == other.turn
     }
 
     // MARK: - Codable
@@ -426,6 +459,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         case http2Username, http2Password
         case http3Username, http3Password
         case chain
+        case turn
         case updatedAt
         case deletedAt
     }
@@ -440,6 +474,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         serverPort = try container.decode(UInt16.self, forKey: .serverPort)
         resolvedIP = try container.decodeIfPresent(String.self, forKey: .resolvedIP)
         subscriptionId = try container.decodeIfPresent(UUID.self, forKey: .subscriptionId)
+        turn = try container.decodeIfPresent(TurnConfiguration.self, forKey: .turn)
 
         let proto = try container.decodeIfPresent(OutboundProtocol.self, forKey: .outboundProtocol) ?? .vless
 
@@ -629,6 +664,7 @@ nonisolated struct ProxyConfiguration: Identifiable, Hashable, Codable, Sendable
         try container.encode(serverPort, forKey: .serverPort)
         try container.encodeIfPresent(resolvedIP, forKey: .resolvedIP)
         try container.encodeIfPresent(subscriptionId, forKey: .subscriptionId)
+        try container.encodeIfPresent(turn, forKey: .turn)
 
         try container.encode(outboundProtocol, forKey: .outboundProtocol)
         switch outbound {

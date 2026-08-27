@@ -57,8 +57,8 @@ nonisolated enum TunnelConstants {
 
     // MARK: - Log Buffer
 
-    static let logRetentionInterval: CFAbsoluteTime = 300
-    static let logMaxEntries = 50
+    static let logRetentionInterval: CFAbsoluteTime = 3600
+    static let logMaxEntries = 2000
     /// Time window (seconds) to attribute connection errors to a recent tunnel interruption.
     static let recentTunnelInterruptionWindow: CFAbsoluteTime = 8
 

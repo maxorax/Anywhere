@@ -23,7 +23,7 @@ nonisolated final class JSCConcurrencyBridge: @unchecked Sendable {
     let executor: BridgeExecutor
 
     private init() {
-        self.executor = BridgeExecutor(label: "com.argsment.Turn.JSCConcurrencyBridge")
+        self.executor = BridgeExecutor(label: "com.maxorax.turn.JSCConcurrencyBridge")
     }
 
     /// The JSC serial (home) queue — bridge-internal; callers enter the domain via ``enqueue``/``run``.

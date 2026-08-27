@@ -306,4 +306,8 @@ extension ProxyConfiguration {
             break
         }
     }
+
+    /// Round-trips `TurnConfiguration` back onto the share link, so exporting a
+    /// TURN-enabled entry and re-importing it yields the same configuration.
+
 }

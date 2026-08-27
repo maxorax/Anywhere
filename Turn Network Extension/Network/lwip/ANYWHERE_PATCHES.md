@@ -1,19 +1,19 @@
-# Turn Patches to lwIP
+# Anywhere Patches to lwIP
 
 This directory holds a vendored copy of lwIP with a small number of
-targeted modifications for the Turn Network Extension's TUN-based
+targeted modifications for the Anywhere Network Extension's TUN-based
 deployment. Every in-source modification is bracketed with
 
 ```
-/* --- BEGIN Turn Patch: <short tag> --- */
+/* --- BEGIN Anywhere Patch: <short tag> --- */
 ...
-/* --- END Turn Patch --- */
+/* --- END Anywhere Patch --- */
 ```
 
 so the full set can be located with:
 
 ```
-grep -rn "Turn Patch" "Turn Network Extension/Network/lwip/src"
+grep -rn "Anywhere Patch" "Anywhere Network Extension/Network/lwip/src"
 ```
 
 ## Deployment context
@@ -161,12 +161,12 @@ that flushes queued ACKs / `pcb->unsent` is gated on a global flag:
 tcp_output(pcb);
 
 /* after */
-if (!lwip_turn_input_batch_mode) {
+if (!lwip_anywhere_input_batch_mode) {
   tcp_output(pcb);
 }
 ```
 
-The flag is declared in `tcp_priv.h` (`extern int lwip_turn_input_batch_mode;`)
+The flag is declared in `tcp_priv.h` (`extern int lwip_anywhere_input_batch_mode;`)
 and defined in `lwip_bridge.c`. The bridge sets it to 1 around each
 kernel `readPackets` batch — see `lwip_bridge_input_batch_begin/end` —
 and `_end` then issues `tcp_output(pcb)` once per active PCB.
@@ -216,9 +216,9 @@ both halves:
 
 - `src/core/tcp_in.c`: search for `/* Try to send something out. */`
   near the bottom of `tcp_input()`.
-- `src/include/lwip/priv/tcp_priv.h`: search for `lwip_turn_input_batch_mode`.
+- `src/include/lwip/priv/tcp_priv.h`: search for `lwip_anywhere_input_batch_mode`.
 
-The flag definition (`int lwip_turn_input_batch_mode = 0;`) and the
+The flag definition (`int lwip_anywhere_input_batch_mode = 0;`) and the
 begin/end functions live in `lwip/lwip_bridge.c` outside vendored lwIP
 and don't need re-applying.
 
@@ -233,16 +233,16 @@ check, call a host-provided filter that returns `PASS` or `DROP`.
 
 ```c
 } else if (flags & TCP_SYN) {
-  if (lwip_turn_tcp_syn_filter != NULL) {
+  if (lwip_anywhere_tcp_syn_filter != NULL) {
     /* extract src/dst bytes from ip_current_*_addr() */
-    int verdict = lwip_turn_tcp_syn_filter(...);
-    if (verdict == LWIP_TURN_SYN_DROP)  { return; }
+    int verdict = lwip_anywhere_tcp_syn_filter(...);
+    if (verdict == LWIP_ANYWHERE_SYN_DROP)  { return; }
   }
   /* original code path: tcp_alloc, send SYN-ACK, etc. */
 ```
 
 The filter pointer is declared in `tcp_priv.h`
-(`extern int (*lwip_turn_tcp_syn_filter)(...)`) and defined in
+(`extern int (*lwip_anywhere_tcp_syn_filter)(...)`) and defined in
 `lwip_bridge.c`; Swift registers it via
 `lwip_bridge_set_tcp_syn_filter_fn`.
 
@@ -283,7 +283,7 @@ the flush never touches listeners.
 - `src/core/tcp_in.c`: search for `else if (flags & TCP_SYN)` in
   `tcp_listen_input`.
 - `src/include/lwip/priv/tcp_priv.h`: search for
-  `lwip_turn_tcp_syn_filter`.
+  `lwip_anywhere_tcp_syn_filter`.
 
 The pointer storage and bridge setter live in `lwip/lwip_bridge.c` and
 don't need re-applying.
@@ -331,7 +331,7 @@ unmarked (SNI-rejected real-IP) destinations.
 - `src/core/tcp_in.c`: search for `if (flags & TCP_ACK)` in
   `tcp_listen_input`.
 - `src/include/lwip/priv/tcp_priv.h`: search for
-  `lwip_turn_tcp_stray_filter`.
+  `lwip_anywhere_tcp_stray_filter`.
 
 The pointer storage and `lwip_bridge_set_tcp_stray_filter_fn` live in
 `lwip/lwip_bridge.c` and don't need re-applying. The silent teardown in
@@ -359,7 +359,7 @@ IPv6 extension headers are dropped, matching lwIP's `IP_REASSEMBLY` /
 `LWIP_IPV6_REASS` = 0 posture.
 
 **Consequence for upgrades:** there is an in-source udp.c modification
-(`/* Turn patch: fallback to wildcard PCB with local_port == 0 */`). It is
+(`/* Anywhere patch: fallback to wildcard PCB with local_port == 0 */`). It is
 now **inert** — the whole file is `#if LWIP_UDP` — and does **not** need
 re-applying. If you ever re-enable `LWIP_UDP`, you would also have to restore
 the UDP catch-all listeners and `udp_recv_cb` in `lwip_bridge.c` (removed when

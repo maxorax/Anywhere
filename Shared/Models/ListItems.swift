@@ -19,6 +19,10 @@ final class ProxyListItem: Identifiable {
     var transportLayerTag: String?
     var securityLayerTag: String?
     var isVision: Bool
+    /// True when the subscription paired this server with a VK TURN relay.
+    /// It says the relay is available, not that traffic is going through it —
+    /// that call is made per connection by the failover mode.
+    var hasTurn: Bool
     var isSelected: Bool
     var latency: LatencyResult?
 
@@ -27,6 +31,7 @@ final class ProxyListItem: Identifiable {
         if let transportLayerTag { result.append(transportLayerTag) }
         if let securityLayerTag { result.append(securityLayerTag) }
         if isVision { result.append("Vision") }
+        if hasTurn { result.append("TURN") }
         return result
     }
 
@@ -38,6 +43,7 @@ final class ProxyListItem: Identifiable {
         transportLayerTag = configuration.displayTransportLayerTag
         securityLayerTag = configuration.displaySecurityLayerTag
         isVision = configuration.hasVisionFlow
+        hasTurn = configuration.turn != nil
         self.isSelected = isSelected
         self.latency = latency
     }
@@ -49,6 +55,7 @@ final class ProxyListItem: Identifiable {
         if transportLayerTag != configuration.displayTransportLayerTag { transportLayerTag = configuration.displayTransportLayerTag }
         if securityLayerTag != configuration.displaySecurityLayerTag { securityLayerTag = configuration.displaySecurityLayerTag }
         if isVision != configuration.hasVisionFlow { isVision = configuration.hasVisionFlow }
+        if hasTurn != (configuration.turn != nil) { hasTurn = configuration.turn != nil }
         if self.isSelected != isSelected { self.isSelected = isSelected }
         if self.latency != latency { self.latency = latency }
     }

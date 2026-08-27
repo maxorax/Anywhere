@@ -8,16 +8,11 @@
 import SwiftUI
 
 struct CustomizeThemeView: View {
-    @Environment(VoyagerStore.self) private var voyagerStore
     @Bindable private var settings = AppSettings.shared
     @State private var screenAspectRatio: CGFloat = 393 / 852
 
     var body: some View {
         Form {
-            if !voyagerStore.isMember {
-                VoyagerNotice("Custom themes are available to Turn Voyager members.")
-            }
-            
             Section {
                 Picker(selection: $settings.homeColorScheme) {
                     ForEach(HomeColorScheme.allCases, id: \.self) { scheme in
@@ -28,7 +23,6 @@ struct CustomizeThemeView: View {
                 }
             }
             
-            .disabled(!voyagerStore.isMember)
             
             Section {
                 ColorPicker(
@@ -45,7 +39,6 @@ struct CustomizeThemeView: View {
                 Text("Background (Connected)")
             }
             
-            .disabled(!voyagerStore.isMember)
             
             Section {
                 ColorPicker(
@@ -62,7 +55,6 @@ struct CustomizeThemeView: View {
                 Text("Background (Disconnected)")
             }
             
-            .disabled(!voyagerStore.isMember)
             
             Section {
                 HStack {
@@ -178,6 +170,5 @@ struct CustomizeThemeView: View {
     NavigationStack {
         CustomizeThemeView()
     }
-    .environment(VoyagerStore.shared)
     .environment(AppSettings.shared)
 }

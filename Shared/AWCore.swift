@@ -15,7 +15,7 @@ nonisolated final class AWCore {
 
     enum Identifier {
         static let appGroupSuite = "group.\(bundle)"
-        static let bundle = "com.argsment.Turn"
+        static let bundle = "com.maxorax.turn"
         static let errorDomain = bundle
         static let iCloudContainer = "iCloud.\(bundle)"
         static let lwipQueue = "\(bundle).lwip"
@@ -41,7 +41,10 @@ nonisolated final class AWCore {
             UserDefaultsKey.quicPolicy: QUICPolicy.automatic.rawValue,
             UserDefaultsKey.reflectionAddresses: ["10.7.0.1"],
             UserDefaultsKey.remnawaveHWID: UUID().uuidString,
-            UserDefaultsKey.showVoyagerCard: true,
+            UserDefaultsKey.subscriptionAutoUpdateHours: SubscriptionRefreshInterval.daily.rawValue,
+            UserDefaultsKey.turnAutoCaptcha: true,
+            UserDefaultsKey.turnCaptchaSolver: "v2",
+            UserDefaultsKey.turnStreams: TurnStreamCount.default,
             UserDefaultsKey.subscriptionDNSDoHURL: DNSUpstream.defaultDoHURL,
             UserDefaultsKey.subscriptionDNSPlainServer: DNSUpstream.defaultPlainServer,
             UserDefaultsKey.trustedCertificateSHA256s: [],
@@ -78,7 +81,6 @@ nonisolated final class AWCore {
         static let lastConfigurationData = "lastConfigurationData"
         static let latencyResults = "latencyResults"
         static let mitmEnabled = "mitmEnabled"
-        static let onboardingCompleted = "onboardingCompleted"
         static let preventDNSLeak = "preventDNSLeak"
         static let proxyDNSDoHURL = "proxyDNSDoHURL"
         static let proxyDNSMode = "proxyDNSMode"
@@ -92,7 +94,7 @@ nonisolated final class AWCore {
         static let ruleSetAssignments = "ruleSetAssignments"
         static let selectedChainId = "selectedChainId"
         static let selectedConfigurationId = "selectedConfigurationId"
-        static let showVoyagerCard = "showVoyagerCard"
+        static let subscriptionAutoUpdateHours = "subscriptionAutoUpdateHours"
         static let subscriptionDNSDoHURL = "subscriptionDNSDoHURL"
         static let subscriptionDNSMode = "subscriptionDNSMode"
         static let subscriptionDNSPlainServer = "subscriptionDNSPlainServer"
@@ -105,7 +107,11 @@ nonisolated final class AWCore {
         static let tunnelIncludeCellularServices = "tunnelIncludeCellularServices"
         static let tunnelIncludedRoutes = "tunnelIncludedRoutes"
         static let tunnelIncludeLocalNetworks = "tunnelIncludeLocalNetworks"
-        static let voyagerMembership = "voyagerMembership"
+        static let turnAutoCaptcha = "turnAutoCaptcha"
+        static let turnCaptchaSolver = "turnCaptchaSolver"
+        static let turnMode = "turnMode"
+        static let turnVKLink = "turnVKLink"
+        static let turnStreams = "turnStreams"
     }
 
     static func migrateToAppGroup(fileName: String) {
@@ -124,13 +130,6 @@ nonisolated final class AWCore {
     // MARK: - Typed UserDefaults Accessors
     
     // App
-    static func getOnboardingCompleted() -> Bool {
-        userDefaults.bool(forKey: UserDefaultsKey.onboardingCompleted)
-    }
-
-    static func setOnboardingCompleted(_ value: Bool) {
-        userDefaults.set(value, forKey: UserDefaultsKey.onboardingCompleted)
-    }
     
     static func getICloudSyncEnabled() -> Bool {
         userDefaults.bool(forKey: UserDefaultsKey.iCloudSyncEnabled)
@@ -145,27 +144,6 @@ nonisolated final class AWCore {
         let id = UUID().uuidString
         userDefaults.set(id, forKey: UserDefaultsKey.syncDeviceID)
         return id
-    }
-
-    // Voyager
-    static func getVoyagerMembership() -> Bool {
-        userDefaults.bool(forKey: UserDefaultsKey.voyagerMembership)
-    }
-
-    static func setVoyagerMembership(_ value: Bool) {
-        userDefaults.set(value, forKey: UserDefaultsKey.voyagerMembership)
-    }
-
-    static func clearVoyagerMembership() {
-        userDefaults.removeObject(forKey: UserDefaultsKey.voyagerMembership)
-    }
-
-    static func getShowVoyagerCard() -> Bool {
-        userDefaults.bool(forKey: UserDefaultsKey.showVoyagerCard)
-    }
-
-    static func setShowVoyagerCard(_ value: Bool) {
-        userDefaults.set(value, forKey: UserDefaultsKey.showVoyagerCard)
     }
 
     enum ThemeColorSlot: String {
@@ -269,6 +247,73 @@ nonisolated final class AWCore {
 
     static func setBypassCountryCode(_ value: String) {
         userDefaults.set(value, forKey: UserDefaultsKey.bypassCountryCode)
+    }
+
+    // MARK: - Subscriptions
+
+    static func getSubscriptionRefreshInterval() -> SubscriptionRefreshInterval {
+        SubscriptionRefreshInterval(rawValue: userDefaults.integer(forKey: UserDefaultsKey.subscriptionAutoUpdateHours)) ?? .daily
+    }
+
+    static func setSubscriptionRefreshInterval(_ value: SubscriptionRefreshInterval) {
+        userDefaults.set(value.rawValue, forKey: UserDefaultsKey.subscriptionAutoUpdateHours)
+    }
+
+    // MARK: - VK TURN
+
+    /// A VK Calls invite the user supplied by hand. When set it wins over the one
+    /// the subscription ships, which lets a stale or exhausted call be replaced
+    /// without waiting for the subscription to be reissued.
+    static func getTurnVKLink() -> String {
+        (userDefaults.string(forKey: UserDefaultsKey.turnVKLink) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func setTurnVKLink(_ value: String) {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            userDefaults.removeObject(forKey: UserDefaultsKey.turnVKLink)
+        } else {
+            userDefaults.set(trimmed, forKey: UserDefaultsKey.turnVKLink)
+        }
+    }
+
+    static func getTurnMode() -> TurnMode {
+        TurnMode(rawValue: userDefaults.string(forKey: UserDefaultsKey.turnMode) ?? "") ?? .auto
+    }
+
+    static func setTurnMode(_ value: TurnMode) {
+        userDefaults.set(value.rawValue, forKey: UserDefaultsKey.turnMode)
+    }
+
+    /// Whether the core may try to solve a VK captcha on its own before falling
+    /// back to the page the user solves by hand.
+    static func getTurnAutoCaptcha() -> Bool {
+        userDefaults.bool(forKey: UserDefaultsKey.turnAutoCaptcha)
+    }
+
+    static func setTurnAutoCaptcha(_ value: Bool) {
+        userDefaults.set(value, forKey: UserDefaultsKey.turnAutoCaptcha)
+    }
+
+    /// Which automatic solver to try first: `v1` or `v2`.
+    static func getTurnCaptchaSolver() -> String {
+        let value = userDefaults.string(forKey: UserDefaultsKey.turnCaptchaSolver) ?? ""
+        return value == "v1" || value == "v2" ? value : "v2"
+    }
+
+    static func setTurnCaptchaSolver(_ value: String) {
+        userDefaults.set(value, forKey: UserDefaultsKey.turnCaptchaSolver)
+    }
+
+    /// How many parallel streams the relay opens. Each one joins the VK call as
+    /// its own participant, so this is the "bots in the call" dial.
+    static func getTurnStreams() -> Int {
+        TurnStreamCount.clamped(userDefaults.integer(forKey: UserDefaultsKey.turnStreams))
+    }
+
+    static func setTurnStreams(_ value: Int) {
+        userDefaults.set(TurnStreamCount.clamped(value), forKey: UserDefaultsKey.turnStreams)
     }
     
     static func getRuleSetAssignments() -> [String: String] {
@@ -652,5 +697,25 @@ nonisolated final class AWCore {
     /// one-time migration off the synced blob (see `MITMRuleSetStore.init`).
     static func hasMITMEnabled() -> Bool {
         userDefaults.object(forKey: UserDefaultsKey.mitmEnabled) != nil
+    }
+}
+
+/// The allowed number of parallel relay streams.
+///
+/// Each stream borrows its own set of TURN credentials, which is one more
+/// participant in the VK call. More streams carry more traffic, but the core
+/// throttles credential fetches to stay under VK's rate limit, so a high count
+/// makes connecting slower and captchas more frequent rather than faster.
+///
+/// It lives here rather than beside the other TURN models because `AWCore` is
+/// compiled into every target, and those models are not.
+nonisolated enum TurnStreamCount {
+    static let minimum = 1
+    static let maximum = 40
+    /// Matches what the subscriptions ship in `turn.defaults.num_streams`.
+    static let `default` = 10
+
+    static func clamped(_ value: Int) -> Int {
+        value <= 0 ? `default` : min(max(value, minimum), maximum)
     }
 }
