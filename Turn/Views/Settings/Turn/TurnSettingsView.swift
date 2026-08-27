@@ -64,7 +64,7 @@ struct TurnSettingsView: View {
             } header: {
                 Text("Streams")
             } footer: {
-                Text("Each stream joins the VK call as a separate participant. More streams carry more traffic, but the core has to fetch credentials for every one of them and waits between fetches to stay under VK's rate limit — so a high count connects slower and hits captchas more often. Default is 10.")
+                Text("Each stream joins the VK call as a separate participant, and the more of them the more traffic they carry. The first ten come up on one trip for credentials. Every further ten needs its own trip, and VK may answer that one with a captcha — until it is solved those streams stay down. Default is 10.")
             }
 
             Section {

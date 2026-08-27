@@ -301,7 +301,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         // Stream count is the user's dial too: the subscription only suggests one.
         relay.streams = AWCore.getTurnStreams()
-        logger.info("[TURN] Streams: \(relay.streams)")
+        // Derived, not a second dial: every set of credentials is its own trip to
+        // VK and any trip can be met with a captcha, so pack as many streams as
+        // the core is known to get from one set. Ten is the core's own default;
+        // asking for more per set buys nothing if VK will not issue that many
+        // channels for one allocation.
+        relay.streamsPerCred = min(relay.streams, TurnConfiguration.streamsPerCredentialSet)
+        logger.info("[TURN] Streams: \(relay.streams), \(relay.streamsPerCred) per credential set")
 
         do {
             let endpoint = try await TurnCore.shared.activate(relay)
