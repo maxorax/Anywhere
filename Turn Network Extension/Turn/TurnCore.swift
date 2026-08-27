@@ -35,6 +35,14 @@ actor TurnCore {
     /// left running on purpose, so a retry can adopt it instead of discarding the
     /// credentials it has already collected.
     private var pending: TurnConfiguration?
+    /// The configuration whose core is being brought up right now.
+    ///
+    /// `active` is only assigned once the listener accepts, and `startAndWait`
+    /// can sit for a couple of minutes before that — the captcha phase happens
+    /// inside the wait. Without this marker the relay reads as idle exactly when
+    /// the app has to raise its captcha, and the connection waits on a prompt
+    /// nobody was shown.
+    private var starting: TurnConfiguration?
     private var logSink: TurnLogSink?
     private var monitor: Task<Void, Never>?
     private let logger = TurnLogger(category: "TurnCore")
@@ -83,6 +91,7 @@ actor TurnCore {
         let seconds = max(configuration.resolvedReadyTimeout, Self.minimumReadyTimeout)
         let timeout = seconds * 1000
 
+        starting = configuration
         startMonitor()
         logger.info("[TURN] Starting core, waiting up to \(seconds)s for the listener "
                     + "(subscription asked for \(configuration.resolvedReadyTimeout)s)")
@@ -101,11 +110,13 @@ actor TurnCore {
             logger.error("[TURN] Core did not come up: \(failure)")
             logger.error("[TURN] Last state: \(state.summary)")
             // Left running on purpose — see `pending`. Reconnecting adopts it.
+            starting = nil
             pending = configuration
             active = nil
             throw TurnError.tunnel(.invalidConfiguration)
         }
 
+        starting = nil
         active = configuration
         pending = nil
         logger.info("[TURN] Listener accepting on \(endpoint.0):\(endpoint.1)")
@@ -116,18 +127,19 @@ actor TurnCore {
         // `isRunning` is part of the test on purpose: an `activate` that finished
         // after we had already decided to go direct leaves a core running with
         // nothing tracking it, and only the core itself still knows.
-        guard active != nil || pending != nil || turn?.isRunning() == true else { return }
+        guard active != nil || pending != nil || starting != nil || turn?.isRunning() == true else { return }
         logger.info("[TURN] Stopping the relay")
         stopCore()
     }
 
     var state: TurnState {
         // The Go core is a long-lived singleton and keeps reporting the last
-        // phase it reached — `captcha` included — after it has been stopped.
-        // With nothing active or pending the relay is not in play, whatever the
-        // core still remembers; reporting otherwise put a captcha prompt in
-        // front of users who were connecting directly over Wi-Fi.
-        guard active != nil || pending != nil else { return .idle }
+        // phase it reached — `captcha` included — after it has been stopped. So
+        // the phase is only meaningful while a relay is in play: starting up,
+        // serving, or left running after a timed-out wait. Reporting it
+        // unconditionally put a captcha prompt in front of users connecting
+        // directly over Wi-Fi.
+        guard active != nil || pending != nil || starting != nil else { return .idle }
 
         guard let json = turn?.stateJSON(), let data = json.data(using: .utf8) else {
             return .idle
@@ -230,6 +242,7 @@ actor TurnCore {
         monitor?.cancel()
         monitor = nil
         turn?.stop()
+        starting = nil
         active = nil
         pending = nil
     }
