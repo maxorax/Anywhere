@@ -87,14 +87,7 @@ struct MainTabView: View {
                 get: { captchaModel.captchaURL.map(IdentifiedURL.init) },
                 set: { if $0 == nil { captchaModel.dismiss() } }
             )) { identified in
-                TurnCaptchaView(url: identified.url) {
-                    // Solving the captcha is the only way this connection
-                    // completes, so closing it is giving up on the attempt —
-                    // take the tunnel down rather than leave it spinning behind
-                    // a sheet the user just dismissed.
-                    captchaModel.dismiss()
-                    viewModel.disconnectVPN()
-                }
+                TurnCaptchaView(url: identified.url) { captchaModel.dismiss() }
             }
             .onChange(of: settings.proMode) { _, isPro in
                 // The tab it points at is gone; leaving the selection there

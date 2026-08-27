@@ -13,9 +13,12 @@ import WebKit
 /// captcha phase.
 struct TurnCaptchaView: View {
     let url: URL
-    /// Closing gives up on the connection: the caller stops the tunnel, since a
-    /// relay parked on an unsolved captcha would otherwise keep spinning behind
-    /// a dismissed sheet.
+    /// Closing only takes the sheet away — deliberately not the tunnel.
+    ///
+    /// The sheet lingers for a moment after a captcha is solved, and people
+    /// close it themselves rather than wait; tearing the connection down there
+    /// would undo the captcha they had just got through. Abandoning the attempt
+    /// is the power button's job, and it stays live while connecting.
     var onClose: () -> Void
 
     @State private var reloadToken = 0

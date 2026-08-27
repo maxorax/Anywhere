@@ -26,6 +26,10 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// a network change can re-run the relay decision from the original.
     private let baseConfiguration = Mutex<ProxyConfiguration?>(nil)
 
+    /// Interface the relay's sockets are currently pinned to, so a path update
+    /// that changes nothing does not re-bind and re-log.
+    private let boundInterface = Mutex<String?>(nil)
+
     // MARK: - Tunnel Lifecycle
     
     override func startTunnel(options: [String : NSObject]? = nil) async throws {
@@ -40,7 +44,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         }
 
         let settings = buildTunnelSettings()
-        
+
         do {
             try await setTunnelNetworkSettings(settings)
         } catch {
@@ -58,6 +62,17 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         // anything that arrives before the stack is up — so without this,
         // `shouldRelay` would classify every cold start as an unidentified
         // network and probe the direct path even on Wi-Fi.
+        //
+        // Binding happens here, after the settings are applied, so the relay is
+        // pinned to the physical interface with the utun already in existence —
+        // the situation the gomobile header describes.
+        //
+        // Apple's guidance is to leave `setTunnelNetworkSettings` until the
+        // provider can forward packets, which would put this whole block first.
+        // Tried, and it broke the relay: its sockets are established before the
+        // tunnel exists, and applying a default route afterwards takes them
+        // down. Shortening the wait is the way to close that window, not
+        // reordering it.
         if let path = await pathMonitorBridge.firstPath(timeout: .seconds(2)) {
             let context = await networkContext(for: path)
             await tunnelStack.seedNetworkContext(
@@ -65,6 +80,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                 isCellular: context.isCellular,
                 ssid: context.ssid
             )
+            await bindRelay(to: path)
         } else {
             logger.warning("[VPN] Path monitor did not report in time — deciding on an unidentified network")
         }
@@ -451,6 +467,30 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
     // MARK: - Path Monitoring
 
+    /// Pins the relay's sockets to the physical interface behind this path.
+    ///
+    /// The gomobile header asks for this on every network change so the relay's
+    /// own reconnects leave the device instead of looping into the utun this
+    /// process serves. Skipped so far, which held up only because the relay was
+    /// never forced through the tunnel — `includeAllNetworks` turns that risk
+    /// into a certainty.
+    private func bindRelay(to path: Network.NWPath) async {
+        guard let name = Self.physicalInterfaceName(for: path) else { return }
+        let changed = boundInterface.withLock { stored -> Bool in
+            guard stored != name else { return false }
+            stored = name
+            return true
+        }
+        guard changed else { return }
+        await TurnCore.shared.bind(toInterface: name)
+    }
+
+    /// The first real interface on the path. `.other` covers the tunnel's own
+    /// utun, which is precisely what the relay must not be pinned to.
+    private static func physicalInterfaceName(for path: Network.NWPath) -> String? {
+        path.availableInterfaces.first { $0.type != .other && $0.type != .loopback }?.name
+    }
+
     /// Classifies a path into the context the relay decision and the
     /// trusted-network policy both read.
     private func networkContext(for path: Network.NWPath) async -> NetworkContext {
@@ -470,6 +510,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         let previous = await tunnelStack.networkContext
         let context = await networkContext(for: path)
+        await bindRelay(to: path)
         await tunnelStack.updateNetworkContext(
             isWiFi: context.isWiFi,
             isCellular: context.isCellular,
