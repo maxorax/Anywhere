@@ -19,6 +19,10 @@ final class AppSettings {
         didSet { AWCore.setExperimentalEnabled(experimentalEnabled) }
     }
 
+    var proMode: Bool {
+        didSet { AWCore.setProMode(proMode) }
+    }
+
     var iCloudSyncEnabled: Bool {
         didSet { AWCore.setICloudSyncEnabled(iCloudSyncEnabled) }
     }
@@ -347,6 +351,7 @@ final class AppSettings {
         tunnelIncludedRoutes = AWCore.getTunnelIncludedRoutes()
 
         allowInsecure = AWCore.getAllowInsecure()
+        proMode = AWCore.getProMode()
 
         alwaysOnEnabled = AWCore.getAlwaysOnEnabled()
         includeAllNetworks = AWCore.getTunnelIncludeAllNetworks()

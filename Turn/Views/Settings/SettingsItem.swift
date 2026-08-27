@@ -26,6 +26,7 @@ enum SettingsItem: String {
     case logs
     case requests
     case about
+    case proMode
 
     private var title: String.LocalizationValue {
         switch self {
@@ -47,6 +48,7 @@ enum SettingsItem: String {
         case .logs: "Logs"
         case .requests: "Requests"
         case .about: "About"
+        case .proMode: "Pro Mode"
         }
     }
 
@@ -75,6 +77,7 @@ enum SettingsItem: String {
             }
         case .requests: "mail.fill"
         case .about: "info.circle.fill"
+        case .proMode: "wrench.and.screwdriver.fill"
         }
     }
 
@@ -105,6 +108,7 @@ enum SettingsItem: String {
         case .logs: .blue
         case .requests: .blue
         case .about: .gray
+        case .proMode: .indigo
         }
     }
 

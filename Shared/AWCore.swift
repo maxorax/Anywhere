@@ -69,6 +69,7 @@ nonisolated final class AWCore {
         static let echDNSMode = "echDNSMode"
         static let echDNSPlainServer = "echDNSPlainServer"
         static let experimentalEnabled = "experimentalEnabled"
+        static let proMode = "proMode"
         static let fallbackDNSMode = "fallbackDNSMode"
         static let fallbackDNSServer = "fallbackDNSServer"
         static let hideVPNIcon = "hideVPNIcon"
@@ -370,6 +371,16 @@ nonisolated final class AWCore {
 
     static func setExperimentalEnabled(_ value: Bool) {
         userDefaults.set(value, forKey: UserDefaultsKey.experimentalEnabled)
+    }
+
+    /// Full interface: the Proxies tab, connection statistics and chain
+    /// management. Off by default so a first run stays a list and a switch.
+    static func getProMode() -> Bool {
+        userDefaults.bool(forKey: UserDefaultsKey.proMode)
+    }
+
+    static func setProMode(_ value: Bool) {
+        userDefaults.set(value, forKey: UserDefaultsKey.proMode)
     }
 
     static func getHideVPNIcon() -> Bool {

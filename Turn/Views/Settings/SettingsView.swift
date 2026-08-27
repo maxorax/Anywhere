@@ -9,21 +9,6 @@ import SwiftUI
 import WidgetKit
 
 struct SettingsView: View {
-    /// Entry points held back from this release, kept wired up so a future one
-    /// turns them on by flipping a flag rather than by rebuilding the plumbing.
-    ///
-    /// `adBlocking` waits on rules to apply: the bundled `Rules.db` ships empty,
-    /// so the ADBlock set contributes nothing and the toggle only looked like it
-    /// did something.
-    private enum HeldBack {
-        static let adBlocking = false
-        static let countryBypass = false
-        static let personalization = false
-        static let security = false
-        static let utilities = false
-        static let advancedSettings = false
-    }
-
     @Environment(AppSettings.self) private var settings
     @Environment(VPNViewModel.self) private var viewModel
     @Environment(RoutingRuleSetStore.self) private var ruleSetStore
@@ -75,10 +60,13 @@ struct SettingsView: View {
     private var appSection: some View {
         @Bindable var settings = settings
         Section("App") {
-            Toggle(isOn: $settings.iCloudSyncEnabled) {
-                SettingsItem.iCloudSync.label
+            Toggle(isOn: $settings.proMode) {
+                SettingsItem.proMode.label
             }
-            if HeldBack.personalization {
+            if settings.proMode {
+                Toggle(isOn: $settings.iCloudSyncEnabled) {
+                    SettingsItem.iCloudSync.label
+                }
                 NavigationLink {
                     PersonalizationSettingsView()
                 } label: {
@@ -102,37 +90,43 @@ struct SettingsView: View {
     @ViewBuilder
     private var vpnSection: some View {
         @Bindable var settings = settings
-        Section("VPN") {
-            Toggle(isOn: $settings.alwaysOnEnabled) {
-                SettingsItem.alwaysOn.label
+        if settings.proMode {
+            Section("VPN") {
+                Toggle(isOn: $settings.alwaysOnEnabled) {
+                    SettingsItem.alwaysOn.label
+                }
+                .disabled(viewModel.pendingReconnect)
             }
-            .disabled(viewModel.pendingReconnect)
         }
     }
 
     @ViewBuilder
     private var routingSection: some View {
         @Bindable var settings = settings
-        Section("Routing") {
-            Toggle(isOn: $settings.isGlobalMode) {
-                SettingsItem.globalMode.label
-            }
-            .onChange(of: settings.isGlobalMode) {
-                ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
-            }
-            if !settings.isGlobalMode {
-                if HeldBack.adBlocking {
-                    Toggle(isOn: $adBlockEnabled) {
-                        SettingsItem.adBlocking.label
+        // Global mode is a pro switch, and it hides everything else in here —
+        // so outside pro mode with it left on there is nothing to show.
+        if settings.proMode || !settings.isGlobalMode {
+            Section("Routing") {
+                if settings.proMode {
+                    Toggle(isOn: $settings.isGlobalMode) {
+                        SettingsItem.globalMode.label
+                    }
+                    .onChange(of: settings.isGlobalMode) {
+                        ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
                     }
                 }
-                if HeldBack.countryBypass {
-                    countryBypassPicker
-                }
-                NavigationLink {
-                    RuleSetListView()
-                } label: {
-                    SettingsItem.routingRules.label
+                if !settings.isGlobalMode {
+                    if settings.proMode {
+                        Toggle(isOn: $adBlockEnabled) {
+                            SettingsItem.adBlocking.label
+                        }
+                        countryBypassPicker
+                    }
+                    NavigationLink {
+                        RuleSetListView()
+                    } label: {
+                        SettingsItem.routingRules.label
+                    }
                 }
             }
         }
@@ -153,7 +147,7 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var securitySection: some View {
-        if HeldBack.security {
+        if settings.proMode {
             Section("Security") {
                 Toggle(isOn: Binding(
                     get: { settings.allowInsecure },
@@ -189,7 +183,7 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var utilitiesSection: some View {
-        if HeldBack.utilities {
+        if settings.proMode {
             Section("Utilities") {
                 NavigationLink {
                     PurifySettingsView()
@@ -235,7 +229,7 @@ struct SettingsView: View {
                 SettingsItem.about.label
             }
         } footer: {
-            if HeldBack.advancedSettings {
+            if settings.proMode {
                 NavigationLink {
                     AdvancedSettingsView()
                 } label: {

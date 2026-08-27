@@ -33,7 +33,8 @@ struct MainTabView: View {
         tabView
             .onChange(of: deepLinkManager.url) { _, newValue in
                 if let url = newValue {
-                    selectedTab = .proxies
+                    // Outside pro mode there is no Proxies tab to land on.
+                    selectedTab = settings.proMode ? .proxies : .home
                     pendingDeepLinkURL = url
                     deepLinkManager.url = nil
                     showingDeepLinkAddSheet = true
@@ -95,6 +96,11 @@ struct MainTabView: View {
                     viewModel.disconnectVPN()
                 }
             }
+            .onChange(of: settings.proMode) { _, isPro in
+                // The tab it points at is gone; leaving the selection there
+                // would show an empty screen.
+                if !isPro, selectedTab == .proxies { selectedTab = .home }
+            }
             .task {
                 captchaModel.start()
                 SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
@@ -130,12 +136,14 @@ struct MainTabView: View {
                     Image("TabIcon")
                 }
                 
-                Tab(value: .proxies) {
-                    NavigationStack {
-                        ProxiesPageView()
+                if settings.proMode {
+                    Tab(value: .proxies) {
+                        NavigationStack {
+                            ProxiesPageView()
+                        }
+                    } label: {
+                        Image(systemName: "network")
                     }
-                } label: {
-                    Image(systemName: "network")
                 }
                 
                 Tab(value: .settings) {
@@ -157,12 +165,14 @@ struct MainTabView: View {
                     Label("Home", image: "TabIcon")
                 }
                 
-                Tab(value: .proxies) {
-                    NavigationStack {
-                        ProxiesPageView()
+                if settings.proMode {
+                    Tab(value: .proxies) {
+                        NavigationStack {
+                            ProxiesPageView()
+                        }
+                    } label: {
+                        Label("Proxies", systemImage: "network")
                     }
-                } label: {
-                    Label("Proxies", systemImage: "network")
                 }
                 
                 Tab(value: .settings) {

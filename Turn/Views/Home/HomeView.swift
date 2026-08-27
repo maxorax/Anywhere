@@ -14,6 +14,8 @@ struct HomeView: View {
     @Environment(ConfigurationStore.self) private var configStore
     @Environment(ChainStore.self) private var chainStore
     @Environment(SubscriptionStore.self) private var subscriptionStore
+
+    private let coordinator = ProxyRowCoordinator.shared
     
     private static let horizontalPadding: CGFloat = 20
     private static let paneSpacing: CGFloat = 20
@@ -28,6 +30,11 @@ struct HomeView: View {
     
     @State private var showingAddSheet = false
     @State private var showingManualAddSheet = false
+    @State private var configurationToEdit: ProxyConfiguration?
+    @State private var collapsedSubscriptions: Set<UUID> = []
+    @State private var updatingSubscription: Subscription?
+    @State private var subscriptionErrorMessage = ""
+    @State private var showingSubscriptionError = false
 
     private var isLoading: Bool { !configStore.isLoaded }
 
@@ -43,7 +50,9 @@ struct HomeView: View {
                 .ignoresSafeArea()
 
             Group {
-                if isConnected && Self.allowsSideBySide(contentWidth: contentWidth) {
+                if !settings.proMode {
+                    simpleLayout
+                } else if isConnected && Self.allowsSideBySide(contentWidth: contentWidth) {
                     sideBySideLayout
                 } else {
                     stackedLayout
@@ -70,6 +79,54 @@ struct HomeView: View {
             ProxyEditorView { configuration in
                 configStore.add(configuration); viewModel.selectIfNone(configuration)
             }
+        }
+        .sheet(item: $configurationToEdit) { configuration in
+            ProxyEditorView(configuration: configuration) { updated in
+                configStore.update(updated)
+            }
+        }
+        .toolbar {
+            // Pro mode keeps proxy management on its own tab; without it this
+            // is the only way to add one.
+            if !settings.proMode {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingAddSheet = true
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("More", systemImage: "ellipsis") {
+                        Button {
+                            // Collapsed subscriptions are off screen; testing
+                            // them would spend dials the user cannot see.
+                            let visible = configStore.configurations.filter { configuration in
+                                guard let id = configuration.subscriptionId else { return true }
+                                return !collapsedSubscriptions.contains(id)
+                            }
+                            viewModel.testLatencies(for: visible)
+                        } label: {
+                            Label("Test Latency", systemImage: "gauge.with.dots.needle.67percent")
+                        }
+                        .disabled(configStore.configurations.isEmpty)
+
+                        if !subscriptionStore.subscriptions.isEmpty {
+                            Button {
+                                updateAllSubscriptions()
+                            } label: {
+                                Label("Update Subscriptions", systemImage: "arrow.clockwise")
+                            }
+                            .disabled(updatingSubscription != nil)
+                        }
+                    }
+                }
+            }
+        }
+        .alert("Subscription Update Failed", isPresented: $showingSubscriptionError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(verbatim: subscriptionErrorMessage)
         }
         .alert("VPN Error", isPresented: Binding(
             get: { viewModel.startError != nil },
@@ -135,6 +192,167 @@ struct HomeView: View {
         .frame(maxWidth: Self.maxControlPaneWidth + Self.paneSpacing + detailWidth)
         .frame(maxWidth: .infinity)
         .padding(.horizontal, Self.horizontalPadding)
+    }
+
+    /// The screen outside pro mode: connect control on top, servers below.
+    ///
+    /// No statistics page here, which means no paging behaviour to fight — the
+    /// list is a plain `List` and keeps its swipe actions and collapsible
+    /// subscription sections.
+    private var simpleLayout: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 16) {
+                powerButton
+                statusLabel
+            }
+            .padding(.top, 8)
+            .padding(.bottom, 20)
+
+            serverList
+        }
+    }
+
+    @ViewBuilder
+    private var serverList: some View {
+        if isLoading {
+            Spacer()
+            ProgressView()
+            Spacer()
+        } else if configStore.configurations.isEmpty {
+            Spacer()
+            ContentUnavailableView {
+                Label("No Proxies", systemImage: "network")
+            } actions: {
+                Button("Add a Configuration") { showingAddSheet = true }
+            }
+            Spacer()
+        } else {
+            List {
+                Section {
+                    ForEach(standaloneItems) { item in
+                        proxyRow(item, editingDisabled: false)
+                    }
+                }
+                ForEach(subscriptionStore.subscriptions) { subscription in
+                    let editingDisabled = SubscriptionDomainHelper.shouldDisableProxyEditing(for: subscription.url)
+                    Section {
+                        DisclosureGroup(isExpanded: expansionBinding(for: subscription)) {
+                            ForEach(items(for: subscription)) { item in
+                                proxyRow(item, editingDisabled: editingDisabled)
+                            }
+                        } label: {
+                            subscriptionHeader(subscription)
+                        }
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+        }
+    }
+
+    private func subscriptionHeader(_ subscription: Subscription) -> some View {
+        HStack(spacing: 14) {
+            Text(subscription.name)
+                .font(.body.weight(.medium))
+            if updatingSubscription?.id == subscription.id {
+                ProgressView().controlSize(.small)
+            } else {
+                Button {
+                    updateSubscription(subscription)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+            }
+            Button {
+                viewModel.testLatencies(for: configStore.configurations(for: subscription))
+            } label: {
+                Image(systemName: "waveform.path.ecg")
+            }
+            .buttonStyle(.borderless)
+            .disabled(isTestingLatency(subscription))
+            .foregroundStyle(isTestingLatency(subscription) ? Color.secondary : Color.green)
+        }
+    }
+
+    private func isTestingLatency(_ subscription: Subscription) -> Bool {
+        configStore.configurations(for: subscription).contains { configuration in
+            if case .testing = viewModel.latencyResults[configuration.id] { return true }
+            return false
+        }
+    }
+
+    private func updateSubscription(_ subscription: Subscription) {
+        guard updatingSubscription == nil else { return }
+        updatingSubscription = subscription
+        Task {
+            do {
+                try await subscriptionStore.refresh(subscription)
+            } catch {
+                subscriptionErrorMessage = error.localizedDescription
+                showingSubscriptionError = true
+            }
+            updatingSubscription = nil
+        }
+    }
+
+    private func updateAllSubscriptions() {
+        guard updatingSubscription == nil else { return }
+        Task {
+            var failures: [String] = []
+            for id in subscriptionStore.subscriptions.map(\.id) {
+                guard let subscription = subscriptionStore.subscriptions.first(where: { $0.id == id }) else { continue }
+                updatingSubscription = subscription
+                do {
+                    try await subscriptionStore.refresh(subscription)
+                } catch {
+                    failures.append("\(subscription.name): \(error.localizedDescription)")
+                }
+            }
+            updatingSubscription = nil
+            if !failures.isEmpty {
+                subscriptionErrorMessage = failures.joined(separator: "\n")
+                showingSubscriptionError = true
+            }
+        }
+    }
+
+    private var standaloneItems: [ProxyListItem] {
+        coordinator.models.filter { $0.subscriptionId == nil }
+    }
+
+    private func items(for subscription: Subscription) -> [ProxyListItem] {
+        coordinator.models.filter { $0.subscriptionId == subscription.id }
+    }
+
+    private func expansionBinding(for subscription: Subscription) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedSubscriptions.contains(subscription.id) },
+            set: { expanded in
+                if expanded {
+                    collapsedSubscriptions.remove(subscription.id)
+                } else {
+                    collapsedSubscriptions.insert(subscription.id)
+                }
+            }
+        )
+    }
+
+    private func configuration(_ id: UUID) -> ProxyConfiguration? {
+        configStore.configurations.first { $0.id == id }
+    }
+
+    private func proxyRow(_ item: ProxyListItem, editingDisabled: Bool) -> some View {
+        ProxyRowView(
+            item: item,
+            editingDisabled: editingDisabled,
+            onSelect: { if let c = configuration(item.id) { viewModel.selectedConfiguration = c } },
+            onTestLatency: { if let c = configuration(item.id) { viewModel.testLatency(for: c) } },
+            onCopyLink: { if let c = configuration(item.id) { UIPasteboard.general.string = c.toURL() } },
+            onEdit: { configurationToEdit = configuration(item.id) },
+            onDelete: { if let c = configuration(item.id) { configStore.delete(c) } }
+        )
     }
 
     private var connectionControls: some View {
