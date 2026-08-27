@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 2/21/26.
 //
@@ -50,7 +50,7 @@ struct SettingsView: View {
         .alert("Restart Required", isPresented: $showICloudRestartAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Restart Anywhere for the change to take effect.")
+            Text("Restart Turn for the change to take effect.")
         }
         .alert("Allow Insecure", isPresented: $showInsecureAlert) {
             Button("Allow Anyway", role: .destructive) {
@@ -96,7 +96,7 @@ struct SettingsView: View {
                 SettingsItem.globalMode.label
             }
             .onChange(of: settings.isGlobalMode) {
-                ControlCenter.shared.reloadControls(ofKind: "com.argsment.Anywhere.Widget.VPNToggle")
+                ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
             }
             if !settings.isGlobalMode {
                 Toggle(isOn: $adBlockEnabled) {
@@ -194,7 +194,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var aboutSection: some View {
         Section {
-            Link(destination: URL(string: "https://t.me/anywhere_official_group")!) {
+            Link(destination: URL(string: "https://t.me/turn_official_group")!) {
                 HStack {
                     TextWithColorfulIconAndCustomImage(title: "Join Telegram Group", comment: nil, imageName: "TelegramSymbol", foregroundStyle: .white, backgroundStyle: .blue.gradient)
                     Spacer()

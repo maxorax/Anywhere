@@ -1,13 +1,13 @@
 //
 //  MITMRule.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "MITMRule")
+nonisolated private let logger = TurnLogger(category: "MITMRule")
 
 nonisolated enum MITMPhase: String, Codable, CaseIterable, Identifiable {
     case httpRequest
@@ -649,7 +649,7 @@ nonisolated struct MITMSnapshot: Codable, Equatable {
         do {
             data = try JSONEncoder().encode(self)
         } catch {
-            logger.report(AnywhereError.store(.saveFailed(.mitmRuleSets, underlying: error)))
+            logger.report(TurnError.store(.saveFailed(.mitmRuleSets, underlying: error)))
             return
         }
         JSONBlobStore.shared.save(.mitm, data: data)

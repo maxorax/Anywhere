@@ -1,6 +1,6 @@
 //
 //  VLESSVisionUDPStream.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "VLESSVisionUDPStream")
+nonisolated private let logger = TurnLogger(category: "VLESSVisionUDPStream")
 
 actor VLESSVisionUDPStream {
     nonisolated let sessionID: UInt16
@@ -48,13 +48,13 @@ actor VLESSVisionUDPStream {
 
     func send(data: Data) async throws {
         guard !closed else {
-            throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux stream closed"))
+            throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux stream closed"))
         }
         guard let multiplexer else {
-            throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux multiplexer deallocated"))
+            throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux multiplexer deallocated"))
         }
         try await sendChain.run { [weak self] in
-            guard let self else { throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux stream closed")) }
+            guard let self else { throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux stream closed")) }
             try await self.buildAndSend(data: data, multiplexer: multiplexer)
         }
     }

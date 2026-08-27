@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB71CDC22F837D11002B9E1D"
-               BuildableName = "Anywhere Widget.appex"
-               BlueprintName = "Anywhere Widget"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn Widget.appex"
+               BlueprintName = "Turn Widget"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-               BuildableName = "Anywhere.app"
-               BlueprintName = "Anywhere"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn.app"
+               BlueprintName = "Turn"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -51,9 +51,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "78B6DF992FE7B70D0084897A"
-               BuildableName = "Anywhere Tests.xctest"
-               BlueprintName = "Anywhere Tests"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn Tests.xctest"
+               BlueprintName = "Turn Tests"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -76,24 +76,24 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB71CDC22F837D11002B9E1D"
-            BuildableName = "Anywhere Widget.appex"
-            BlueprintName = "Anywhere Widget"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn Widget.appex"
+            BlueprintName = "Turn Widget"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-            BuildableName = "Anywhere.app"
-            BlueprintName = "Anywhere"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn.app"
+            BlueprintName = "Turn"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCWidgetKind"
-            value = "com.argsment.Anywhere.Widget.ModeToggle"
+            value = "com.argsment.Turn.Widget.ModeToggle"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
@@ -121,9 +121,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-            BuildableName = "Anywhere.app"
-            BlueprintName = "Anywhere"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn.app"
+            BlueprintName = "Turn"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

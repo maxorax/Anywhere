@@ -1,6 +1,6 @@
 //
 //  TCPTransport+Compatibility.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/27/26.
 //
@@ -10,7 +10,7 @@ import Network
 
 nonisolated final class LegacyTCPEngine: TCPTransportEngine, Sendable {
     private let connection: NWConnection
-    private let queue = DispatchQueue(label: "com.argsment.Anywhere.TCPTransport", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.argsment.Turn.TCPTransport", qos: .userInitiated)
 
     init(endpoint: NWEndpoint, connectTimeout: UInt32) {
         let tcpOptions = NWProtocolTCP.Options()

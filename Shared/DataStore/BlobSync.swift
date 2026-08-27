@@ -1,6 +1,6 @@
 //
 //  BlobSync.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/13/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-nonisolated private let logger = AnywhereLogger(category: "BlobSync")
+nonisolated private let logger = TurnLogger(category: "BlobSync")
 
 nonisolated enum BlobMerge {
     static func register() {

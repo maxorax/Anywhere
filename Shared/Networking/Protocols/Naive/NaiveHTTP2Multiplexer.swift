@@ -1,6 +1,6 @@
 //
 //  NaiveHTTP2Multiplexer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/18/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "NaiveHTTP2Multiplexer")
+nonisolated private let logger = TurnLogger(category: "NaiveHTTP2Multiplexer")
 
 nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
 
@@ -146,7 +146,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
         case .ready:
             return
         case .fail:
-            throw AnywhereError.proxy(.naive, .notReady)
+            throw TurnError.proxy(.naive, .notReady)
         case .beginAndPark:
             refreshPoolSnapshot()
             beginSetup()
@@ -282,7 +282,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
             catch { handleSessionError(error); return }
 
             guard let data, !data.isEmpty else {
-                handleSessionError(AnywhereError.proxy(.naive, .connectionClosed(detail: "Connection closed")))
+                handleSessionError(TurnError.proxy(.naive, .connectionClosed(detail: "Connection closed")))
                 return
             }
 
@@ -296,7 +296,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
                 return false
             }
             if overflow {
-                handleSessionError(AnywhereError.proxy(.naive, .connectionClosed(detail: "Receive buffer exceeded \(Self.maxReceiveBufferSize) bytes")))
+                handleSessionError(TurnError.proxy(.naive, .connectionClosed(detail: "Receive buffer exceeded \(Self.maxReceiveBufferSize) bytes")))
                 return
             }
 
@@ -340,7 +340,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
             if let decoded = hpackDecoder.decodeHeaders(from: frame.payload) {
                 stream.handleHeaders(fields: decoded.fields)
             } else {
-                stream.handleStreamError(AnywhereError.proxy(.naive, .protocolViolation(detail: "Failed to decode headers on stream \(frame.streamID)")))
+                stream.handleStreamError(TurnError.proxy(.naive, .protocolViolation(detail: "Failed to decode headers on stream \(frame.streamID)")))
             }
 
         case .data:
@@ -413,9 +413,9 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
         }
 
         refreshPoolSnapshot()
-        for stream in doomed { stream.handleSessionError(AnywhereError.proxy(.naive, .goaway)) }
+        for stream in doomed { stream.handleSessionError(TurnError.proxy(.naive, .goaway)) }
         if failReady {
-            completeReadyContinuations(AnywhereError.proxy(.naive, .goaway))
+            completeReadyContinuations(TurnError.proxy(.naive, .goaway))
         }
     }
 
@@ -474,7 +474,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
             let step = buildDataStep(data, on: stream, offset: offset)
             switch step {
             case .closed:
-                throw AnywhereError.proxy(.naive, .notReady)
+                throw TurnError.proxy(.naive, .notReady)
             case .park:
                 await parkForFlow(stream: stream)
             case .built(let frames, let nextOffset):
@@ -556,7 +556,7 @@ nonisolated final class NaiveHTTP2Multiplexer: Multiplexer, Sendable {
     }
 
     func close(error: Error? = nil) {
-        teardown(reason: error ?? AnywhereError.proxy(.naive, .connectionClosed(detail: "Session closed")))
+        teardown(reason: error ?? TurnError.proxy(.naive, .connectionClosed(detail: "Session closed")))
     }
     
     private func teardown(reason: Error) {

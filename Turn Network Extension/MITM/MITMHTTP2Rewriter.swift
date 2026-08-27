@@ -1,6 +1,6 @@
 //
 //  MITMHTTP2Rewriter.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMHTTP2Rewriter")
+nonisolated private let logger = TurnLogger(category: "MITMHTTP2Rewriter")
 
 nonisolated final class MITMHTTP2Rewriter: Sendable {
 

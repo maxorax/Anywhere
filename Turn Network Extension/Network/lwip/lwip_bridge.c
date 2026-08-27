@@ -30,21 +30,21 @@ static void *s_host_ctx = NULL;
 void  lwip_bridge_set_host_ctx(void *ctx) { s_host_ctx = ctx; }
 void *lwip_bridge_host_ctx(void)          { return s_host_ctx; }
 
-int (*lwip_anywhere_tcp_syn_filter)(const void *src_ip, u16_t src_port,
+int (*lwip_turn_tcp_syn_filter)(const void *src_ip, u16_t src_port,
                                     const void *dst_ip, u16_t dst_port,
                                     int is_ipv6) = NULL;
 
-int (*lwip_anywhere_tcp_stray_filter)(const void *src_ip, u16_t src_port,
+int (*lwip_turn_tcp_stray_filter)(const void *src_ip, u16_t src_port,
                                       const void *dst_ip, u16_t dst_port,
                                       int is_ipv6) = NULL;
 
 void lwip_bridge_set_output_fn(lwip_output_fn fn)         { s_output_fn = fn; }
 void lwip_bridge_set_tcp_accept_fn(lwip_tcp_accept_fn fn) { s_tcp_accept_fn = fn; }
 void lwip_bridge_set_tcp_syn_filter_fn(lwip_tcp_syn_filter_fn fn) {
-    lwip_anywhere_tcp_syn_filter = fn;
+    lwip_turn_tcp_syn_filter = fn;
 }
 void lwip_bridge_set_tcp_stray_filter_fn(lwip_tcp_syn_filter_fn fn) {
-    lwip_anywhere_tcp_stray_filter = fn;
+    lwip_turn_tcp_stray_filter = fn;
 }
 void lwip_bridge_set_tcp_recv_fn(lwip_tcp_recv_fn fn)   { s_tcp_recv_fn = fn; }
 void lwip_bridge_set_tcp_sent_fn(lwip_tcp_sent_fn fn)   { s_tcp_sent_fn = fn; }
@@ -250,7 +250,7 @@ void lwip_bridge_init(void) {
     static int initialized = 0;
 
     if (!initialized) {
-        s_log = os_log_create("com.argsment.Anywhere.Network-Extension", "LWIP-Bridge");
+        s_log = os_log_create("com.argsment.Turn.Network-Extension", "LWIP-Bridge");
         lwip_init();
         initialized = 1;
     }
@@ -391,14 +391,14 @@ void lwip_bridge_shutdown(void) {
 
 /* Storage for the input-batch flag declared in `lwip/priv/tcp_priv.h`.
  * Single-threaded under NO_SYS=1, so a plain int is fine. */
-int lwip_anywhere_input_batch_mode = 0;
+int lwip_turn_input_batch_mode = 0;
 
 void lwip_bridge_input_batch_begin(void) {
-    lwip_anywhere_input_batch_mode = 1;
+    lwip_turn_input_batch_mode = 1;
 }
 
 void lwip_bridge_input_batch_end(void) {
-    lwip_anywhere_input_batch_mode = 0;
+    lwip_turn_input_batch_mode = 0;
     /* One tcp_output per PCB flushes the per-segment TF_ACK_NOW flags
      * accumulated during the batch (and any pcb->unsent unlocked by
      * those ACKs). Capture `next` before tcp_output in case a callback

@@ -1,6 +1,6 @@
 //
 //  MITMBodyReplace.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/31/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMBodyReplace")
+nonisolated private let logger = TurnLogger(category: "MITMBodyReplace")
 
 nonisolated enum MITMBodyReplace {
     

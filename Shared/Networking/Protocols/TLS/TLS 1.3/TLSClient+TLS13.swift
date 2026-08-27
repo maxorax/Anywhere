@@ -1,6 +1,6 @@
 //
 //  TLSClient+TLS13.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/19/26.
 //
@@ -11,7 +11,7 @@ import CommonCrypto
 import Security
 import Compression
 
-nonisolated private let logger = AnywhereLogger(category: "TLSClient")
+nonisolated private let logger = TurnLogger(category: "TLSClient")
 
 extension TLSClient {
 
@@ -24,7 +24,7 @@ extension TLSClient {
         clientHello: Data
     ) async throws -> TLSRecordConnection {
         guard let privateKey = ephemeralPrivateKey else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "No ephemeral key"))
+            throw TurnError.tls(.handshakeFailed(detail: "No ephemeral key"))
         }
 
         do {
@@ -65,7 +65,7 @@ extension TLSClient {
             tls13.handshakeTranscript = transcript
             negotiatedVersion = 0x0304
         } catch {
-            throw AnywhereError.tls(.handshakeFailed(detail: "Key derivation failed"))
+            throw TurnError.tls(.handshakeFailed(detail: "Key derivation failed"))
         }
 
         return try await consumeRemainingTLS13Handshake(buffer: buffer)
@@ -129,7 +129,7 @@ extension TLSClient {
 
         while true {
         guard let keys = tls13.handshakeKeys, let kd = tls13.keyDerivation else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "Missing handshake keys"))
+            throw TurnError.tls(.handshakeFailed(detail: "Missing handshake keys"))
         }
 
         var offset = startOffset
@@ -181,7 +181,7 @@ extension TLSClient {
                                 ech.retryConfigList = parseECHRetryConfigList(fromEncryptedExtensions: hsBody)
                             } else if let alpn = parseALPNFromEncryptedExtensions(hsBody) {
                                 guard (configuration.alpn ?? ["h2", "http/1.1"]).contains(alpn) else {
-                                    throw AnywhereError.tls(.handshakeFailed(detail: "Server selected an ALPN we didn't offer"))
+                                    throw TurnError.tls(.handshakeFailed(detail: "Server selected an ALPN we didn't offer"))
                                 }
                                 self.negotiatedALPN = alpn
                             }
@@ -209,7 +209,7 @@ extension TLSClient {
                                 )
                                 guard hsBody.count == expectedVerifyData.count,
                                       constantTimeEqual(hsBody, expectedVerifyData) else {
-                                    throw AnywhereError.tls(.handshakeFailed(detail: "Server Finished verification failed"))
+                                    throw TurnError.tls(.handshakeFailed(detail: "Server Finished verification failed"))
                                 }
                             }
                             fullTranscript.append(hsMessage)
@@ -230,7 +230,7 @@ extension TLSClient {
                         hsOffset += 4 + hsLen
                     }
                 } catch {
-                    throw AnywhereError.tls(.handshakeFailed(detail: "Record decryption failed"))
+                    throw TurnError.tls(.handshakeFailed(detail: "Record decryption failed"))
                 }
             }
 
@@ -250,7 +250,7 @@ extension TLSClient {
             // the intended server. Surface the rejection (with any retry configs)
             // rather than validating the wrong certificate.
             if let ech = echContext, ech.rejected {
-                throw AnywhereError.tls(.ech(.rejected(retryConfigList: ech.retryConfigList)))
+                throw TurnError.tls(.ech(.rejected(retryConfigList: ech.retryConfigList)))
             }
 
             try validateCertificate()
@@ -272,7 +272,7 @@ extension TLSClient {
             return try await finishTLS13Handshake(fullTranscript: fullTranscript)
         } else {
             guard let connection else {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Connection cancelled"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Connection cancelled"))
             }
             switch try await connection.receive() {
             case .bytes(let moreData):
@@ -280,7 +280,7 @@ extension TLSClient {
                 startOffset = processedOffset
                 continue
             case .end:
-                throw AnywhereError.tls(.handshakeFailed(detail: "Connection closed before TLS 1.3 handshake completed"))
+                throw TurnError.tls(.handshakeFailed(detail: "Connection closed before TLS 1.3 handshake completed"))
             }
         }
         } // while true
@@ -359,7 +359,7 @@ extension TLSClient {
 
     private func finishTLS13Handshake(fullTranscript: Data) async throws -> TLSRecordConnection {
         guard let kd = tls13.keyDerivation, let hs = tls13.handshakeSecret else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "Missing handshake state"))
+            throw TurnError.tls(.handshakeFailed(detail: "Missing handshake state"))
         }
 
         let application = kd.deriveApplicationMaterial(
@@ -371,7 +371,7 @@ extension TLSClient {
         try await sendTLS13ClientFinished()
 
         guard let appKeys = self.tls13.applicationKeys else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "Application keys not available"))
+            throw TurnError.tls(.handshakeFailed(detail: "Application keys not available"))
         }
 
         let tlsConnection = TLSRecordConnection(
@@ -399,7 +399,7 @@ extension TLSClient {
         guard let keys = tls13.handshakeKeys,
               let transcript = tls13.handshakeTranscript,
               let kd = tls13.keyDerivation else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "Missing handshake keys"))
+            throw TurnError.tls(.handshakeFailed(detail: "Missing handshake keys"))
         }
 
         var ccsRecord = Data([TLSContentType.changeCipherSpec, 0x03, 0x03, 0x00, 0x01, 0x01])
@@ -423,7 +423,7 @@ extension TLSClient {
         ccsRecord.append(finishedRecord)
 
         guard let connection else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Connection cancelled"))
+            throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Connection cancelled"))
         }
         try await connection.send(ccsRecord)
     }

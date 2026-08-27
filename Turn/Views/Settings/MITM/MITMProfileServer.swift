@@ -1,6 +1,6 @@
 //
 //  MITMProfileServer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMProfileServer")
+nonisolated private let logger = TurnLogger(category: "MITMProfileServer")
 
 actor MITMProfileServer {
     static let shared = MITMProfileServer()
@@ -41,9 +41,9 @@ actor MITMProfileServer {
             await self?.stop()
         }
 
-        guard let url = URL(string: "http://127.0.0.1:\(boundPort.rawValue)/AnywhereMITMRoot.mobileconfig") else {
+        guard let url = URL(string: "http://127.0.0.1:\(boundPort.rawValue)/TurnMITMRoot.mobileconfig") else {
             stop()
-            throw AnywhereError.mitm(.profileServerBindFailed)
+            throw TurnError.mitm(.profileServerBindFailed)
         }
         return url
     }
@@ -72,12 +72,12 @@ actor MITMProfileServer {
                     portSignal.yield(port)
                     portSignal.finish()
                 } else {
-                    portSignal.finish(throwing: AnywhereError.mitm(.profileServerBindFailed))
+                    portSignal.finish(throwing: TurnError.mitm(.profileServerBindFailed))
                 }
             case .failed(let error):
                 portSignal.finish(throwing: error)
             case .cancelled:
-                portSignal.finish(throwing: AnywhereError.mitm(.profileServerBindFailed))
+                portSignal.finish(throwing: TurnError.mitm(.profileServerBindFailed))
             default:
                 break
             }
@@ -94,11 +94,11 @@ actor MITMProfileServer {
             for try await port in portStream { boundPort = port }
         } catch {
             stop()
-            throw AnywhereError.mitm(.profileServerBindFailed)
+            throw TurnError.mitm(.profileServerBindFailed)
         }
         guard let boundPort else {
             stop()
-            throw AnywhereError.mitm(.profileServerBindFailed)
+            throw TurnError.mitm(.profileServerBindFailed)
         }
         return boundPort
     }
@@ -111,14 +111,14 @@ actor MITMProfileServer {
             listener = try LegacyMITMProfileListener(payload: payload)
         } catch {
             stop()
-            throw AnywhereError.mitm(.profileServerBindFailed)
+            throw TurnError.mitm(.profileServerBindFailed)
         }
         legacyListener = listener
         do {
             return try await listener.start()
         } catch {
             stop()
-            throw AnywhereError.mitm(.profileServerBindFailed)
+            throw TurnError.mitm(.profileServerBindFailed)
         }
     }
 
@@ -151,7 +151,7 @@ actor MITMProfileServer {
     fileprivate static func httpResponse(payload: Data) -> Data {
         let header = "HTTP/1.1 200 OK\r\n" +
                      "Content-Type: application/x-apple-aspen-config\r\n" +
-                     "Content-Disposition: attachment; filename=\"AnywhereMITMRoot.mobileconfig\"\r\n" +
+                     "Content-Disposition: attachment; filename=\"TurnMITMRoot.mobileconfig\"\r\n" +
                      "Content-Length: \(payload.count)\r\n" +
                      "Connection: close\r\n" +
                      "Cache-Control: no-store\r\n\r\n"
@@ -167,7 +167,7 @@ actor MITMProfileServer {
 nonisolated private final class LegacyMITMProfileListener: Sendable {
     private let listener: NWListener
     private let payload: Data
-    private let queue = DispatchQueue(label: "com.argsment.Anywhere.MITMProfileServer")
+    private let queue = DispatchQueue(label: "com.argsment.Turn.MITMProfileServer")
 
     private struct State {
         var connections: [ObjectIdentifier: NWConnection] = [:]
@@ -194,12 +194,12 @@ nonisolated private final class LegacyMITMProfileListener: Sendable {
                     portSignal.yield(port)
                     portSignal.finish()
                 } else {
-                    portSignal.finish(throwing: AnywhereError.mitm(.profileServerBindFailed))
+                    portSignal.finish(throwing: TurnError.mitm(.profileServerBindFailed))
                 }
             case .failed(let error):
                 portSignal.finish(throwing: error)
             case .cancelled:
-                portSignal.finish(throwing: AnywhereError.mitm(.profileServerBindFailed))
+                portSignal.finish(throwing: TurnError.mitm(.profileServerBindFailed))
             default:
                 break
             }
@@ -211,7 +211,7 @@ nonisolated private final class LegacyMITMProfileListener: Sendable {
 
         var boundPort: NWEndpoint.Port?
         for try await port in portStream { boundPort = port }
-        guard let boundPort else { throw AnywhereError.mitm(.profileServerBindFailed) }
+        guard let boundPort else { throw TurnError.mitm(.profileServerBindFailed) }
         return boundPort
     }
 

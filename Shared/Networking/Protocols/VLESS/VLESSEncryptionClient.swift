@@ -1,6 +1,6 @@
 //
 //  VLESSEncryptionClient.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/10/26.
 //
@@ -101,7 +101,7 @@ nonisolated private final class VLESSEncryptionAEAD: Sendable {
     /// Open with an explicit nonce (used for the "max nonce" rekey marker).
     func open(_ sealed: Data, nonce: Data, additionalData: Data?) throws -> Data {
         guard sealed.count >= VLESSWire.aeadTagLength else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: sealed buffer shorter than tag"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: sealed buffer shorter than tag"))
         }
         let ciphertext = sealed.prefix(sealed.count - VLESSWire.aeadTagLength)
         let tag = sealed.suffix(VLESSWire.aeadTagLength)
@@ -146,16 +146,16 @@ nonisolated private enum VLESSHeader {
 
     static func decode(_ header: [UInt8]) throws -> Int {
         guard header.count == VLESSWire.headerLength else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: header is not 5 bytes"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: header is not 5 bytes"))
         }
         let length = (Int(header[3]) << 8) | Int(header[4])
         guard header[0] == VLESSWire.recordTypeApplicationData,
               header[1] == VLESSWire.recordVersionMajor,
               header[2] == VLESSWire.recordVersionMinor else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: unexpected record prefix \(header[0..<3])"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: unexpected record prefix \(header[0..<3])"))
         }
         guard length >= VLESSWire.minRecordPayload, length <= VLESSWire.maxRecordPayload else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: record length \(length) out of range"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: record length \(length) out of range"))
         }
         return length
     }
@@ -196,10 +196,10 @@ nonisolated struct VLESSEncryptionPadding {
                   let prob = Int(parts[0]),
                   let lo = Int(parts[1]),
                   let hi = Int(parts[2]) else {
-                throw AnywhereError.proxy(.vlessEncryption, .unsupported(feature: "invalid padding segment \"\(segment)\""))
+                throw TurnError.proxy(.vlessEncryption, .unsupported(feature: "invalid padding segment \"\(segment)\""))
             }
             if i == 0, prob < 100 || lo < 35 || hi < 35 {
-                throw AnywhereError.proxy(.vlessEncryption, .unsupported(feature: "first padding length must be at least 35"))
+                throw TurnError.proxy(.vlessEncryption, .unsupported(feature: "first padding length must be at least 35"))
             }
             if i % 2 == 0 {
                 lengths.append((prob, lo, hi))
@@ -209,7 +209,7 @@ nonisolated struct VLESSEncryptionPadding {
             }
         }
         guard totalMaxLen <= 18 + 65535 else {
-            throw AnywhereError.proxy(.vlessEncryption, .unsupported(feature: "total padding length must not exceed 65553"))
+            throw TurnError.proxy(.vlessEncryption, .unsupported(feature: "total padding length must not exceed 65553"))
         }
         return VLESSEncryptionPadding(lengths: lengths, gaps: gaps)
     }
@@ -269,7 +269,7 @@ nonisolated private enum VLESSNfsPublicKey {
         case 1184:
             return .mlkem768(try MLKEM768.PublicKey(rawRepresentation: raw), raw: raw)
         default:
-            throw AnywhereError.proxy(.vlessEncryption, .handshakeFailed(detail: "invalid public key"))
+            throw TurnError.proxy(.vlessEncryption, .handshakeFailed(detail: "invalid public key"))
         }
     }
 }
@@ -332,7 +332,7 @@ nonisolated final class VLESSEncryptionClient {
             SecRandomCopyBytes(kSecRandomDefault, 16, pointer.baseAddress!)
         }
         guard status == errSecSuccess else {
-            throw AnywhereError.proxy(.vlessEncryption, .handshakeFailed(detail: "rng failure"))
+            throw TurnError.proxy(.vlessEncryption, .handshakeFailed(detail: "rng failure"))
         }
         return iv
     }
@@ -571,7 +571,7 @@ nonisolated final class VLESSEncryptionClient {
             additionalData: nil
         )
         guard serverPfsPublic.count == 1088 + 32 else {
-            throw AnywhereError.proxy(.vlessEncryption, .handshakeFailed(detail: "PFS server hello has wrong length"))
+            throw TurnError.proxy(.vlessEncryption, .handshakeFailed(detail: "PFS server hello has wrong length"))
         }
         let mlkemCiphertext = serverPfsPublic.prefix(1088)
         let x25519PubBytes = serverPfsPublic.suffix(32)
@@ -636,7 +636,7 @@ nonisolated final class VLESSEncryptionClient {
         let lenBytes = try readAEAD.open(sealedLength, additionalData: nil)
         // Decoded value is the SEALED body size (plaintext + tag).
         guard lenBytes.count >= 2 else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: server sealed length frame too short: \(lenBytes.count) bytes"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: server sealed length frame too short: \(lenBytes.count) bytes"))
         }
         let sealedPaddingBodySize = VLESSLength.decode(lenBytes)
         // Over-read bytes are padding tail, always unmasked (sent
@@ -700,7 +700,7 @@ nonisolated private final class VLESSEncryptionByteReader {
                 return head
             }
             guard let data = try await connection.receiveRaw(), !data.isEmpty else {
-                throw AnywhereError.proxy(.vlessEncryption, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.vlessEncryption, .connectionClosed(detail: nil))
             }
             buffer.withLock { $0.append(data) }
         }
@@ -852,7 +852,7 @@ nonisolated final class VLESSEncryptedConnection: ProxyConnection {
                 return
             }
             guard let data = try await inner.receiveRaw(), !data.isEmpty else {
-                throw AnywhereError.proxy(.vlessEncryption, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.vlessEncryption, .connectionClosed(detail: nil))
             }
             recvState.withLock { $0.inboundBuffer.appendCompacting(data) }
         }
@@ -947,7 +947,7 @@ nonisolated final class VLESSEncryptedConnection: ProxyConnection {
                 // invalidate this ticket so a future dial re-handshakes.
                 if !firstRecordSeen, let zeroRTT = zeroRTTState {
                     VLESSEncryption0RTTCache.shared.invalidate(key: zeroRTT.cacheKey, matching: zeroRTT.pfsKey)
-                    throw AnywhereError.proxy(.vlessEncryption, .handshakeFailed(detail: "new handshake needed"))
+                    throw TurnError.proxy(.vlessEncryption, .handshakeFailed(detail: "new handshake needed"))
                 }
                 throw error
             case .record(let plaintext):

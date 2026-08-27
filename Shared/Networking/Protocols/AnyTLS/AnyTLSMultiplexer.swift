@@ -1,6 +1,6 @@
 //
 //  AnyTLSMultiplexer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/16/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "AnyTLSMultiplexer")
+nonisolated private let logger = TurnLogger(category: "AnyTLSMultiplexer")
 
 nonisolated final class AnyTLSMultiplexer: Multiplexer, Sendable {
 
@@ -125,7 +125,7 @@ nonisolated final class AnyTLSMultiplexer: Multiplexer, Sendable {
         state.synDoneTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
-            self?.close(error: AnywhereError.proxy(.anyTLS, .openTimeout))
+            self?.close(error: TurnError.proxy(.anyTLS, .openTimeout))
         }
     }
     
@@ -255,7 +255,7 @@ nonisolated final class AnyTLSMultiplexer: Multiplexer, Sendable {
         switch action {
         case .rejected:
             logger.debug("[AnyTLSMultiplexer] writeConn rejected — multiplexer closed (\(bytes.count)B)")
-            throw AnywhereError.proxy(.anyTLS, .connectionClosed(detail: "AnyTLS multiplexer closed"))
+            throw TurnError.proxy(.anyTLS, .connectionClosed(detail: "AnyTLS multiplexer closed"))
         case .buffered:
             return
         case .send(let pending):
@@ -380,7 +380,7 @@ nonisolated final class AnyTLSMultiplexer: Multiplexer, Sendable {
             if !payload.isEmpty {
                 let message = String(data: payload, encoding: .utf8) ?? "<binary>"
                 logger.debug("[AnyTLSMultiplexer] cmdSYNACK error sid=\(sid): \(message)")
-                stream?.deliverClose(error: AnywhereError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS remote: \(message)")))
+                stream?.deliverClose(error: TurnError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS remote: \(message)")))
                 lock.withLock { $0.streams[sid] = nil }
             } else {
                 logger.debug("[AnyTLSMultiplexer] cmdSYNACK ok sid=\(sid)")
@@ -406,7 +406,7 @@ nonisolated final class AnyTLSMultiplexer: Multiplexer, Sendable {
         case AnyTLSProtocol.cmdAlert:
             let message = String(data: payload, encoding: .utf8) ?? "<binary>"
             logger.debug("[AnyTLSMultiplexer] cmdAlert from server: \(message)")
-            close(error: AnywhereError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS alert: \(message)")))
+            close(error: TurnError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS alert: \(message)")))
 
         case AnyTLSProtocol.cmdUpdatePaddingScheme:
             if let new = AnyTLSPaddingScheme.parse(payload) {

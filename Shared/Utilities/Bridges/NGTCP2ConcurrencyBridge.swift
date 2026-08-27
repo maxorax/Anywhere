@@ -1,6 +1,6 @@
 //
 //  NGTCP2ConcurrencyBridge.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/15/26.
 //
@@ -11,7 +11,7 @@ nonisolated final class NGTCP2ConcurrencyBridge: @unchecked Sendable {
     let executor: BridgeExecutor
 
     init() {
-        self.executor = BridgeExecutor(label: "com.argsment.Anywhere.NGTCP2ConcurrencyBridge")
+        self.executor = BridgeExecutor(label: "com.argsment.Turn.NGTCP2ConcurrencyBridge")
     }
     
     private var queue: DispatchQueue { executor.queue }

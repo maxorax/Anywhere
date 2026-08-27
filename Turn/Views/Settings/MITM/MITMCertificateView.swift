@@ -1,6 +1,6 @@
 //
 //  MITMCertificateView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -209,7 +209,7 @@ struct MITMCertificateView: View {
             return String(localized: "Generate a certificate to begin.")
         }
         return controller.trusted
-            ? String(localized: "Anywhere Root Certificate is installed and trusted.")
+            ? String(localized: "Turn Root Certificate is installed and trusted.")
             : String(localized: "Install the profile and trust in Settings to use MITM.")
     }
 
@@ -247,7 +247,7 @@ struct MITMCertificateView: View {
 
     private func certificateURL() -> URL? {
         guard let der = controller.certificateData() else { return nil }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("AnywhereMITMRoot.cer")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("TurnMITMRoot.cer")
         do {
             try der.write(to: url, options: .atomic)
             return url

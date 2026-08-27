@@ -1,6 +1,6 @@
 //
 //  NowhereClient.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/30/26.
 //
@@ -199,7 +199,7 @@ nonisolated final class NowhereClient: Sendable {
             state.pending.removeValue(forKey: key)
             guard state.epoch == buildEpoch else {
                 let discarded = (try? builderResult.get())?.1 ?? []
-                return (.failure(AnywhereError.proxy(.nowhere, .streamClosed)), discarded)
+                return (.failure(TurnError.proxy(.nowhere, .streamClosed)), discarded)
             }
             switch builderResult {
             case .success(let (transport, holders)):
@@ -275,7 +275,7 @@ nonisolated final class NowhereClient: Sendable {
             try await existing.ensureReady()
             return existing
         case .transportSpent:
-            throw AnywhereError.proxy(.nowhere, .streamClosed)
+            throw TurnError.proxy(.nowhere, .streamClosed)
         case .fresh(let newSession):
             newSession.setOnClose { [weak self, weak newSession] in
                 guard let self, let newSession else { return }
@@ -330,7 +330,7 @@ nonisolated final class NowhereClient: Sendable {
             attempt: attempt
         )
         guard attempt?.bind(connection) != false else {
-            throw AnywhereError.proxy(.nowhere, .streamClosed)
+            throw TurnError.proxy(.nowhere, .streamClosed)
         }
         do {
             try await connection.open()
@@ -362,7 +362,7 @@ nonisolated final class NowhereClient: Sendable {
             flowHeader: header
         )
         guard attempt?.bind(connection) != false else {
-            throw AnywhereError.proxy(.nowhere, .streamClosed)
+            throw TurnError.proxy(.nowhere, .streamClosed)
         }
         do {
             try await connection.open()
@@ -377,7 +377,7 @@ nonisolated final class NowhereClient: Sendable {
     }
 
     private static func isStaleSessionError(_ error: Error) -> Bool {
-        guard case AnywhereError.proxy(.nowhere, let failure) = error else { return false }
+        guard case TurnError.proxy(.nowhere, let failure) = error else { return false }
         switch failure {
         case .notReady, .streamClosed: return true
         case .flowRejected(let code) where code == NowhereProtocol.FlowRejectCode.sessionReplaced.rawValue:

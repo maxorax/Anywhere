@@ -1,6 +1,6 @@
 //
 //  AnyTLSMultiplexerRegistry.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/16/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "AnyTLSMultiplexerRegistry")
+nonisolated private let logger = TurnLogger(category: "AnyTLSMultiplexerRegistry")
 
 /// Keyed by `(host, port, password)`; configs sharing the triple reuse one warm pool.
 nonisolated final class AnyTLSMultiplexerRegistry: Sendable {

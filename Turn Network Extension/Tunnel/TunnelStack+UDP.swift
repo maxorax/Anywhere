@@ -1,13 +1,13 @@
 //
 //  TunnelStack+UDP.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/23/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "TunnelStack+UDP")
+nonisolated private let logger = TurnLogger(category: "TunnelStack+UDP")
 
 extension TunnelStack {
 
@@ -32,7 +32,7 @@ extension TunnelStack {
 
     /// Answers `datagram` with ICMP port-unreachable — sourced from the
     /// original destination — so the sender abandons the destination fast
-    /// (QUIC fallback, stale fake IPs, blocked UDP). Callable from anywhere.
+    /// (QUIC fallback, stale fake IPs, blocked UDP). Callable from turn.
     nonisolated func sendICMPPortUnreachable(rejecting datagram: UDPPacket.Inbound) {
         guard let packet = ICMPPacket.portUnreachable(
             srcIP: datagram.srcIPData,
@@ -46,7 +46,7 @@ extension TunnelStack {
     }
 
     /// Builds a UDP packet and queues it to the TUN output; callers pass the
-    /// original 5-tuple swapped. Callable from anywhere.
+    /// original 5-tuple swapped. Callable from turn.
     nonisolated func writeOutboundUDP(srcIP: Data, srcPort: UInt16,
                           dstIP: Data, dstPort: UInt16,
                           isIPv6: Bool, payload: Data) {

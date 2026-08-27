@@ -1,6 +1,6 @@
 //
 //  HysteriaClient.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/18/26.
 //
@@ -172,7 +172,7 @@ nonisolated final class HysteriaClient: Sendable {
             try await existing.ensureReady()
             return existing
         case .transportSpent:
-            throw AnywhereError.proxy(.hysteria, .streamClosed)
+            throw TurnError.proxy(.hysteria, .streamClosed)
         case .fresh(let newSession):
             newSession.setOnClose { [weak self, weak newSession] in
                 guard let self, let newSession else { return }
@@ -251,7 +251,7 @@ nonisolated final class HysteriaClient: Sendable {
     }
     
     private static func isStaleSessionError(_ error: Error) -> Bool {
-        guard case AnywhereError.proxy(.hysteria, let failure) = error else { return false }
+        guard case TurnError.proxy(.hysteria, let failure) = error else { return false }
         switch failure {
         case .notReady, .streamClosed: return true
         default: return false

@@ -1,6 +1,6 @@
 //
 //  MITMRuleEditorView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -122,7 +122,7 @@ struct MITMRuleEditorView: View {
                     switch rewriteMode {
                     case .transparent, .redirect302:
                         LabeledContent {
-                            TextField(String("https://argsment.com/anywhere"), text: $rewriteURL)
+                            TextField(String("https://argsment.com/turn"), text: $rewriteURL)
                                 .autocorrectionDisabled()
                                 .textInputAutocapitalization(.never)
                                 .multilineTextAlignment(.trailing)
@@ -131,7 +131,7 @@ struct MITMRuleEditorView: View {
                         }
                     case .reject200Text:
                         LabeledContent {
-                            TextField(String("Success from Anywhere"), text: $rejectText)
+                            TextField(String("Success from Turn"), text: $rejectText)
                                 .autocorrectionDisabled()
                                 .textInputAutocapitalization(.never)
                                 .multilineTextAlignment(.trailing)
@@ -160,7 +160,7 @@ struct MITMRuleEditorView: View {
                         TextWithColorfulIcon(title: "Header Name", comment: nil, systemName: "tag.fill", foregroundStyle: .white, backgroundStyle: .gray.gradient)
                     }
                     LabeledContent {
-                        TextField(String("Anywhere"), text: $headerValue)
+                        TextField(String("Turn"), text: $headerValue)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                             .multilineTextAlignment(.trailing)
@@ -195,7 +195,7 @@ struct MITMRuleEditorView: View {
                     }
                 case .bodyReplace:
                     LabeledContent {
-                        TextField(String("Anywhere"), text: $searchText)
+                        TextField(String("Turn"), text: $searchText)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                             .multilineTextAlignment(.trailing)

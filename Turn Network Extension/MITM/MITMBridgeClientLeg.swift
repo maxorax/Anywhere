@@ -1,13 +1,13 @@
 //
 //  MITMBridgeClientLeg.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/15/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "MITMBridgeClientLeg")
+nonisolated private let logger = TurnLogger(category: "MITMBridgeClientLeg")
 
 nonisolated protocol MITMBridgeClientLegDelegate: AnyObject {
     func clientLegSendRequestHead(_ head: MITMRequestHead, url: String?, endStream: Bool)
@@ -104,7 +104,7 @@ actor MITMBridgeClientLeg: MITMResponseSink {
         case streaming(remaining: Int?)
         /// Accumulating the body for a buffered rewrite; head emitted at END_STREAM.
         case buffering(BufferedReq)
-        /// Answered locally (rewrite synth / Anywhere.respond); swallow further DATA.
+        /// Answered locally (rewrite synth / Turn.respond); swallow further DATA.
         case synthAnswered
     }
     private var requestStreams: [UInt32: RequestStream] = [:]
@@ -948,11 +948,11 @@ actor MITMBridgeClientLeg: MITMResponseSink {
     private func answerSynth(streamID: UInt32, response: MITMScriptEngine.SynthesizedResponse) {
         requestStreams[streamID] = .synthAnswered // swallow further request DATA
         let sanitized = response.sanitizedHeaders(lowercaseNames: true) { name in
-            logger.warning("[MITM][JS] bridge \(host): Anywhere.respond dropping invalid header: \(name)")
+            logger.warning("[MITM][JS] bridge \(host): Turn.respond dropping invalid header: \(name)")
         }
         let headers = response.withDateStamp(sanitized, lowercaseName: true)
         let body = response.truncatedBody(cap: MITMBodyCodec.maxBufferedBodyBytes) { size in
-            logger.warning("[MITM][JS] bridge \(host): Anywhere.respond body \(size) B over cap; truncating")
+            logger.warning("[MITM][JS] bridge \(host): Turn.respond body \(size) B over cap; truncating")
         }
         deliverResponseHead(streamID: streamID, status: response.status, headers: headers, endStream: body.isEmpty)
         if !body.isEmpty { deliverResponseData(streamID: streamID, body, endStream: true) }

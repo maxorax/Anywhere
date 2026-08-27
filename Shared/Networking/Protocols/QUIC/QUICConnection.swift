@@ -1,6 +1,6 @@
 //
 //  QUICConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/11/26.
 //
@@ -10,7 +10,7 @@ import Network
 import CryptoKit
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "QUICConnection")
+nonisolated private let logger = TurnLogger(category: "QUICConnection")
 
 // MARK: - QUICPacketObfuscator
 

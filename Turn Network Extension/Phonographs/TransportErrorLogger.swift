@@ -1,6 +1,6 @@
 //
 //  TransportErrorLogger.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/18/26.
 //
@@ -12,7 +12,7 @@ nonisolated enum TransportErrorLogger {
     // MARK: - Formatting
     
     static func conciseErrorDescription(_ error: Error) -> String {
-        if let error = error as? AnywhereError { return error.conciseDescription }
+        if let error = error as? TurnError { return error.conciseDescription }
         var message = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         let redundantPrefixes = [
             "Connection failed: ",
@@ -35,19 +35,19 @@ nonisolated enum TransportErrorLogger {
         operation: String,
         endpoint: String,
         error: Error,
-        logger: AnywhereLogger,
+        logger: TurnLogger,
         prefix: String,
         context: String? = nil
     ) {
         let errorDescription = conciseErrorDescription(error)
         let suffix = context.map { " [\($0)]" } ?? ""
 
-        if case AnywhereError.proxy(.naive, _) = error {
+        if case TurnError.proxy(.naive, _) = error {
             logger.debug("\(prefix) \(operation) error: \(endpoint): \(errorDescription)\(suffix)")
             return
         }
         
-        switch (error as? AnywhereError)?.peerClose {
+        switch (error as? TurnError)?.peerClose {
         case .cascade:
             logger.debug("\(prefix) \(operation) after peer close: \(endpoint): \(errorDescription)\(suffix)")
             return
@@ -59,7 +59,7 @@ nonisolated enum TransportErrorLogger {
         }
 
         let line = "\(prefix) \(operation) failed: \(endpoint): \(errorDescription)\(suffix)"
-        switch AnywhereError.severity(of: error) {
+        switch TurnError.severity(of: error) {
         case .debug: logger.debug(line)
         case .info: logger.info(line)
         case .warning: logger.warning(line)
@@ -72,7 +72,7 @@ nonisolated enum TransportErrorLogger {
     static func logTransientSend(
         endpoint: String,
         error: Error,
-        logger: AnywhereLogger,
+        logger: TurnLogger,
         prefix: String
     ) {
         let errorDescription = conciseErrorDescription(error)
@@ -84,10 +84,10 @@ nonisolated enum TransportErrorLogger {
 
 nonisolated final class ConnectionFailureReporter {
     private let prefix: String
-    private let logger: AnywhereLogger
+    private let logger: TurnLogger
     private var reported = false
 
-    init(prefix: String, logger: AnywhereLogger) {
+    init(prefix: String, logger: TurnLogger) {
         self.prefix = prefix
         self.logger = logger
     }

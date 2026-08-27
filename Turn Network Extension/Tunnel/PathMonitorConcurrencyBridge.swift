@@ -1,6 +1,6 @@
 //
 //  PathMonitorConcurrencyBridge.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/17/26.
 //
@@ -14,7 +14,7 @@ nonisolated final class PathMonitorConcurrencyBridge: Sendable {
     private let queue: DispatchQueue
 
     init() {
-        self.queue = DispatchQueue(label: "com.argsment.Anywhere.PathMonitorConcurrencyBridge")
+        self.queue = DispatchQueue(label: "com.argsment.Turn.PathMonitorConcurrencyBridge")
     }
     
     func paths() -> AsyncStream<Network.NWPath> {

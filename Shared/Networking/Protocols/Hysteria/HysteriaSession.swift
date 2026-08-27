@@ -1,6 +1,6 @@
 //
 //  HysteriaSession.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/13/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "HysteriaSession")
+nonisolated private let logger = TurnLogger(category: "HysteriaSession")
 
 nonisolated final class HysteriaSession: Sendable {
 
@@ -138,7 +138,7 @@ nonisolated final class HysteriaSession: Sendable {
             
             let opened: Bool = await quic.run { self.openControlAndAuthOnQueue() }
             if !opened {
-                failSession(AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Failed to open auth stream")))
+                failSession(TurnError.proxy(.hysteria, .connectionClosed(detail: "Failed to open auth stream")))
             }
         }
     }
@@ -243,34 +243,34 @@ nonisolated final class HysteriaSession: Sendable {
 
             session.authBuffer.append(data)
             if session.authBuffer.count > Self.authBufferMaxBytes {
-                return .fail(AnywhereError.proxy(.hysteria, .connectionClosed(detail:
+                return .fail(TurnError.proxy(.hysteria, .connectionClosed(detail:
                     "Auth response exceeded \(Self.authBufferMaxBytes)-byte buffer cap"
                 )))
             }
 
             guard let (frameType, payload, consumed) = Self.parseNextHTTP3Frame(session.authBuffer) else {
                 if fin {
-                    return .fail(AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Auth stream ended before HEADERS frame")))
+                    return .fail(TurnError.proxy(.hysteria, .connectionClosed(detail: "Auth stream ended before HEADERS frame")))
                 }
                 return .needMore
             }
             session.authBuffer = Data(session.authBuffer.dropFirst(consumed))
 
             guard frameType == 0x01 else {
-                return .fail(AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Auth response wasn't HEADERS")))
+                return .fail(TurnError.proxy(.hysteria, .connectionClosed(detail: "Auth response wasn't HEADERS")))
             }
             guard let headers = HysteriaHTTP3Codec.decodeHeaderBlock(payload) else {
-                return .fail(AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Malformed auth QPACK block")))
+                return .fail(TurnError.proxy(.hysteria, .connectionClosed(detail: "Malformed auth QPACK block")))
             }
 
             session.authHeadersReceived = true
 
             let status = headers.first(where: { $0.name == ":status" })?.value
             guard let statusStr = status, let code = Int(statusStr) else {
-                return .fail(AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Missing :status on auth response")))
+                return .fail(TurnError.proxy(.hysteria, .connectionClosed(detail: "Missing :status on auth response")))
             }
             if code != HysteriaProtocol.authSuccessStatus {
-                return .fail(AnywhereError.proxy(.hysteria, .authenticationRejected(status: code, detail: nil)))
+                return .fail(TurnError.proxy(.hysteria, .authenticationRejected(status: code, detail: nil)))
             }
 
             session.udpSupported = (headers.first(where: { $0.name == "hysteria-udp" })?.value).map {
@@ -321,7 +321,7 @@ nonisolated final class HysteriaSession: Sendable {
         let effect: Effect = lock.withLock { session in
             if sid == session.authStreamID {
                 if session.state != .ready {
-                    return .failAuth(error ?? AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Auth stream closed before completion")))
+                    return .failAuth(error ?? TurnError.proxy(.hysteria, .connectionClosed(detail: "Auth stream closed before completion")))
                 }
                 return .none
             }
@@ -362,9 +362,9 @@ nonisolated final class HysteriaSession: Sendable {
         }
         switch result {
         case .notReady:
-            throw AnywhereError.proxy(.hysteria, .notReady)
+            throw TurnError.proxy(.hysteria, .notReady)
         case .openFailed:
-            throw AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Failed to open TCP stream"))
+            throw TurnError.proxy(.hysteria, .connectionClosed(detail: "Failed to open TCP stream"))
         case .ok(let sid):
             _poolState.withLock { $0.tcpCount += 1 }
             updateIdleCloseTimer()
@@ -396,10 +396,10 @@ nonisolated final class HysteriaSession: Sendable {
 
     func registerUDPSession(_ conn: HysteriaUDPConnection) async throws -> UInt32 {
         let sid: UInt32 = try lock.withLock { session in
-            guard session.state == .ready else { throw AnywhereError.proxy(.hysteria, .notReady) }
-            guard session.udpSupported else { throw AnywhereError.proxy(.hysteria, .unsupported(feature: "UDP")) }
+            guard session.state == .ready else { throw TurnError.proxy(.hysteria, .notReady) }
+            guard session.udpSupported else { throw TurnError.proxy(.hysteria, .unsupported(feature: "UDP")) }
             guard session.udpSessions.count < Int(UInt32.max) else {
-                throw AnywhereError.proxy(.hysteria, .connectionClosed(detail: "UDP session pool exhausted"))
+                throw TurnError.proxy(.hysteria, .connectionClosed(detail: "UDP session pool exhausted"))
             }
             var sid = session.nextUDPSessionID
             while session.udpSessions[sid] != nil {
@@ -468,8 +468,8 @@ nonisolated final class HysteriaSession: Sendable {
         let liveCount = _poolState.withLock { $0.tcpCount + $0.udpCount }
         guard liveCount == 0 else { return }
         performTeardown(
-            readyError: AnywhereError.proxy(.hysteria, .streamClosed),
-            connectionError: AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Session closed"))
+            readyError: TurnError.proxy(.hysteria, .streamClosed),
+            connectionError: TurnError.proxy(.hysteria, .connectionClosed(detail: "Session closed"))
         )
     }
     
@@ -485,8 +485,8 @@ nonisolated final class HysteriaSession: Sendable {
     
     func close() {
         performTeardown(
-            readyError: AnywhereError.proxy(.hysteria, .streamClosed),
-            connectionError: AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Session closed"))
+            readyError: TurnError.proxy(.hysteria, .streamClosed),
+            connectionError: TurnError.proxy(.hysteria, .connectionClosed(detail: "Session closed"))
         )
     }
     

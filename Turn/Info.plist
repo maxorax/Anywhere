@@ -6,22 +6,22 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>Anywhere Routing Rule Set</string>
+			<string>Turn Routing Rule Set</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.argsment.Anywhere-Routing-Rule-Set</string>
+				<string>com.argsment.Turn-Routing-Rule-Set</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>Anywhere MITM Rule Set</string>
+			<string>Turn MITM Rule Set</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.argsment.Anywhere-MITM-Rule-Set</string>
+				<string>com.argsment.Turn-MITM-Rule-Set</string>
 			</array>
 		</dict>
 	</array>
@@ -31,17 +31,17 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.anywhere</string>
+			<string>com.argsment.Turn.scheme.turn</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>anywhere</string>
+				<string>turn</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.nowhere</string>
+			<string>com.argsment.Turn.scheme.nowhere</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>nowhere</string>
@@ -51,7 +51,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.vless</string>
+			<string>com.argsment.Turn.scheme.vless</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>vless</string>
@@ -61,7 +61,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.hysteria2</string>
+			<string>com.argsment.Turn.scheme.hysteria2</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>hysteria2</string>
@@ -71,7 +71,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.hy2</string>
+			<string>com.argsment.Turn.scheme.hy2</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>hy2</string>
@@ -81,7 +81,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.trojan</string>
+			<string>com.argsment.Turn.scheme.trojan</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>trojan</string>
@@ -91,7 +91,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.anytls</string>
+			<string>com.argsment.Turn.scheme.anytls</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>anytls</string>
@@ -101,7 +101,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.ss</string>
+			<string>com.argsment.Turn.scheme.ss</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ss</string>
@@ -111,7 +111,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.argsment.Anywhere.scheme.sudoku</string>
+			<string>com.argsment.Turn.scheme.sudoku</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>sudoku</string>

@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB1C10762F23B82F00B74CD8"
-               BuildableName = "Anywhere Network Extension.appex"
-               BlueprintName = "Anywhere Network Extension"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn Network Extension.appex"
+               BlueprintName = "Turn Network Extension"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-               BuildableName = "Anywhere.app"
-               BlueprintName = "Anywhere"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn.app"
+               BlueprintName = "Turn"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -51,9 +51,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "78B6DF992FE7B70D0084897A"
-               BuildableName = "Anywhere Tests.xctest"
-               BlueprintName = "Anywhere Tests"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn Tests.xctest"
+               BlueprintName = "Turn Tests"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -72,16 +72,16 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.argsment.Anywhere"
-         RemotePath = "/var/containers/Bundle/Application/67DE49ED-C4A8-48AB-B1B4-F554C500182A/Anywhere.app">
+         BundleIdentifier = "com.argsment.Turn"
+         RemotePath = "/var/containers/Bundle/Application/67DE49ED-C4A8-48AB-B1B4-F554C500182A/Turn.app">
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-            BuildableName = "Anywhere.app"
-            BlueprintName = "Anywhere"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn.app"
+            BlueprintName = "Turn"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </LaunchAction>
@@ -95,8 +95,8 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.argsment.Anywhere"
-         RemotePath = "/var/containers/Bundle/Application/42B10ED2-2E0D-467C-869A-89030C07D222/Anywhere.app">
+         BundleIdentifier = "com.argsment.Turn"
+         RemotePath = "/var/containers/Bundle/Application/42B10ED2-2E0D-467C-869A-89030C07D222/Turn.app">
       </RemoteRunnable>
    </ProfileAction>
    <AnalyzeAction

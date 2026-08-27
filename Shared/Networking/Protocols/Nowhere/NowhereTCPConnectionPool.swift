@@ -1,6 +1,6 @@
 //
 //  NowhereTCPConnectionPool.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/22/26.
 //
@@ -187,7 +187,7 @@ nonisolated private final class NowhereTCPConnectionPool: Sendable {
         }
 
         if unavailable {
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
         for connection in stale {
             connection.setPreparedCloseHandler(nil)
@@ -198,7 +198,7 @@ nonisolated private final class NowhereTCPConnectionPool: Sendable {
         if let selected {
             selected.setPreparedCloseHandler(nil)
             guard attempt.bind(selected) else {
-                throw AnywhereError.proxy(.nowhere, .streamClosed)
+                throw TurnError.proxy(.nowhere, .streamClosed)
             }
             do {
                 try await selected.activate(
@@ -255,7 +255,7 @@ nonisolated private final class NowhereTCPConnectionPool: Sendable {
             tunnel: nil
         )
         guard attempt.bind(connection) else {
-            throw AnywhereError.proxy(.nowhere, .streamClosed)
+            throw TurnError.proxy(.nowhere, .streamClosed)
         }
         do {
             try await connection.openFresh(

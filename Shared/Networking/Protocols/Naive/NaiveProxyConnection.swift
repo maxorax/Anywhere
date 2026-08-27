@@ -1,6 +1,6 @@
 //
 //  NaiveProxyConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/9/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "NaiveProxyConnection")
+nonisolated private let logger = TurnLogger(category: "NaiveProxyConnection")
 
 // MARK: - NaiveTunnel Protocol
 

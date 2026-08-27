@@ -1,6 +1,6 @@
 //
 //  WebSocketConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -62,7 +62,7 @@ nonisolated final class WebSocketConnection: Sendable {
         try await withDialDeadline(Self.upgradeDeadline, onExpiry: {
             self.cancel()
         }, error: {
-            AnywhereError.proxy(.webSocket, .upgradeFailed(detail: "handshake timed out"))
+            TurnError.proxy(.webSocket, .upgradeFailed(detail: "handshake timed out"))
         }) {
             try await self.sendAndAwaitUpgrade(earlyData: earlyData)
         }
@@ -97,13 +97,13 @@ nonisolated final class WebSocketConnection: Sendable {
         request += "\r\n"
 
         guard let requestData = request.data(using: .utf8) else {
-            throw AnywhereError.proxy(.webSocket, .upgradeFailed(detail: "Failed to encode upgrade request"))
+            throw TurnError.proxy(.webSocket, .upgradeFailed(detail: "Failed to encode upgrade request"))
         }
 
         do {
             try await transport.send(requestData)
         } catch {
-            throw AnywhereError.capture(error, context: "WebSocket upgrade request")
+            throw TurnError.capture(error, context: "WebSocket upgrade request")
         }
 
         try await receiveUpgradeResponse()
@@ -116,11 +116,11 @@ nonisolated final class WebSocketConnection: Sendable {
             do {
                 chunk = try await transport.receive()
             } catch {
-                throw AnywhereError.capture(error, context: "WebSocket upgrade response")
+                throw TurnError.capture(error, context: "WebSocket upgrade response")
             }
 
             guard case .bytes(let data) = chunk, !data.isEmpty else {
-                throw AnywhereError.proxy(.webSocket, .upgradeFailed(detail: "Empty response from server"))
+                throw TurnError.proxy(.webSocket, .upgradeFailed(detail: "Empty response from server"))
             }
 
             let headerData: Data? = self.state.withLock { state in
@@ -142,12 +142,12 @@ nonisolated final class WebSocketConnection: Sendable {
             }
 
             guard let headerString = String(data: headerData, encoding: .utf8) else {
-                throw AnywhereError.proxy(.webSocket, .upgradeFailed(detail: "Cannot decode response headers"))
+                throw TurnError.proxy(.webSocket, .upgradeFailed(detail: "Cannot decode response headers"))
             }
 
             let firstLine = headerString.split(separator: "\r\n", maxSplits: 1).first ?? ""
             guard firstLine.contains("101") else {
-                throw AnywhereError.proxy(.webSocket, .upgradeFailed(detail: "Expected HTTP 101, got: \(firstLine)"))
+                throw TurnError.proxy(.webSocket, .upgradeFailed(detail: "Expected HTTP 101, got: \(firstLine)"))
             }
 
             self.state.withLock { $0.upgraded = true }
@@ -189,7 +189,7 @@ nonisolated final class WebSocketConnection: Sendable {
                     if code == 1000 || code == 1005 {
                         return nil
                     }
-                    throw AnywhereError.proxy(.webSocket, .webSocketClosed(code: code, reason: reason))
+                    throw TurnError.proxy(.webSocket, .webSocketClosed(code: code, reason: reason))
                 }
             }
 
@@ -207,7 +207,7 @@ nonisolated final class WebSocketConnection: Sendable {
                 return false
             }
             if overflow {
-                throw AnywhereError.proxy(.webSocket, .protocolViolation(detail: "invalid frame: Receive buffer exceeded limit"))
+                throw TurnError.proxy(.webSocket, .protocolViolation(detail: "invalid frame: Receive buffer exceeded limit"))
             }
         }
     }

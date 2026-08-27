@@ -1,6 +1,6 @@
 # Routing Rule System — Developer Guide
 
-Anywhere decides, for every connection, whether to send it **direct**, to
+Turn decides, for every connection, whether to send it **direct**, to
 **reject** it, or to route it through a chosen **proxy** — based on the
 connection's destination. Routing rules are how you express that policy. This
 guide covers authoring rule sets and the `.arrs` import format. It is
@@ -30,7 +30,7 @@ notation. It does **not** cover the settings UI beyond what authoring requires.
 
 ## How it works
 
-When a new connection is accepted, Anywhere knows its destination as a
+When a new connection is accepted, Turn knows its destination as a
 **domain** (resolved through fake-IP DNS, or read from the TLS SNI) and/or a
 literal **IP address**. It asks the router to classify that destination:
 
@@ -106,7 +106,7 @@ trie walk) and says exactly what it means.
 
 ### Domain Keyword (`3`)
 
-Raw **substring** match anywhere in the host. `example` matches `example.com`,
+Raw **substring** match turn in the host. `example` matches `example.com`,
 `myexample.net`, and `cdn.example-images.org` alike. It is both slower and far
 more prone to false positives than a suffix, so **prefer Domain Suffix
 whenever a suffix can express the intent**; reserve keywords for cases where
@@ -230,7 +230,7 @@ but is discarded later when rules are loaded.
 ## Subscriptions
 
 A subscription is a `.arrs` file served over **http(s)** from a URL whose path
-ends in `.arrs`. Anywhere fetches it, parses it with the format above, and
+ends in `.arrs`. Turn fetches it, parses it with the format above, and
 stores the result as a custom set. On **refresh**, the rules are **replaced**
 wholesale by the freshly fetched file, while the name you gave the set locally
 is **preserved** across refreshes — so a remote rename does not clobber yours,

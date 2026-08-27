@@ -1,6 +1,6 @@
 //
 //  MITMGateRegex.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/3/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMGateRegex")
+nonisolated private let logger = TurnLogger(category: "MITMGateRegex")
 
 nonisolated final class MITMGateRegex: Sendable {
 

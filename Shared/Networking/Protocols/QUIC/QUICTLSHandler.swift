@@ -1,6 +1,6 @@
 //
 //  QUICTLSHandler.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/11/26.
 //
@@ -10,7 +10,7 @@ import CryptoKit
 import Security
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "QUICTLSHandler")
+nonisolated private let logger = TurnLogger(category: "QUICTLSHandler")
 
 // MARK: - Session Ticket Cache
 
@@ -139,7 +139,7 @@ nonisolated class QUICTLSHandler {
 
     func exportKeyingMaterial(label: String, context: Data, length: Int) throws -> Data {
         guard state == .completed, let keyDerivation, let exporterMasterSecret, length > 0 else {
-            throw AnywhereError.quic(.connectionFailed(detail: "TLS exporter unavailable"))
+            throw TurnError.quic(.connectionFailed(detail: "TLS exporter unavailable"))
         }
         return keyDerivation.exportKeyingMaterial(
             exporterMasterSecret: exporterMasterSecret,
@@ -209,7 +209,7 @@ nonisolated class QUICTLSHandler {
     
     private func fail(_ reason: String, error: Error? = nil) -> QUICTLSResult {
         if handshakeError == nil {
-            handshakeError = error ?? AnywhereError.tls(.handshakeFailed(detail: reason))
+            handshakeError = error ?? TurnError.tls(.handshakeFailed(detail: reason))
         }
         return .error(NGTCP2_ERR_CALLBACK_FAILURE)
     }
@@ -297,7 +297,7 @@ nonisolated class QUICTLSHandler {
 
         let serverRandom = Data(body[2..<34])
         if serverRandom == TLSRandom.helloRetryRequest {
-            return fail("server sent HelloRetryRequest (unsupported)", error: AnywhereError.tls(.helloRetryRequest))
+            return fail("server sent HelloRetryRequest (unsupported)", error: TurnError.tls(.helloRetryRequest))
         }
 
         var offset = 34
@@ -890,7 +890,7 @@ nonisolated class QUICTLSHandler {
         case .trusted:
             return nil
         case .rejected(let reason):
-            return AnywhereError.tls(.certificateValidationFailed(detail: reason))
+            return TurnError.tls(.certificateValidationFailed(detail: reason))
         }
     }
 

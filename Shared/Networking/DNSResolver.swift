@@ -1,6 +1,6 @@
 //
 //  DNSResolver.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/8/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "DNSResolver")
+nonisolated private let logger = TurnLogger(category: "DNSResolver")
 
 nonisolated final class DNSResolver: Sendable {
     static let shared = DNSResolver()

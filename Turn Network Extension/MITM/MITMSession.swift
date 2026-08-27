@@ -1,6 +1,6 @@
 //
 //  MITMSession.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMSession")
+nonisolated private let logger = TurnLogger(category: "MITMSession")
 
 nonisolated struct MITMDialResult {
     let connection: ProxyConnection
@@ -52,7 +52,7 @@ actor MITMSession: MITMHTTP1StreamDelegate {
         // MARK: ByteTransport
 
         func send(_ data: Data) async throws {
-            guard !state.withLock({ $0.closed }) else { throw AnywhereError.transport(.notConnected) }
+            guard !state.withLock({ $0.closed }) else { throw TurnError.transport(.notConnected) }
             lwipBridge.enqueue { [self] in
                 let host = state.withLock { $0.closed ? nil : $0.host }
                 host?.mitmSessionSendToClient(data)
@@ -577,16 +577,16 @@ actor MITMSession: MITMHTTP1StreamDelegate {
             guard disarm() else { connection.cancel(); return }
             guard !torn else { return }
             if Self.isCertVerifyFailure(error) {
-                logger.warning("[MITM] \(dstHost): upstream certificate validation failed (\(AnywhereError.describe(error))); closing rather than masking as a 502")
+                logger.warning("[MITM] \(dstHost): upstream certificate validation failed (\(TurnError.describe(error))); closing rather than masking as a 502")
                 cancel(error: nil)
             } else {
-                failInnerLegWith502("upstream connect failed: \(AnywhereError.describe(error))")
+                failInnerLegWith502("upstream connect failed: \(TurnError.describe(error))")
             }
         }
     }
     
     private static func isCertVerifyFailure(_ error: Error) -> Bool {
-        if case AnywhereError.tls(.certificateValidationFailed) = error { return true }
+        if case TurnError.tls(.certificateValidationFailed) = error { return true }
         return false
     }
 
@@ -627,7 +627,7 @@ actor MITMSession: MITMHTTP1StreamDelegate {
     }
     
     private func sendChunked(_ data: Data, via record: any MITMByteLeg) async throws {
-        guard !torn else { throw AnywhereError.transport(.notConnected) }
+        guard !torn else { throw TurnError.transport(.notConnected) }
         try await sender(for: record).submit {
             try await Self.drainChunked(data, over: record, chunkSize: Self.pumpChunkSize)
         }.value()
@@ -795,7 +795,7 @@ actor MITMSession: MITMHTTP1StreamDelegate {
             }
         } catch {
             guard !torn else { return }
-            failInnerLegWith502("upstream connect failed: \(AnywhereError.describe(error))")
+            failInnerLegWith502("upstream connect failed: \(TurnError.describe(error))")
         }
     }
 
@@ -1015,7 +1015,7 @@ extension MITMSession: TLSServerDelegate {
         spawn(.inboundPump(inner: record))
     }
 
-    nonisolated func tlsServer(_ server: TLSServer, didFail error: AnywhereError) {
+    nonisolated func tlsServer(_ server: TLSServer, didFail error: TurnError) {
         assumeIsolated { $0.cancel(error: error) }
     }
 }
@@ -1144,7 +1144,7 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
         let resolved = firstHead?.resolvedUpstream
         let dialHost = resolved?.host ?? dstHost
         let port = resolved?.port ?? dstPort
-        guard let host else { failPendingBridgeRequests(error: AnywhereError.transport(.notConnected)); return }
+        guard let host else { failPendingBridgeRequests(error: TurnError.transport(.notConnected)); return }
         do {
             let dial = try await host.mitmDialUpstream(host: dialHost, port: port)
             guard !torn else { dial.connection.cancel(); await dial.proxyClient?.cancel(); return }
@@ -1159,7 +1159,7 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
     
     private func failPendingBridgeRequests(error: Error) {
         guard !torn else { return }
-        logger.warning("[MITM] \(dstHost): first upstream connect failed: \(AnywhereError.describe(error)); answering pending streams 502, keeping the connection")
+        logger.warning("[MITM] \(dstHost): first upstream connect failed: \(TurnError.describe(error)); answering pending streams 502, keeping the connection")
         // Discard the failed probe connection; nothing to reuse.
         sharedUpstreamRecord = nil
         sharedUpstreamTLSClient?.cancel(); sharedUpstreamTLSClient = nil
@@ -1192,7 +1192,7 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
         let client = TLSClient(configuration: configuration)
         sharedUpstreamTLSClient = client
         let disarm = armUpstreamHandshakeTimeout { [weak self] in
-            self?.post(.failPendingBridgeRequests(reason: AnywhereError.mitm(.upstreamHandshakeTimeout)))
+            self?.post(.failPendingBridgeRequests(reason: TurnError.mitm(.upstreamHandshakeTimeout)))
         }
         do {
             let record = try await client.connect(overTunnel: connection)
@@ -1208,7 +1208,7 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
             guard disarm() else { connection.cancel(); return }
             guard !torn else { return }
             if Self.isCertVerifyFailure(error) {
-                logger.warning("[MITM] \(dstHost): upstream certificate validation failed (\(AnywhereError.describe(error))); closing rather than masking as a 502")
+                logger.warning("[MITM] \(dstHost): upstream certificate validation failed (\(TurnError.describe(error))); closing rather than masking as a 502")
                 cancel(error: nil)
             } else {
                 failPendingBridgeRequests(error: error)
@@ -1357,7 +1357,7 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
             startBridgeUpstreamHandshake(streamID: streamID, host: host)
         } catch {
             guard !torn else { return }
-            logger.warning("\(dstHost): h1 upstream dial failed for stream \(streamID): \(AnywhereError.describe(error))")
+            logger.warning("\(dstHost): h1 upstream dial failed for stream \(streamID): \(TurnError.describe(error))")
             bridgeAbortStream(streamID)
             await bridgeClient?.failStream(streamID: streamID, status: 502, message: "Bad Gateway")
         }
@@ -1457,10 +1457,10 @@ extension MITMSession: MITMBridgeClientLegDelegate, MITMUpstreamLegDelegate {
             guard disarm() else { connection.cancel(); return }
             guard !torn else { return }
             if Self.isCertVerifyFailure(error) {
-                logger.warning("\(dstHost): bridge upstream certificate validation failed for stream \(streamID) (\(AnywhereError.describe(error))); closing rather than masking as a 502")
+                logger.warning("\(dstHost): bridge upstream certificate validation failed for stream \(streamID) (\(TurnError.describe(error))); closing rather than masking as a 502")
                 cancel(error: nil)
             } else {
-                logger.warning("\(dstHost): bridge upstream TLS failed for stream \(streamID): \(AnywhereError.describe(error))")
+                logger.warning("\(dstHost): bridge upstream TLS failed for stream \(streamID): \(TurnError.describe(error))")
                 bridgeAbortStream(streamID)
                 await bridgeClient?.failStream(streamID: streamID, status: 502, message: "Bad Gateway")
             }

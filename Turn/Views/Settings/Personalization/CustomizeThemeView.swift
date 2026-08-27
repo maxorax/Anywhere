@@ -1,6 +1,6 @@
 //
 //  CustomizeThemeView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/20/26.
 //
@@ -15,7 +15,7 @@ struct CustomizeThemeView: View {
     var body: some View {
         Form {
             if !voyagerStore.isMember {
-                VoyagerNotice("Custom themes are available to Anywhere Voyager members.")
+                VoyagerNotice("Custom themes are available to Turn Voyager members.")
             }
             
             Section {

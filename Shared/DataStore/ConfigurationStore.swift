@@ -1,6 +1,6 @@
 //
 //  ConfigurationStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Observation
 import SwiftUI
 
-nonisolated private let logger = AnywhereLogger(category: "ConfigurationStore")
+nonisolated private let logger = TurnLogger(category: "ConfigurationStore")
 
 @MainActor
 @Observable
@@ -207,7 +207,7 @@ class ConfigurationStore {
                 let data = try encoder.encode(snapshot)
                 JSONBlobStore.shared.save(.configurations, data: data)
             } catch {
-                logger.report(AnywhereError.store(.saveFailed(.configurations, underlying: error)))
+                logger.report(TurnError.store(.saveFailed(.configurations, underlying: error)))
             }
         }
     }

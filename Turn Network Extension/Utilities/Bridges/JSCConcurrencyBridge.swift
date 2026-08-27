@@ -1,6 +1,6 @@
 //
 //  JSCConcurrencyBridge.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/16/26.
 //
@@ -23,7 +23,7 @@ nonisolated final class JSCConcurrencyBridge: @unchecked Sendable {
     let executor: BridgeExecutor
 
     private init() {
-        self.executor = BridgeExecutor(label: "com.argsment.Anywhere.JSCConcurrencyBridge")
+        self.executor = BridgeExecutor(label: "com.argsment.Turn.JSCConcurrencyBridge")
     }
 
     /// The JSC serial (home) queue — bridge-internal; callers enter the domain via ``enqueue``/``run``.

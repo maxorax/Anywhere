@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7870E4302FF89000006C0F14 /* Anywhere Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7870E41A2FF88ED5006C0F14 /* Anywhere Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7870E4302FF89000006C0F14 /* Turn Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7870E41A2FF88ED5006C0F14 /* Turn Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB1C107A2F23B82F00B74CD8 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB1C10792F23B82F00B74CD8 /* NetworkExtension.framework */; };
-		CB1C10822F23B82F00B74CD8 /* Anywhere Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Anywhere Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		CB2B54B22F6C3E2800F24AC2 /* Anywhere Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Anywhere Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CB1C10822F23B82F00B74CD8 /* Turn Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CB2B54B22F6C3E2800F24AC2 /* Turn Network Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB71CDC52F837D11002B9E1D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB71CDC42F837D11002B9E1D /* WidgetKit.framework */; };
 		CB71CDC72F837D11002B9E1D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB71CDC62F837D11002B9E1D /* SwiftUI.framework */; };
-		CB71CDD42F837D11002B9E1D /* Anywhere Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB71CDC32F837D11002B9E1D /* Anywhere Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		CBFA0DE000000000000000C1 /* AnywhereRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B1 /* AnywhereRules */; };
-		CBFA0DE000000000000000C2 /* AnywhereRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B2 /* AnywhereRules */; };
+		CB71CDD42F837D11002B9E1D /* Turn Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CB71CDC32F837D11002B9E1D /* Turn Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CBFA0DE000000000000000C1 /* TurnRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B1 /* TurnRules */; };
+		CBFA0DE000000000000000C2 /* TurnRules in Frameworks */ = {isa = PBXBuildFile; productRef = CBFA0DE000000000000000B2 /* TurnRules */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,14 +24,14 @@
 			containerPortal = CB1C105D2F23B81500B74CD8 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 7870E4192FF88ED5006C0F14;
-			remoteInfo = "Anywhere Watch App";
+			remoteInfo = "Turn Watch App";
 		};
 		78B6DF9E2FE7B70D0084897A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CB1C105D2F23B81500B74CD8 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CB1C10642F23B81500B74CD8;
-			remoteInfo = Anywhere;
+			remoteInfo = Turn;
 		};
 		CB1C10802F23B82F00B74CD8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -63,7 +63,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				7870E4302FF89000006C0F14 /* Anywhere Watch App.app in Embed Watch Content */,
+				7870E4302FF89000006C0F14 /* Turn Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -74,8 +74,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CB71CDD42F837D11002B9E1D /* Anywhere Widget.appex in Embed Foundation Extensions */,
-				CB1C10822F23B82F00B74CD8 /* Anywhere Network Extension.appex in Embed Foundation Extensions */,
+				CB71CDD42F837D11002B9E1D /* Turn Widget.appex in Embed Foundation Extensions */,
+				CB1C10822F23B82F00B74CD8 /* Turn Network Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,7 +86,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CB2B54B22F6C3E2800F24AC2 /* Anywhere Network Extension.appex in Embed Foundation Extensions */,
+				CB2B54B22F6C3E2800F24AC2 /* Turn Network Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,51 +94,51 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		7870E41A2FF88ED5006C0F14 /* Anywhere Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Anywhere Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		78B6DF9A2FE7B70D0084897A /* Anywhere Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Anywhere Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB1C10652F23B81500B74CD8 /* Anywhere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Anywhere.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB1C10772F23B82F00B74CD8 /* Anywhere Network Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Anywhere Network Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7870E41A2FF88ED5006C0F14 /* Turn Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Turn Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		78B6DF9A2FE7B70D0084897A /* Turn Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Turn Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB1C10652F23B81500B74CD8 /* Turn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Turn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Turn Network Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB1C10792F23B82F00B74CD8 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
-		CB2B549C2F6C3E2700F24AC2 /* Anywhere TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Anywhere TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB71CDC32F837D11002B9E1D /* Anywhere Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Anywhere Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB2B549C2F6C3E2700F24AC2 /* Turn TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Turn TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB71CDC32F837D11002B9E1D /* Turn Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Turn Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB71CDC42F837D11002B9E1D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CB71CDC62F837D11002B9E1D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		78170FEA300DEEC9003A8100 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere" target */ = {
+		78170FEA300DEEC9003A8100 /* Exceptions for "Turn Network Extension" folder in "Turn" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Tunnel/NetworkExtensionConcurrencyBridge.swift,
 			);
-			target = CB1C10642F23B81500B74CD8 /* Anywhere */;
+			target = CB1C10642F23B81500B74CD8 /* Turn */;
 		};
-		78170FEB300DEEC9003A8100 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere TV" target */ = {
+		78170FEB300DEEC9003A8100 /* Exceptions for "Turn Network Extension" folder in "Turn TV" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Tunnel/NetworkExtensionConcurrencyBridge.swift,
 			);
-			target = CB2B549B2F6C3E2700F24AC2 /* Anywhere TV */;
+			target = CB2B549B2F6C3E2700F24AC2 /* Turn TV */;
 		};
-		7870E4262FF88FDC006C0F14 /* Exceptions for "Shared" folder in "Anywhere Watch App" target */ = {
+		7870E4262FF88FDC006C0F14 /* Exceptions for "Shared" folder in "Turn Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppIcons/AppIcon.icon,
 				Localizable.xcstrings,
 				Models/WatchBridge.swift,
-				Utilities/AnywhereLogger.swift,
+				Utilities/TurnLogger.swift,
 				Utilities/VPNStatus.swift,
 			);
-			target = 7870E4192FF88ED5006C0F14 /* Anywhere Watch App */;
+			target = 7870E4192FF88ED5006C0F14 /* Turn Watch App */;
 		};
-		CB1C10832F23B82F00B74CD8 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere Network Extension" target */ = {
+		CB1C10832F23B82F00B74CD8 /* Exceptions for "Turn Network Extension" folder in "Turn Network Extension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */;
+			target = CB1C10762F23B82F00B74CD8 /* Turn Network Extension */;
 		};
-		CB65476A2F65715600C85E4A /* Exceptions for "Shared" folder in "Anywhere Network Extension" target */ = {
+		CB65476A2F65715600C85E4A /* Exceptions for "Shared" folder in "Turn Network Extension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AWCore.swift,
@@ -401,8 +401,8 @@
 				"Networking/Transport/UDPTransport+Compatibility.swift",
 				Networking/TunnelLimits.swift,
 				Protocols/SoftDeletable.swift,
-				Utilities/AnywhereError.swift,
-				Utilities/AnywhereLogger.swift,
+				Utilities/TurnError.swift,
+				Utilities/TurnLogger.swift,
 				Utilities/Bridges/BridgeContext.swift,
 				Utilities/Bridges/BridgeExecutor.swift,
 				Utilities/Bridges/DNSSyscallConcurrencyBridge.swift,
@@ -417,16 +417,16 @@
 				"Utilities/UUID+VLESSString.swift",
 				Utilities/VPNStatus.swift,
 			);
-			target = CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */;
+			target = CB1C10762F23B82F00B74CD8 /* Turn Network Extension */;
 		};
-		CB71CDD82F837D11002B9E1D /* Exceptions for "Anywhere Widget" folder in "Anywhere Widget" target */ = {
+		CB71CDD82F837D11002B9E1D /* Exceptions for "Turn Widget" folder in "Turn Widget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CB71CDC22F837D11002B9E1D /* Anywhere Widget */;
+			target = CB71CDC22F837D11002B9E1D /* Turn Widget */;
 		};
-		CB71D2EE2F838FF3002B9E1D /* Exceptions for "Shared" folder in "Anywhere Widget" target */ = {
+		CB71D2EE2F838FF3002B9E1D /* Exceptions for "Shared" folder in "Turn Widget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AWCore.swift,
@@ -435,88 +435,88 @@
 				Models/DNSMode.swift,
 				Models/ProxyMode.swift,
 				Models/QUICPolicy.swift,
-				Utilities/AnywhereError.swift,
-				Utilities/AnywhereLogger.swift,
+				Utilities/TurnError.swift,
+				Utilities/TurnLogger.swift,
 				Utilities/Bridges/SwiftRegexConcurrencyBridge.swift,
 			);
-			target = CB71CDC22F837D11002B9E1D /* Anywhere Widget */;
+			target = CB71CDC22F837D11002B9E1D /* Turn Widget */;
 		};
-		CB8632442FB83C1600059EFE /* Exceptions for "Anywhere" folder in "Anywhere TV" target */ = {
+		CB8632442FB83C1600059EFE /* Exceptions for "Turn" folder in "Turn TV" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Views/Settings/MITM/MITMRuleSetParser.swift,
 				Views/Settings/RuleSets/RoutingRuleParser.swift,
 			);
-			target = CB2B549B2F6C3E2700F24AC2 /* Anywhere TV */;
+			target = CB2B549B2F6C3E2700F24AC2 /* Turn TV */;
 		};
-		CBE5B8662F62E736003CECEF /* Exceptions for "Anywhere" folder in "Anywhere" target */ = {
+		CBE5B8662F62E736003CECEF /* Exceptions for "Turn" folder in "Turn" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CB1C10642F23B81500B74CD8 /* Anywhere */;
+			target = CB1C10642F23B81500B74CD8 /* Turn */;
 		};
-		CBE5F58E2F6D0A74003CECEF /* Exceptions for "Anywhere TV" folder in "Anywhere TV" target */ = {
+		CBE5F58E2F6D0A74003CECEF /* Exceptions for "Turn TV" folder in "Turn TV" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CB2B549B2F6C3E2700F24AC2 /* Anywhere TV */;
+			target = CB2B549B2F6C3E2700F24AC2 /* Turn TV */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		7870E41B2FF88ED5006C0F14 /* Anywhere Watch App */ = {
+		7870E41B2FF88ED5006C0F14 /* Turn Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Anywhere Watch App";
+			path = "Turn Watch App";
 			sourceTree = "<group>";
 		};
-		78B6DF9B2FE7B70D0084897A /* Anywhere Tests */ = {
+		78B6DF9B2FE7B70D0084897A /* Turn Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Anywhere Tests";
+			path = "Turn Tests";
 			sourceTree = "<group>";
 		};
-		CB1C10672F23B81500B74CD8 /* Anywhere */ = {
+		CB1C10672F23B81500B74CD8 /* Turn */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CBE5B8662F62E736003CECEF /* Exceptions for "Anywhere" folder in "Anywhere" target */,
-				CB8632442FB83C1600059EFE /* Exceptions for "Anywhere" folder in "Anywhere TV" target */,
+				CBE5B8662F62E736003CECEF /* Exceptions for "Turn" folder in "Turn" target */,
+				CB8632442FB83C1600059EFE /* Exceptions for "Turn" folder in "Turn TV" target */,
 			);
-			path = Anywhere;
+			path = Turn;
 			sourceTree = "<group>";
 		};
-		CB1C107B2F23B82F00B74CD8 /* Anywhere Network Extension */ = {
+		CB1C107B2F23B82F00B74CD8 /* Turn Network Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				78170FEA300DEEC9003A8100 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere" target */,
-				78170FEB300DEEC9003A8100 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere TV" target */,
-				CB1C10832F23B82F00B74CD8 /* Exceptions for "Anywhere Network Extension" folder in "Anywhere Network Extension" target */,
+				78170FEA300DEEC9003A8100 /* Exceptions for "Turn Network Extension" folder in "Turn" target */,
+				78170FEB300DEEC9003A8100 /* Exceptions for "Turn Network Extension" folder in "Turn TV" target */,
+				CB1C10832F23B82F00B74CD8 /* Exceptions for "Turn Network Extension" folder in "Turn Network Extension" target */,
 			);
-			path = "Anywhere Network Extension";
+			path = "Turn Network Extension";
 			sourceTree = "<group>";
 		};
-		CB2B549D2F6C3E2700F24AC2 /* Anywhere TV */ = {
+		CB2B549D2F6C3E2700F24AC2 /* Turn TV */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CBE5F58E2F6D0A74003CECEF /* Exceptions for "Anywhere TV" folder in "Anywhere TV" target */,
+				CBE5F58E2F6D0A74003CECEF /* Exceptions for "Turn TV" folder in "Turn TV" target */,
 			);
-			path = "Anywhere TV";
+			path = "Turn TV";
 			sourceTree = "<group>";
 		};
-		CB71CDC82F837D11002B9E1D /* Anywhere Widget */ = {
+		CB71CDC82F837D11002B9E1D /* Turn Widget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CB71CDD82F837D11002B9E1D /* Exceptions for "Anywhere Widget" folder in "Anywhere Widget" target */,
+				CB71CDD82F837D11002B9E1D /* Exceptions for "Turn Widget" folder in "Turn Widget" target */,
 			);
-			path = "Anywhere Widget";
+			path = "Turn Widget";
 			sourceTree = "<group>";
 		};
 		CB7A00022F65700100C85E4A /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				7870E4262FF88FDC006C0F14 /* Exceptions for "Shared" folder in "Anywhere Watch App" target */,
-				CB65476A2F65715600C85E4A /* Exceptions for "Shared" folder in "Anywhere Network Extension" target */,
-				CB71D2EE2F838FF3002B9E1D /* Exceptions for "Shared" folder in "Anywhere Widget" target */,
+				7870E4262FF88FDC006C0F14 /* Exceptions for "Shared" folder in "Turn Watch App" target */,
+				CB65476A2F65715600C85E4A /* Exceptions for "Shared" folder in "Turn Network Extension" target */,
+				CB71D2EE2F838FF3002B9E1D /* Exceptions for "Shared" folder in "Turn Widget" target */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -542,7 +542,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBFA0DE000000000000000C1 /* AnywhereRules in Frameworks */,
+				CBFA0DE000000000000000C1 /* TurnRules in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,7 +558,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBFA0DE000000000000000C2 /* AnywhereRules in Frameworks */,
+				CBFA0DE000000000000000C2 /* TurnRules in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,12 +578,12 @@
 			isa = PBXGroup;
 			children = (
 				CB7A00022F65700100C85E4A /* Shared */,
-				CB1C10672F23B81500B74CD8 /* Anywhere */,
-				7870E41B2FF88ED5006C0F14 /* Anywhere Watch App */,
-				CB2B549D2F6C3E2700F24AC2 /* Anywhere TV */,
-				CB1C107B2F23B82F00B74CD8 /* Anywhere Network Extension */,
-				CB71CDC82F837D11002B9E1D /* Anywhere Widget */,
-				78B6DF9B2FE7B70D0084897A /* Anywhere Tests */,
+				CB1C10672F23B81500B74CD8 /* Turn */,
+				7870E41B2FF88ED5006C0F14 /* Turn Watch App */,
+				CB2B549D2F6C3E2700F24AC2 /* Turn TV */,
+				CB1C107B2F23B82F00B74CD8 /* Turn Network Extension */,
+				CB71CDC82F837D11002B9E1D /* Turn Widget */,
+				78B6DF9B2FE7B70D0084897A /* Turn Tests */,
 				CB1C10782F23B82F00B74CD8 /* Frameworks */,
 				CB1C10662F23B81500B74CD8 /* Products */,
 			);
@@ -592,12 +592,12 @@
 		CB1C10662F23B81500B74CD8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CB1C10652F23B81500B74CD8 /* Anywhere.app */,
-				CB1C10772F23B82F00B74CD8 /* Anywhere Network Extension.appex */,
-				CB2B549C2F6C3E2700F24AC2 /* Anywhere TV.app */,
-				CB71CDC32F837D11002B9E1D /* Anywhere Widget.appex */,
-				78B6DF9A2FE7B70D0084897A /* Anywhere Tests.xctest */,
-				7870E41A2FF88ED5006C0F14 /* Anywhere Watch App.app */,
+				CB1C10652F23B81500B74CD8 /* Turn.app */,
+				CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */,
+				CB2B549C2F6C3E2700F24AC2 /* Turn TV.app */,
+				CB71CDC32F837D11002B9E1D /* Turn Widget.appex */,
+				78B6DF9A2FE7B70D0084897A /* Turn Tests.xctest */,
+				7870E41A2FF88ED5006C0F14 /* Turn Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -615,9 +615,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7870E4192FF88ED5006C0F14 /* Anywhere Watch App */ = {
+		7870E4192FF88ED5006C0F14 /* Turn Watch App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7870E4242FF88ED6006C0F14 /* Build configuration list for PBXNativeTarget "Anywhere Watch App" */;
+			buildConfigurationList = 7870E4242FF88ED6006C0F14 /* Build configuration list for PBXNativeTarget "Turn Watch App" */;
 			buildPhases = (
 				7870E4162FF88ED5006C0F14 /* Sources */,
 				7870E4172FF88ED5006C0F14 /* Frameworks */,
@@ -628,18 +628,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				7870E41B2FF88ED5006C0F14 /* Anywhere Watch App */,
+				7870E41B2FF88ED5006C0F14 /* Turn Watch App */,
 			);
-			name = "Anywhere Watch App";
+			name = "Turn Watch App";
 			packageProductDependencies = (
 			);
-			productName = "Anywhere Watch App";
-			productReference = 7870E41A2FF88ED5006C0F14 /* Anywhere Watch App.app */;
+			productName = "Turn Watch App";
+			productReference = 7870E41A2FF88ED5006C0F14 /* Turn Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
-		78B6DF992FE7B70D0084897A /* Anywhere Tests */ = {
+		78B6DF992FE7B70D0084897A /* Turn Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 78B6DFA22FE7B70D0084897A /* Build configuration list for PBXNativeTarget "Anywhere Tests" */;
+			buildConfigurationList = 78B6DFA22FE7B70D0084897A /* Build configuration list for PBXNativeTarget "Turn Tests" */;
 			buildPhases = (
 				78B6DF962FE7B70D0084897A /* Sources */,
 				78B6DF972FE7B70D0084897A /* Frameworks */,
@@ -651,18 +651,18 @@
 				78B6DF9F2FE7B70D0084897A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				78B6DF9B2FE7B70D0084897A /* Anywhere Tests */,
+				78B6DF9B2FE7B70D0084897A /* Turn Tests */,
 			);
-			name = "Anywhere Tests";
+			name = "Turn Tests";
 			packageProductDependencies = (
 			);
-			productName = "Anywhere Tests";
-			productReference = 78B6DF9A2FE7B70D0084897A /* Anywhere Tests.xctest */;
+			productName = "Turn Tests";
+			productReference = 78B6DF9A2FE7B70D0084897A /* Turn Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		CB1C10642F23B81500B74CD8 /* Anywhere */ = {
+		CB1C10642F23B81500B74CD8 /* Turn */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB1C10702F23B81600B74CD8 /* Build configuration list for PBXNativeTarget "Anywhere" */;
+			buildConfigurationList = CB1C10702F23B81600B74CD8 /* Build configuration list for PBXNativeTarget "Turn" */;
 			buildPhases = (
 				CB1C10612F23B81500B74CD8 /* Sources */,
 				CB1C10622F23B81500B74CD8 /* Frameworks */,
@@ -678,20 +678,20 @@
 				7870E4332FF89000006C0F14 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CB1C10672F23B81500B74CD8 /* Anywhere */,
+				CB1C10672F23B81500B74CD8 /* Turn */,
 				CB7A00022F65700100C85E4A /* Shared */,
 			);
-			name = Anywhere;
+			name = Turn;
 			packageProductDependencies = (
-				CBFA0DE000000000000000B1 /* AnywhereRules */,
+				CBFA0DE000000000000000B1 /* TurnRules */,
 			);
-			productName = Anywhere;
-			productReference = CB1C10652F23B81500B74CD8 /* Anywhere.app */;
+			productName = Turn;
+			productReference = CB1C10652F23B81500B74CD8 /* Turn.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */ = {
+		CB1C10762F23B82F00B74CD8 /* Turn Network Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB1C10842F23B82F00B74CD8 /* Build configuration list for PBXNativeTarget "Anywhere Network Extension" */;
+			buildConfigurationList = CB1C10842F23B82F00B74CD8 /* Build configuration list for PBXNativeTarget "Turn Network Extension" */;
 			buildPhases = (
 				CB1C10732F23B82F00B74CD8 /* Sources */,
 				CB1C10742F23B82F00B74CD8 /* Frameworks */,
@@ -702,18 +702,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CB1C107B2F23B82F00B74CD8 /* Anywhere Network Extension */,
+				CB1C107B2F23B82F00B74CD8 /* Turn Network Extension */,
 			);
-			name = "Anywhere Network Extension";
+			name = "Turn Network Extension";
 			packageProductDependencies = (
 			);
 			productName = "Network Extension";
-			productReference = CB1C10772F23B82F00B74CD8 /* Anywhere Network Extension.appex */;
+			productReference = CB1C10772F23B82F00B74CD8 /* Turn Network Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		CB2B549B2F6C3E2700F24AC2 /* Anywhere TV */ = {
+		CB2B549B2F6C3E2700F24AC2 /* Turn TV */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB2B54AA2F6C3E2800F24AC2 /* Build configuration list for PBXNativeTarget "Anywhere TV" */;
+			buildConfigurationList = CB2B54AA2F6C3E2800F24AC2 /* Build configuration list for PBXNativeTarget "Turn TV" */;
 			buildPhases = (
 				CB2B54982F6C3E2700F24AC2 /* Sources */,
 				CB2B54992F6C3E2700F24AC2 /* Frameworks */,
@@ -726,20 +726,20 @@
 				CB2B54B12F6C3E2800F24AC2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CB2B549D2F6C3E2700F24AC2 /* Anywhere TV */,
+				CB2B549D2F6C3E2700F24AC2 /* Turn TV */,
 				CB7A00022F65700100C85E4A /* Shared */,
 			);
-			name = "Anywhere TV";
+			name = "Turn TV";
 			packageProductDependencies = (
-				CBFA0DE000000000000000B2 /* AnywhereRules */,
+				CBFA0DE000000000000000B2 /* TurnRules */,
 			);
-			productName = Anywhere;
-			productReference = CB2B549C2F6C3E2700F24AC2 /* Anywhere TV.app */;
+			productName = Turn;
+			productReference = CB2B549C2F6C3E2700F24AC2 /* Turn TV.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CB71CDC22F837D11002B9E1D /* Anywhere Widget */ = {
+		CB71CDC22F837D11002B9E1D /* Turn Widget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB71CDD72F837D11002B9E1D /* Build configuration list for PBXNativeTarget "Anywhere Widget" */;
+			buildConfigurationList = CB71CDD72F837D11002B9E1D /* Build configuration list for PBXNativeTarget "Turn Widget" */;
 			buildPhases = (
 				CB71CDBF2F837D11002B9E1D /* Sources */,
 				CB71CDC02F837D11002B9E1D /* Frameworks */,
@@ -750,13 +750,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CB71CDC82F837D11002B9E1D /* Anywhere Widget */,
+				CB71CDC82F837D11002B9E1D /* Turn Widget */,
 			);
-			name = "Anywhere Widget";
+			name = "Turn Widget";
 			packageProductDependencies = (
 			);
 			productName = WidgetExtension;
-			productReference = CB71CDC32F837D11002B9E1D /* Anywhere Widget.appex */;
+			productReference = CB71CDC32F837D11002B9E1D /* Turn Widget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -790,7 +790,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CB1C10602F23B81500B74CD8 /* Build configuration list for PBXProject "Anywhere" */;
+			buildConfigurationList = CB1C10602F23B81500B74CD8 /* Build configuration list for PBXProject "Turn" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -807,19 +807,19 @@
 			mainGroup = CB1C105C2F23B81500B74CD8;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "AnywhereRules" */,
+				CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB1C10662F23B81500B74CD8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CB1C10642F23B81500B74CD8 /* Anywhere */,
-				7870E4192FF88ED5006C0F14 /* Anywhere Watch App */,
-				CB2B549B2F6C3E2700F24AC2 /* Anywhere TV */,
-				CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */,
-				CB71CDC22F837D11002B9E1D /* Anywhere Widget */,
-				78B6DF992FE7B70D0084897A /* Anywhere Tests */,
+				CB1C10642F23B81500B74CD8 /* Turn */,
+				7870E4192FF88ED5006C0F14 /* Turn Watch App */,
+				CB2B549B2F6C3E2700F24AC2 /* Turn TV */,
+				CB1C10762F23B82F00B74CD8 /* Turn Network Extension */,
+				CB71CDC22F837D11002B9E1D /* Turn Widget */,
+				78B6DF992FE7B70D0084897A /* Turn Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -917,27 +917,27 @@
 /* Begin PBXTargetDependency section */
 		7870E4332FF89000006C0F14 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7870E4192FF88ED5006C0F14 /* Anywhere Watch App */;
+			target = 7870E4192FF88ED5006C0F14 /* Turn Watch App */;
 			targetProxy = 7870E4322FF89000006C0F14 /* PBXContainerItemProxy */;
 		};
 		78B6DF9F2FE7B70D0084897A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CB1C10642F23B81500B74CD8 /* Anywhere */;
+			target = CB1C10642F23B81500B74CD8 /* Turn */;
 			targetProxy = 78B6DF9E2FE7B70D0084897A /* PBXContainerItemProxy */;
 		};
 		CB1C10812F23B82F00B74CD8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */;
+			target = CB1C10762F23B82F00B74CD8 /* Turn Network Extension */;
 			targetProxy = CB1C10802F23B82F00B74CD8 /* PBXContainerItemProxy */;
 		};
 		CB2B54B12F6C3E2800F24AC2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CB1C10762F23B82F00B74CD8 /* Anywhere Network Extension */;
+			target = CB1C10762F23B82F00B74CD8 /* Turn Network Extension */;
 			targetProxy = CB2B54B02F6C3E2800F24AC2 /* PBXContainerItemProxy */;
 		};
 		CB71CDD32F837D11002B9E1D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CB71CDC22F837D11002B9E1D /* Anywhere Widget */;
+			target = CB71CDC22F837D11002B9E1D /* Turn Widget */;
 			targetProxy = CB71CDD22F837D11002B9E1D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -948,21 +948,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Watch App/Anywhere Watch App.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Watch App/Turn Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Anywhere;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Turn;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = watchos;
@@ -983,21 +983,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Watch App/Anywhere Watch App.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Watch App/Turn Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Anywhere;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.argsment.Turn;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = watchos;
@@ -1039,7 +1039,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1048,11 +1048,11 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = Anywhere/BridgingHeader.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Turn/BridgingHeader.h;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Anywhere.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Anywhere";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Turn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Turn";
 			};
 			name = Debug;
 		};
@@ -1082,7 +1082,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1091,11 +1091,11 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = Anywhere/BridgingHeader.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Turn/BridgingHeader.h;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Anywhere.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Anywhere";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Turn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Turn";
 			};
 			name = Release;
 		};
@@ -1234,7 +1234,7 @@
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Classic AppIcon-Muted";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Anywhere/Anywhere.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Turn/Turn.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1255,12 +1255,12 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
-				INFOPLIST_FILE = Anywhere/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_FILE = Turn/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Anywhere need your camera permission to scan QR Code.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Turn need your camera permission to scan QR Code.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1272,13 +1272,13 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = Anywhere/BridgingHeader.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Turn/BridgingHeader.h;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1291,7 +1291,7 @@
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Classic AppIcon-Muted";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Anywhere/Anywhere.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Turn/Turn.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1312,12 +1312,12 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
-				INFOPLIST_FILE = Anywhere/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_FILE = Turn/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Anywhere need your camera permission to scan QR Code.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Turn need your camera permission to scan QR Code.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1329,13 +1329,13 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = Anywhere/BridgingHeader.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Turn/BridgingHeader.h;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1346,7 +1346,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = NO;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Network Extension/Anywhere Network Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Network Extension/Turn Network Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1361,14 +1361,14 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Anywhere Network Extension/Network/lwip/src/include\"",
-					"\"$(SRCROOT)/Anywhere Network Extension/Network/lwip/port\"",
+					"\"$(SRCROOT)/Turn Network Extension/Network/lwip/src/include\"",
+					"\"$(SRCROOT)/Turn Network Extension/Network/lwip/port\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/QUIC/ngtcp2\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE2\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 				);
-				INFOPLIST_FILE = "Anywhere Network Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Anywhere Network Extension";
+				INFOPLIST_FILE = "Turn Network Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Turn Network Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1377,7 +1377,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Anywhere.Network-Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Turn.Network-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1386,7 +1386,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) NETWORK_EXTENSION";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Anywhere Network Extension/BridgingHeader.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Turn Network Extension/BridgingHeader.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3";
@@ -1398,7 +1398,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = NO;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Network Extension/Anywhere Network Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Network Extension/Turn Network Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1413,14 +1413,14 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Anywhere Network Extension/Network/lwip/src/include\"",
-					"\"$(SRCROOT)/Anywhere Network Extension/Network/lwip/port\"",
+					"\"$(SRCROOT)/Turn Network Extension/Network/lwip/src/include\"",
+					"\"$(SRCROOT)/Turn Network Extension/Network/lwip/port\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/QUIC/ngtcp2\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE2\"",
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 				);
-				INFOPLIST_FILE = "Anywhere Network Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Anywhere Network Extension";
+				INFOPLIST_FILE = "Turn Network Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Turn Network Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1429,7 +1429,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Anywhere.Network-Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.argsment.Turn.Network-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1438,7 +1438,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) NETWORK_EXTENSION";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Anywhere Network Extension/BridgingHeader.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Turn Network Extension/BridgingHeader.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3";
@@ -1451,7 +1451,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere TV/Anywhere TV.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn TV/Turn TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1471,8 +1471,8 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
-				INFOPLIST_FILE = "Anywhere TV/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_FILE = "Turn TV/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -1483,14 +1483,14 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Anywhere TV/BridgingHeader.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Turn TV/BridgingHeader.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -1503,7 +1503,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere TV/Anywhere TV.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn TV/Turn TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
@@ -1523,8 +1523,8 @@
 					"\"$(SRCROOT)/Shared/Networking/Protocols/Crypto/BLAKE3\"",
 					"\"$(SRCROOT)/Shared/Utilities/YAML/libyaml/include\"",
 				);
-				INFOPLIST_FILE = "Anywhere TV/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Anywhere;
+				INFOPLIST_FILE = "Turn TV/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Turn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -1535,14 +1535,14 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Anywhere TV/BridgingHeader.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Turn TV/BridgingHeader.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -1555,13 +1555,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Widget/Anywhere Widget.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Widget/Turn Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Anywhere Widget/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Anywhere Widget";
+				INFOPLIST_FILE = "Turn Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Turn Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1570,7 +1570,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.Widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1587,13 +1587,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = "Anywhere Widget/Anywhere Widget.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Turn Widget/Turn Widget.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 340;
 				DEVELOPMENT_TEAM = C7AS5D38Q8;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Anywhere Widget/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Anywhere Widget";
+				INFOPLIST_FILE = "Turn Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Turn Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1602,7 +1602,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Anywhere.Widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.argsment.Turn.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1617,7 +1617,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7870E4242FF88ED6006C0F14 /* Build configuration list for PBXNativeTarget "Anywhere Watch App" */ = {
+		7870E4242FF88ED6006C0F14 /* Build configuration list for PBXNativeTarget "Turn Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7870E4222FF88ED6006C0F14 /* Debug */,
@@ -1626,7 +1626,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		78B6DFA22FE7B70D0084897A /* Build configuration list for PBXNativeTarget "Anywhere Tests" */ = {
+		78B6DFA22FE7B70D0084897A /* Build configuration list for PBXNativeTarget "Turn Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				78B6DFA02FE7B70D0084897A /* Debug */,
@@ -1635,7 +1635,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB1C10602F23B81500B74CD8 /* Build configuration list for PBXProject "Anywhere" */ = {
+		CB1C10602F23B81500B74CD8 /* Build configuration list for PBXProject "Turn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB1C106E2F23B81600B74CD8 /* Debug */,
@@ -1644,7 +1644,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB1C10702F23B81600B74CD8 /* Build configuration list for PBXNativeTarget "Anywhere" */ = {
+		CB1C10702F23B81600B74CD8 /* Build configuration list for PBXNativeTarget "Turn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB1C10712F23B81600B74CD8 /* Debug */,
@@ -1653,7 +1653,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB1C10842F23B82F00B74CD8 /* Build configuration list for PBXNativeTarget "Anywhere Network Extension" */ = {
+		CB1C10842F23B82F00B74CD8 /* Build configuration list for PBXNativeTarget "Turn Network Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB1C10852F23B82F00B74CD8 /* Debug */,
@@ -1662,7 +1662,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB2B54AA2F6C3E2800F24AC2 /* Build configuration list for PBXNativeTarget "Anywhere TV" */ = {
+		CB2B54AA2F6C3E2800F24AC2 /* Build configuration list for PBXNativeTarget "Turn TV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB2B54AB2F6C3E2800F24AC2 /* Debug */,
@@ -1671,7 +1671,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB71CDD72F837D11002B9E1D /* Build configuration list for PBXNativeTarget "Anywhere Widget" */ = {
+		CB71CDD72F837D11002B9E1D /* Build configuration list for PBXNativeTarget "Turn Widget" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB71CDD52F837D11002B9E1D /* Debug */,
@@ -1683,9 +1683,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "AnywhereRules" */ = {
+		CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hiDandelion/AnywhereRules.git";
+			repositoryURL = "https://github.com/hiDandelion/TurnRules.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
@@ -1694,15 +1694,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CBFA0DE000000000000000B1 /* AnywhereRules */ = {
+		CBFA0DE000000000000000B1 /* TurnRules */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "AnywhereRules" */;
-			productName = AnywhereRules;
+			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */;
+			productName = TurnRules;
 		};
-		CBFA0DE000000000000000B2 /* AnywhereRules */ = {
+		CBFA0DE000000000000000B2 /* TurnRules */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "AnywhereRules" */;
-			productName = AnywhereRules;
+			package = CBFA0DE000000000000000A1 /* XCRemoteSwiftPackageReference "TurnRules" */;
+			productName = TurnRules;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,6 +1,6 @@
 //
 //  PhoneSession.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/4/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Observation
 import WatchConnectivity
 
-nonisolated private let logger = AnywhereLogger(category: "PhoneSession")
+nonisolated private let logger = TurnLogger(category: "PhoneSession")
 
 /// Watch side of the bridge: holds the latest snapshot received from the
 /// iPhone and sends state/toggle/select requests. `sendMessage` wakes the

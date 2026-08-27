@@ -1,6 +1,6 @@
 //
 //  DNSSettingsView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by Takuma Kirishima on 7/24/26.
 //

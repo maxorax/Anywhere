@@ -1,6 +1,6 @@
 //
 //  MITMSettingsView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -118,7 +118,7 @@ struct MITMSettingsView: View {
             Text(importError ?? "")
         }
         .alert("Subscribe Rule Set", isPresented: $showSubscribeAlert) {
-            TextField("Anywhere MITM Rule Set URL", text: $subscribeURL)
+            TextField("Turn MITM Rule Set URL", text: $subscribeURL)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
@@ -171,7 +171,7 @@ struct MITMSettingsView: View {
         do {
             let url = try result.get()
             guard url.pathExtension.lowercased() == "amrs" else {
-                importError = String(localized: "Invalid Anywhere MITM Rule Set File.")
+                importError = String(localized: "Invalid Turn MITM Rule Set File.")
                 return
             }
             let accessing = url.startAccessingSecurityScopedResource()
@@ -203,7 +203,7 @@ struct MITMSettingsView: View {
 
     private func subscribe(to rawValue: String) {
         guard let url = MITMRuleSet.validSubscriptionURL(from: rawValue) else {
-            subscribeError = String(localized: "Invalid Anywhere MITM Rule Set URL.")
+            subscribeError = String(localized: "Invalid Turn MITM Rule Set URL.")
             return
         }
         Task {

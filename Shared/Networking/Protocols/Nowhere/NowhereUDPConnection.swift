@@ -1,6 +1,6 @@
 //
 //  NowhereUDPConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/30/26.
 //
@@ -90,19 +90,19 @@ actor NowhereUDPConnection {
                 var buffer = Data()
                 while true {
                     guard let chunk = try await nextControlChunk() else {
-                        throw AnywhereError.proxy(.nowhere, .connectionClosed(detail: "UDP control stream closed before READY"))
+                        throw TurnError.proxy(.nowhere, .connectionClosed(detail: "UDP control stream closed before READY"))
                     }
                     buffer.append(chunk)
                     session.extendStreamOffset(sid, count: chunk.count)
                     guard buffer.count >= NowhereProtocol.flowResultSize else { continue }
                     guard let result = NowhereProtocol.decodeFlowResult(buffer) else {
-                        throw AnywhereError.proxy(.nowhere, .connectionClosed(detail: "Invalid UDP flow result"))
+                        throw TurnError.proxy(.nowhere, .connectionClosed(detail: "Invalid UDP flow result"))
                     }
                     switch result {
                     case .ready:
                         break
                     case .reject(let code):
-                        throw AnywhereError.proxy(.nowhere, .flowRejected(code: code.rawValue))
+                        throw TurnError.proxy(.nowhere, .flowRejected(code: code.rawValue))
                     }
                     break
                 }
@@ -146,7 +146,7 @@ actor NowhereUDPConnection {
     }
 
     nonisolated func handleSessionError(_ error: Error) {
-        if case AnywhereError.quic(.closed(graceful: true)) = error {
+        if case TurnError.quic(.closed(graceful: true)) = error {
             terminate(error: nil, sendAdvisory: false)
         } else {
             terminate(error: error, sendAdvisory: false)
@@ -169,7 +169,7 @@ actor NowhereUDPConnection {
 
     func sendRaw(_ data: Data) async throws {
         guard _isReady.load(ordering: .relaxed) else {
-            throw AnywhereError.proxy(.nowhere, .streamClosed)
+            throw TurnError.proxy(.nowhere, .streamClosed)
         }
         // Packet IDs are allocated only when the final PMTU requires fragmentation.
         try await attemptSend(data: data, maxSizeOverride: nil, retriesLeft: 1)
@@ -197,17 +197,17 @@ actor NowhereUDPConnection {
                 payload: data,
                 maxDatagramSize: maxSize
             )
-        } catch AnywhereError.proxy(.nowhere, .packetTooLarge) {
+        } catch TurnError.proxy(.nowhere, .packetTooLarge) {
             // UDP is lossy by contract. Drop only this packet; keep the flow alive.
             return
         }
         do {
             try await session.writeDatagrams(frames)
         } catch {
-            if case AnywhereError.quic(.datagramTooLarge(let maxBound)) = error,
+            if case TurnError.quic(.datagramTooLarge(let maxBound)) = error,
                retriesLeft > 0 {
                 guard _isReady.load(ordering: .relaxed) else {
-                    throw AnywhereError.proxy(.nowhere, .streamClosed)
+                    throw TurnError.proxy(.nowhere, .streamClosed)
                 }
                 // A new identity prevents the receiver from mixing fragments encoded with
                 // different geometry after the path MTU changed mid-send.
@@ -218,10 +218,10 @@ actor NowhereUDPConnection {
                 )
                 return
             }
-            if case AnywhereError.quic(.datagramTooLarge) = error {
+            if case TurnError.quic(.datagramTooLarge) = error {
                 return  // path bound changed again; drop without closing the flow
             }
-            if case AnywhereError.quic(.datagramQueueFull) = error {
+            if case TurnError.quic(.datagramQueueFull) = error {
                 return  // reject newest packet; preserve queued packets and the flow
             }
             throw error

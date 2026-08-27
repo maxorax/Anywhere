@@ -1,6 +1,6 @@
 //
 //  MITMHTTP1Stream.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/4/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMHTTP1Stream")
+nonisolated private let logger = TurnLogger(category: "MITMHTTP1Stream")
 
 nonisolated protocol MITMHTTP1ResponseIRSink: AnyObject, Sendable {
     func http1ResponseHead(status: Int, headers: [(name: String, value: String)], endStream: Bool)
@@ -42,7 +42,7 @@ actor MITMHTTP1Stream {
     /// otherwise grow the array to tens of MB. Past the cap the tail folds into the final chunk.
     fileprivate static let maxTrackedChunkSizes: Int = 8192
 
-    /// Memory cap on `Anywhere.respond` bodies; oversized bodies are truncated
+    /// Memory cap on `Turn.respond` bodies; oversized bodies are truncated
     /// rather than rejected — a partial mock beats a dropped one.
     private static let maxSynthesizedResponseBodyBytes: Int = MITMBodyCodec.maxBufferedBodyBytes
 
@@ -63,7 +63,7 @@ actor MITMHTTP1Stream {
     /// Response-phase rules for this host; the request stream consults them to gate the
     /// `Accept-Encoding` clamp. Empty on a response stream.
     private let responseBodyGateRules: [CompiledMITMRule]
-    /// Rule-set ID for the matched host (`Anywhere.store` scope key); nil when no set matches.
+    /// Rule-set ID for the matched host (`Turn.store` scope key); nil when no set matches.
     private let ruleSetID: UUID?
     /// Forced `Host:` once a transparent rewrite commits to a replacement
     /// authority. Sticky: the connection has one upstream leg, so later requests
@@ -297,7 +297,7 @@ actor MITMHTTP1Stream {
     /// Prefix of `rxBuffer` already scanned for CRLF CRLF (O(n) total, not O(n²)).
     private var headScanned: Int = 0
 
-    /// Client-bound synth bytes from `Anywhere.respond(...)`; drained by the
+    /// Client-bound synth bytes from `Turn.respond(...)`; drained by the
     /// session pump. Request phase only.
     private var pendingClientBytes = Data()
 
@@ -418,7 +418,7 @@ actor MITMHTTP1Stream {
         continuation.resume(returning: Data())
     }
 
-    /// Drains client-bound bytes queued by `Anywhere.respond(...)`. ``MITMMessageRewriter``
+    /// Drains client-bound bytes queued by `Turn.respond(...)`. ``MITMMessageRewriter``
     /// requirement; a `nonisolated` shim re-entering isolation, as the session calls it synchronously
     /// on the shared lwIP executor.
     nonisolated func drainPendingClientBytes() -> Data {
@@ -1631,7 +1631,7 @@ actor MITMHTTP1Stream {
             }
         case .synthesizedResponse(let response):
             if responseIRSink != nil {
-                // Response-phase Anywhere.respond shouldn't occur on the bridge; reset, don't mis-frame.
+                // Response-phase Turn.respond shouldn't occur on the bridge; reset, don't mis-frame.
                 _ = bridgeResetIfNeeded()
                 finishDrivePass(resumed)
                 return
@@ -1828,7 +1828,7 @@ actor MITMHTTP1Stream {
         let lines = raw.components(separatedBy: "\r\n")
         guard let startLine = lines.first, !startLine.isEmpty else { return .forward }
         guard isHTTPStartLine(startLine) else {
-            // Not a head Anywhere rewrites (some other `HTTP/<d>.<d>` version). Forward it verbatim if
+            // Not a head Turn rewrites (some other `HTTP/<d>.<d>` version). Forward it verbatim if
             // it still parses as a valid start-line grammar; fail closed only on a true non-HTTP or
             // malformed-version/status head rather than laundering it through.
             return parsesStartLine(startLine) ? .forward : .smuggling
@@ -2103,16 +2103,16 @@ actor MITMHTTP1Stream {
         return out
     }
 
-    /// Serializes an `Anywhere.respond(...)` payload as HTTP/1.1 and queues it,
+    /// Serializes an `Turn.respond(...)` payload as HTTP/1.1 and queues it,
     /// sanitizing headers so script-injected CRLF can't split the response.
     private func queueSynthesizedResponse(_ response: MITMScriptEngine.SynthesizedResponse) {
         let reason = canonicalReasonPhrase(for: response.status)
         let startLine = "HTTP/1.1 \(response.status) \(reason)"
         var headers = response.sanitizedHeaders(lowercaseNames: false) { name in
-            logger.warning("[MITM][JS] HTTP/1 \(host): Anywhere.respond dropping invalid header: \(name)")
+            logger.warning("[MITM][JS] HTTP/1 \(host): Turn.respond dropping invalid header: \(name)")
         }
         let body = response.truncatedBody(cap: Self.maxSynthesizedResponseBodyBytes) { size in
-            logger.warning("[MITM][JS] HTTP/1 \(host): Anywhere.respond body \(size) B exceeds memory cap \(Self.maxSynthesizedResponseBodyBytes) B; truncating")
+            logger.warning("[MITM][JS] HTTP/1 \(host): Turn.respond body \(size) B exceeds memory cap \(Self.maxSynthesizedResponseBodyBytes) B; truncating")
         }
         headers = response.withDateStamp(headers, lowercaseName: false)
         headers.append((name: "Content-Length", value: String(body.count)))

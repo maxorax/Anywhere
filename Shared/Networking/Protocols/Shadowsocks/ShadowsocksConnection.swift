@@ -1,6 +1,6 @@
 //
 //  ShadowsocksConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/6/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "ShadowsocksConnection")
+nonisolated private let logger = TurnLogger(category: "ShadowsocksConnection")
 
 // MARK: - ShadowsocksConnection
 
@@ -103,7 +103,7 @@ nonisolated final class ShadowsocksUDPConnection: ProxyConnection {
         }
         let decrypted = try ShadowsocksUDPCrypto.decrypt(cipher: cipher, masterKey: masterKey, data: data)
         guard let parsed = ShadowsocksProtocol.decodeUDPPacket(data: decrypted) else {
-            throw AnywhereError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
+            throw TurnError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
         }
         return parsed.payload
     }

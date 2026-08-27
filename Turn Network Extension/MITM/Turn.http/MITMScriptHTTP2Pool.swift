@@ -1,6 +1,6 @@
 //
 //  MITMScriptHTTP2Pool.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/2/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMScriptHTTP2Pool")
+nonisolated private let logger = TurnLogger(category: "MITMScriptHTTP2Pool")
 
 nonisolated enum MITMScriptHTTP2Outcome {
     case response(MITMScriptHTTPClient.Response)
@@ -82,7 +82,7 @@ nonisolated final class MITMScriptHTTP2Pool: TransportPool {
                 resourceTimeout: resourceTimeout
             )
             return .response(response)
-        } catch AnywhereError.mitm(.needsHTTP1Fallback) {
+        } catch TurnError.mitm(.needsHTTP1Fallback) {
             return .fallbackToHTTP1
         }
     }

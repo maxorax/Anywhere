@@ -1,6 +1,6 @@
 //
 //  MITMRuleSetParser.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/8/26.
 //
@@ -56,7 +56,7 @@ enum MITMRuleSetParser {
                 if let rule = parseRuleLine(line) { rules.append(rule) }
             case .parameter:
                 guard parameters.count < MITMRuleSet.maxParameterCount else { continue }
-                // Drop duplicate names: they'd collide as `Anywhere.params` keys.
+                // Drop duplicate names: they'd collide as `Turn.params` keys.
                 if let parameter = parseParameterLine(line),
                    parameterNames.insert(parameter.name).inserted {
                     parameters.append(parameter)

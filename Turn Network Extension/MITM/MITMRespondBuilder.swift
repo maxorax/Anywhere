@@ -1,6 +1,6 @@
 //
 //  MITMRespondBuilder.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/1/26.
 //
@@ -44,9 +44,9 @@ nonisolated enum MITMRespondBuilder {
     }
 
     /// Non-empty so clients don't treat a zero-length 200 as an error.
-    private static let defaultText = "Success from Anywhere"
+    private static let defaultText = "Success from Turn"
 
-    /// Used when `.reject200Data` is blank: base64 of "Anywhere".
+    /// Used when `.reject200Data` is blank: base64 of "Turn".
     private static let defaultDataBase64 = "QW55d2hlcmU="
 
     /// 43-byte 1×1 transparent GIF89a (the canonical tracking-pixel payload).

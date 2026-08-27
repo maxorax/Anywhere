@@ -1,6 +1,6 @@
 //
 //  ProxyClient+VLESS.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/13/26.
 //
@@ -56,13 +56,13 @@ nonisolated extension ProxyClient {
         do {
             encryptionConfig = try VLESSEncryptionConfig.parse(vlessEncryption)
         } catch {
-            throw AnywhereError.proxy(.vless, .protocolViolation(
+            throw TurnError.proxy(.vless, .protocolViolation(
                 detail: "Invalid VLESS encryption: \(error.localizedDescription)"
             ))
         }
         if let encryptionConfig {
             guard #available(iOS 26.0, macOS 26.0, tvOS 26.0, *) else {
-                throw AnywhereError.proxy(.vless, .protocolViolation(
+                throw TurnError.proxy(.vless, .protocolViolation(
                     detail: "VLESS encryption requires iOS 26 / macOS 26 / tvOS 26 or later"
                 ))
             }
@@ -122,7 +122,7 @@ nonisolated extension ProxyClient {
         do {
             try await vless.sendHandshake(requestHeader: requestHeader, initialData: handshakeInitialData)
         } catch {
-            throw AnywhereError.capture(error, context: "VLESS handshake")
+            throw TurnError.capture(error, context: "VLESS handshake")
         }
 
         let proxyConnection: ProxyConnection = (command == .udp)
@@ -144,7 +144,7 @@ nonisolated extension ProxyClient {
                 }
                 return vision
             } catch {
-                throw AnywhereError.capture(error, context: "VLESS Vision intro")
+                throw TurnError.capture(error, context: "VLESS Vision intro")
             }
         } else {
             return proxyConnection
@@ -160,10 +160,10 @@ nonisolated extension ProxyClient {
             return nil
         }
         guard let version = connection.outerTLSVersion else {
-            return AnywhereError.proxy(.vless, .protocolViolation(detail: "Vision requires outer TLS or REALITY transport"))
+            return TurnError.proxy(.vless, .protocolViolation(detail: "Vision requires outer TLS or REALITY transport"))
         }
         if version != .tls13 {
-            return AnywhereError.proxy(.vless, .protocolViolation(detail: "Vision requires outer TLS 1.3, found \(version)"))
+            return TurnError.proxy(.vless, .protocolViolation(detail: "Vision requires outer TLS 1.3, found \(version)"))
         }
         return nil
     }

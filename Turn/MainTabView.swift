@@ -1,6 +1,6 @@
 //
 //  MainTabView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/13/26.
 //
@@ -70,7 +70,7 @@ struct MainTabView: View {
                 get: { voyagerStore.isPresentingVoyagerView },
                 set: { voyagerStore.isPresentingVoyagerView = $0 }
             )) {
-                AnywhereVoyagerView()
+                TurnVoyagerView()
                     .environment(voyagerStore)
             }
     }
@@ -88,7 +88,7 @@ struct MainTabView: View {
                             )
                     }
                 } label: {
-                    Image("anywhere")
+                    Image("turn")
                 }
                 
                 Tab(value: .proxies) {
@@ -115,7 +115,7 @@ struct MainTabView: View {
                     }
                     .colorScheme(settings.homeColorScheme == .light ? .light : .dark)
                 } label: {
-                    Label("Home", image: "anywhere")
+                    Label("Home", image: "turn")
                 }
                 
                 Tab(value: .proxies) {

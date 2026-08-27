@@ -1,6 +1,6 @@
 //
 //  YAML.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/15/26.
 //
@@ -64,7 +64,7 @@ nonisolated enum YAML {
     static func load(_ input: String) throws -> Node {
         var parser = yaml_parser_t()
         guard yaml_parser_initialize(&parser) == 1 else {
-            throw AnywhereError.parse(.yaml(detail: "parser initialization failed"))
+            throw TurnError.parse(.yaml(detail: "parser initialization failed"))
         }
         defer { yaml_parser_delete(&parser) }
 
@@ -120,7 +120,7 @@ nonisolated private final class Loader {
             } else {
                 message = "YAML parse error"
             }
-            throw AnywhereError.parse(.yaml(detail: message))
+            throw TurnError.parse(.yaml(detail: message))
         }
         return event
     }

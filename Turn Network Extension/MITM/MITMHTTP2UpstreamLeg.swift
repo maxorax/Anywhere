@@ -1,6 +1,6 @@
 //
 //  MITMHTTP2UpstreamLeg.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/15/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMHTTP2UpstreamLeg")
+nonisolated private let logger = TurnLogger(category: "MITMHTTP2UpstreamLeg")
 
 nonisolated protocol MITMUpstreamLegDelegate: AnyObject {
     func upstreamLegWriteToOrigin(_ data: Data)
@@ -1177,7 +1177,7 @@ actor MITMHTTP2UpstreamLeg {
                         }
                         leg.deliverFinalResponse(streamID: streamID, status: buffer.status, headers: regular, body: body, trailers: trailers, neverIndexed: buffer.neverIndexed)
                     case .synthesizedResponse:
-                        // Anywhere.respond is request-phase only; ignore on response and emit original.
+                        // Turn.respond is request-phase only; ignore on response and emit original.
                         leg.deliverFinalResponse(streamID: streamID, status: buffer.status, headers: regular, body: plaintext, trailers: trailers, neverIndexed: buffer.neverIndexed)
                     }
                     // Non-blocking: the stream is already released and the pump kept running, so just

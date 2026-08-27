@@ -1,6 +1,6 @@
 //
 //  TunnelStack+Lifecycle.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/30/26.
 //
@@ -9,14 +9,14 @@ import Foundation
 import NetworkExtension
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TunnelStack+Lifecycle")
+nonisolated private let logger = TurnLogger(category: "TunnelStack+Lifecycle")
 
 extension TunnelStack {
 
     // MARK: - Lifecycle
     
     func start(packetFlow: NEPacketTunnelFlow, configuration: ProxyConfiguration) async {
-        AnywhereLogger.installLogSink { [weak self] message, level in
+        TurnLogger.installLogSink { [weak self] message, level in
             let logLevel: TunnelLogLevel
             switch level {
             case .debug, .info: logLevel = .info
@@ -109,7 +109,7 @@ extension TunnelStack {
         nurseryJobContinuation.finish()
         await rootTask?.value
         rootTask = nil
-        AnywhereLogger.installLogSink(nil)
+        TurnLogger.installLogSink(nil)
     }
     
     func switchConfiguration(_ newConfiguration: ProxyConfiguration) {

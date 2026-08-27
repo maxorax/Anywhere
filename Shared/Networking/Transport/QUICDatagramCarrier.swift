@@ -1,6 +1,6 @@
 //
 //  QUICDatagramCarrier.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/21/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Darwin
 
-nonisolated private let logger = AnywhereLogger(category: "QUICDatagramCarrier")
+nonisolated private let logger = TurnLogger(category: "QUICDatagramCarrier")
 
 nonisolated protocol QUICDatagramEngine: AnyObject, Sendable {
     func send(_ datagram: Data)
@@ -94,7 +94,7 @@ actor QUICDatagramCarrier {
 
     func connect(remoteAddr: sockaddr_storage, localAddr: inout sockaddr_storage) throws {
         guard let endpoint = Self.nwEndpoint(from: remoteAddr) else {
-            throw AnywhereError.quic(.connectionFailed(detail: "invalid remote address"))
+            throw TurnError.quic(.connectionFailed(detail: "invalid remote address"))
         }
         Self.fillAnyLocalAddr(&localAddr, family: remoteAddr.ss_family)
 
@@ -277,9 +277,9 @@ nonisolated final class ModernQUICDatagramEngine: QUICDatagramEngine, Sendable {
             case .ready:
                 sink.ready(interfaceType: connection.currentPath?.availableInterfaces.first?.type)
             case .failed(let error):
-                sink.failed(AnywhereError.errnoCode(from: error))
+                sink.failed(TurnError.errnoCode(from: error))
             case .waiting(let error):
-                sink.waiting(AnywhereError.errnoCode(from: error))
+                sink.waiting(TurnError.errnoCode(from: error))
             default:
                 break
             }
@@ -372,7 +372,7 @@ nonisolated final class ModernQUICDatagramEngine: QUICDatagramEngine, Sendable {
                 try await group.next()
             }
         } catch {
-            sink.failed(AnywhereError.errnoCode(from: error))
+            sink.failed(TurnError.errnoCode(from: error))
             throw error
         }
     }

@@ -1,6 +1,6 @@
 //
 //  QUICConnection+Migration.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -10,7 +10,7 @@ import Network
 import CryptoKit
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "QUICConnection")
+nonisolated private let logger = TurnLogger(category: "QUICConnection")
 
 extension QUICConnection {
 
@@ -58,7 +58,7 @@ extension QUICConnection {
         guard migrationEnabled, state == .connected, migrationKind == nil,
               migrationFailures < Self.maxMigrationFailures,
               let conn = connectionOpaquePointer else {
-            close(error: AnywhereError.quic(.connectionFailed(detail: "network path lost")))
+            close(error: TurnError.quic(.connectionFailed(detail: "network path lost")))
             return
         }
 
@@ -82,7 +82,7 @@ extension QUICConnection {
             logger.warning("[QUIC] Reactive migration rejected (ngtcp2 \(rv)); reconnecting")
             newCarrier.assumeIsolated { $0.close() }
             migrationFailures += 1
-            close(error: AnywhereError.quic(.connectionFailed(detail: "migration rejected: \(rv)")))
+            close(error: TurnError.quic(.connectionFailed(detail: "migration rejected: \(rv)")))
             return
         }
         
@@ -213,7 +213,7 @@ extension QUICConnection {
                 abortProactiveMigration(countAsFailure: true)
             } else {
                 clearMigrationState()
-                close(error: AnywhereError.quic(.connectionFailed(detail: "migration path validation failed")))
+                close(error: TurnError.quic(.connectionFailed(detail: "migration path validation failed")))
             }
         }
     }

@@ -1,6 +1,6 @@
 //
 //  SubscriptionStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Observation
 import SwiftUI
 
-nonisolated private let logger = AnywhereLogger(category: "SubscriptionStore")
+nonisolated private let logger = TurnLogger(category: "SubscriptionStore")
 
 @MainActor
 @Observable
@@ -122,7 +122,7 @@ class SubscriptionStore {
                 let data = try encoder.encode(snapshot)
                 JSONBlobStore.shared.save(.subscriptions, data: data)
             } catch {
-                logger.report(AnywhereError.store(.saveFailed(.subscriptions, underlying: error)))
+                logger.report(TurnError.store(.saveFailed(.subscriptions, underlying: error)))
             }
         }
     }

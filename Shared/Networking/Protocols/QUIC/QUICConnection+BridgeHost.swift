@@ -1,6 +1,6 @@
 //
 //  QUICConnection+BridgeHost.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -46,9 +46,9 @@ extension QUICConnection {
     
     func handleStreamClose(streamId: Int64, appErrorCode: UInt64, hasAppError: Bool) {
         let error: Error? = (hasAppError && !Self.isBenignCloseCode(appErrorCode))
-            ? AnywhereError.quic(.streamClosedWithError(applicationCode: appErrorCode))
+            ? TurnError.quic(.streamClosedWithError(applicationCode: appErrorCode))
             : nil
-        failStreamSendQueue(streamId: streamId, error: error ?? AnywhereError.quic(.closed(graceful: false)))
+        failStreamSendQueue(streamId: streamId, error: error ?? TurnError.quic(.closed(graceful: false)))
         releaseStreamSendState(streamId: streamId)
         handlers.withLock { $0.streamTermination }?(streamId, error)
     }
@@ -56,8 +56,8 @@ extension QUICConnection {
     func handleStreamReset(streamId: Int64, appErrorCode: UInt64) {
         let error: Error? = Self.isBenignCloseCode(appErrorCode)
             ? nil
-            : AnywhereError.quic(.streamReset(applicationCode: appErrorCode))
-        failStreamSendQueue(streamId: streamId, error: error ?? AnywhereError.quic(.closed(graceful: false)))
+            : TurnError.quic(.streamReset(applicationCode: appErrorCode))
+        failStreamSendQueue(streamId: streamId, error: error ?? TurnError.quic(.closed(graceful: false)))
         handlers.withLock { $0.streamTermination }?(streamId, error)
     }
     

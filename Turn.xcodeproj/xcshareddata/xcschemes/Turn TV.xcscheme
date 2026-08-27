@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB2B549B2F6C3E2700F24AC2"
-               BuildableName = "Anywhere TV.app"
-               BlueprintName = "Anywhere TV"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn TV.app"
+               BlueprintName = "Turn TV"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB2B549B2F6C3E2700F24AC2"
-            BuildableName = "Anywhere TV.app"
-            BlueprintName = "Anywhere TV"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn TV.app"
+            BlueprintName = "Turn TV"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB2B549B2F6C3E2700F24AC2"
-            BuildableName = "Anywhere TV.app"
-            BlueprintName = "Anywhere TV"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn TV.app"
+            BlueprintName = "Turn TV"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

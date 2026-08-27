@@ -1,6 +1,6 @@
 //
 //  SudokuMultiplexerPool.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/12/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "SudokuMultiplexerPool")
+nonisolated private let logger = TurnLogger(category: "SudokuMultiplexerPool")
 
 // MARK: - SudokuMultiplexerRegistry
 
@@ -193,7 +193,7 @@ nonisolated final class SudokuMultiplexerPool: TransportPool {
     /// (age-based idle eviction is the base's sweep).
     private func reusableMultiplexer() throws -> SudokuMuxClient? {
         try pool.state.withLock { st in
-            if st.extra { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+            if st.extra { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
             st.multiplexers[Self.bucket]?.removeAll { multiplexer in
                 guard multiplexer.isClosed else { return false }
                 st.lastActivity.removeValue(forKey: ObjectIdentifier(multiplexer))
@@ -232,7 +232,7 @@ nonisolated final class SudokuMultiplexerPool: TransportPool {
         }
         if wasClosed {
             multiplexer.close(error: nil)
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         logger.debug("[SudokuMultiplexerPool] new session \(configuration.serverAddress):\(configuration.serverPort)")
         return multiplexer

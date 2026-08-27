@@ -1,13 +1,13 @@
 //
 //  ConfigurationConnectivityTests.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/21/26.
 //
 
 import Testing
 import Foundation
-@testable import Anywhere
+@testable import Turn
 
 @Suite(.enabled(if: TestEnvironment.isConfigured), .serialized)
 struct ConfigurationConnectivityTests {

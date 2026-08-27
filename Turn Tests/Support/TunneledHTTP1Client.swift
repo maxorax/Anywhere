@@ -1,6 +1,6 @@
 //
 //  TunneledHTTP1Client.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/21/26.
 //
@@ -16,7 +16,7 @@ enum TunneledHTTP1Client {
     ) async throws -> HTTPResponse {
         var request = "GET \(path) HTTP/1.1\r\n"
         request += "Host: \(host)\r\n"
-        request += "User-Agent: Anywhere\r\n"
+        request += "User-Agent: Turn\r\n"
         request += "Accept: */*\r\n"
         for (name, value) in extraHeaders { request += "\(name): \(value)\r\n" }
         request += "Connection: close\r\n\r\n"

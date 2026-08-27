@@ -1,6 +1,6 @@
 //
 //  DIQRScanner.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 2/16/26.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 import AVFoundation
 
-nonisolated private let logger = AnywhereLogger(category: "DIQRScanner")
+nonisolated private let logger = TurnLogger(category: "DIQRScanner")
 
 fileprivate struct CameraProperties {
     var session: AVCaptureSession = .init()

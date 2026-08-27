@@ -1,6 +1,6 @@
 //
 //  RuleResolver.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "RuleResolver")
+nonisolated private let logger = TurnLogger(category: "RuleResolver")
 
 nonisolated final class RuleResolver: Sendable {
     static let shared = RuleResolver()

@@ -1,6 +1,6 @@
 //
 //  ProxyClient.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 1/26/26.
 //
@@ -62,7 +62,7 @@ nonisolated final class ProxyClient: Sendable {
         }
         if tornDown {
             connection.cancel()
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
         return connection
     }
@@ -150,7 +150,7 @@ nonisolated final class ProxyClient: Sendable {
 
         if configuration.outboundProtocol == .nowhere,
            configuration.nowhereUplink != configuration.nowhereDownlink {
-            throw AnywhereError.proxy(.nowhere, .protocolViolation(detail: "Asymmetric Nowhere carriers do not support proxy chains"))
+            throw TurnError.proxy(.nowhere, .protocolViolation(detail: "Asymmetric Nowhere carriers do not support proxy chains"))
         }
 
         if isQUICTransport {
@@ -163,7 +163,7 @@ nonisolated final class ProxyClient: Sendable {
         }
 
         guard let lastDeliver = configuration.upstreamCommand(for: command) else {
-            throw AnywhereError.proxy(configuration.outboundProtocol.wire, .protocolViolation(
+            throw TurnError.proxy(configuration.outboundProtocol.wire, .protocolViolation(
                 detail: "\(configuration.outboundProtocol.name) doesn't support \(command)"
             ))
         }
@@ -190,7 +190,7 @@ nonisolated final class ProxyClient: Sendable {
         guard !chain.isEmpty else { return .success([]) }
 
         guard let lastDeliver = outerProtocol.upstreamCommand(for: outerCommand) else {
-            return .failure(AnywhereError.proxy(outerProtocol.wire, .protocolViolation(
+            return .failure(TurnError.proxy(outerProtocol.wire, .protocolViolation(
                 detail: "\(outerProtocol.name) doesn't support \(outerCommand)"
             )))
         }
@@ -213,7 +213,7 @@ nonisolated final class ProxyClient: Sendable {
                 let downstreamCmd = commands[i + 1]
                 // Config-aware: a VLESS hop over XHTTP-h3 rides QUIC, so it needs .udp from below.
                 guard let request = nextHop.upstreamCommand(for: downstreamCmd) else {
-                    return .failure(AnywhereError.proxy(nextHop.outboundProtocol.wire, .protocolViolation(
+                    return .failure(TurnError.proxy(nextHop.outboundProtocol.wire, .protocolViolation(
                         detail: "Chain hop \(nextHop.outboundProtocol.name) doesn't support \(downstreamCmd) downstream — needed by the hop above it"
                     )))
                 }
@@ -307,7 +307,7 @@ nonisolated final class ProxyClient: Sendable {
             throw error
         }
         guard let tunnel = currentTunnel else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Empty proxy chain"))
+            throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Empty proxy chain"))
         }
         return tunnel
     }
@@ -366,11 +366,11 @@ nonisolated final class ProxyClient: Sendable {
     ) async throws -> ProxyConnection {
         // Vision silently drops UDP/443 (QUIC).
         if command == .udp && destinationPort == 443 && isVisionFlow {
-            throw AnywhereError.routing(.dropped)
+            throw TurnError.routing(.dropped)
         }
 
         if command == .mux, !configuration.outboundProtocol.supportsMux {
-            throw AnywhereError.proxy(configuration.outboundProtocol.wire, .protocolViolation(
+            throw TurnError.proxy(configuration.outboundProtocol.wire, .protocolViolation(
                 detail: "Mux is not supported with \(configuration.outboundProtocol.name)"
             ))
         }
@@ -429,7 +429,7 @@ nonisolated final class ProxyClient: Sendable {
 
         if configuration.outboundProtocol.isNaive {
             if command != .tcp {
-                throw AnywhereError.routing(.dropped)
+                throw TurnError.routing(.dropped)
             }
             return try await connectWithNaive(destinationHost: destinationHost, destinationPort: destinationPort)
         }
@@ -516,7 +516,7 @@ nonisolated final class ProxyClient: Sendable {
         initialData: Data?
     ) async throws -> ProxyConnection {
         guard case .ws(let wsConfig) = configuration.xrayTransportLayer else {
-            throw AnywhereError.proxy(.webSocket, .invalidConfiguration(detail: "WebSocket transport specified but no WebSocket configuration"))
+            throw TurnError.proxy(.webSocket, .invalidConfiguration(detail: "WebSocket transport specified but no WebSocket configuration"))
         }
 
         let wsConnection: WebSocketConnection
@@ -561,7 +561,7 @@ nonisolated final class ProxyClient: Sendable {
         initialData: Data?
     ) async throws -> ProxyConnection {
         guard case .httpUpgrade(let huConfig) = configuration.xrayTransportLayer else {
-            throw AnywhereError.proxy(.httpUpgrade, .invalidConfiguration(detail: "HTTP upgrade transport specified but no configuration"))
+            throw TurnError.proxy(.httpUpgrade, .invalidConfiguration(detail: "HTTP upgrade transport specified but no configuration"))
         }
 
         let huConnection: HTTPUpgradeConnection
@@ -597,7 +597,7 @@ nonisolated final class ProxyClient: Sendable {
         initialData: Data?
     ) async throws -> ProxyConnection {
         guard case .grpc(let grpcConfig) = configuration.xrayTransportLayer else {
-            throw AnywhereError.proxy(.grpc, .invalidConfiguration(detail: "gRPC transport specified but no gRPC configuration"))
+            throw TurnError.proxy(.grpc, .invalidConfiguration(detail: "gRPC transport specified but no gRPC configuration"))
         }
 
         // The :authority falls back to the TLS/Reality SNI when no override is configured.
@@ -772,7 +772,7 @@ nonisolated final class ProxyClient: Sendable {
         initialData: Data?
     ) async throws -> ProxyConnection {
         guard case .xhttp(let xhttpConfig) = configuration.xrayTransportLayer else {
-            throw AnywhereError.proxy(.xhttp, .invalidConfiguration(detail: "XHTTP transport specified but no XHTTP configuration"))
+            throw TurnError.proxy(.xhttp, .invalidConfiguration(detail: "XHTTP transport specified but no XHTTP configuration"))
         }
 
         let httpVersion = decideXHTTPHTTPVersion()
@@ -1018,7 +1018,7 @@ nonisolated final class ProxyClient: Sendable {
             }
         }
         guard let lease = await manager.acquire(), let session = lease.connection as? HTTP3Multiplexer else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H3 session acquisition failed"))
+            throw TurnError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H3 session acquisition failed"))
         }
         let connection = XHTTPConnection(
             h3Multiplexer: session, configuration: xhttp, mode: mode, sessionId: sessionId
@@ -1047,7 +1047,7 @@ nonisolated final class ProxyClient: Sendable {
             }
         }
         guard let lease = await manager.acquire(), let shared = lease.connection as? XHTTPH2Multiplexer else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H2 connection acquisition failed"))
+            throw TurnError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H2 connection acquisition failed"))
         }
         let connection = XHTTPConnection(sharedH2: shared, configuration: xhttp, mode: mode, sessionId: sessionId)
         connection.configureRole(role)
@@ -1068,7 +1068,7 @@ nonisolated final class ProxyClient: Sendable {
                     .seconds(Self.sharedH2BringUpTimeout),
                     onExpiry: { shared.poolClose() },
                     error: {
-                        AnywhereError.transport(
+                        TurnError.transport(
                             .timedOut(
                                 .connect,
                                 endpoint: "\(host):\(port)",
@@ -1211,7 +1211,7 @@ nonisolated final class ProxyClient: Sendable {
             return {
                 try await ConnectionMetrics.$currentAttempt.withValue(nil) {
                     guard let lease = await manager.acquire(), let connection = lease.connection as? XHTTPH1Multiplexer else {
-                        throw AnywhereError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H1 upload acquisition failed"))
+                        throw TurnError.transport(.connectionFailed(endpoint: "\(host):\(port)", detail: "xmux H1 upload acquisition failed"))
                     }
                     connection.adoptLease(lease)
                     return connection.sessionTransport
@@ -1221,7 +1221,7 @@ nonisolated final class ProxyClient: Sendable {
 
         return { [weak self] in
             guard let self else {
-                throw AnywhereError.transport(.terminated)
+                throw TurnError.transport(.terminated)
             }
             let route: XHTTPLegRoute
             if let chain = self.configuration.chain, !chain.isEmpty {
@@ -1236,7 +1236,7 @@ nonisolated final class ProxyClient: Sendable {
             case .byteStream(let closures):
                 return closures
             case .http3:
-                throw AnywhereError.proxy(.xhttp, .invalidConfiguration(detail: "HTTP/3 has no separate upload connection"))
+                throw TurnError.proxy(.xhttp, .invalidConfiguration(detail: "HTTP/3 has no separate upload connection"))
             }
         }
     }
@@ -1281,7 +1281,7 @@ nonisolated final class ProxyClient: Sendable {
 // MARK: - Wire Mapping
 
 nonisolated extension OutboundProtocol {
-    fileprivate var wire: AnywhereError.Wire {
+    fileprivate var wire: TurnError.Wire {
         switch self {
         case .nowhere: .nowhere
         case .vless: .vless

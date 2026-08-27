@@ -1,6 +1,6 @@
 //
 //  HomeView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -327,7 +327,7 @@ private struct ConfigurationCapsule: View {
         } label: {
             ProminentCapsule {
                 HStack {
-                    Image("anywhere")
+                    Image("turn")
                         .foregroundStyle(.primary.opacity(0.7))
                         .frame(width: 24)
                     Text(configuration.name)

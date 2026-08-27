@@ -1,6 +1,6 @@
 //
 //  DNSSyscallConcurrencyBridge.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/17/26.
 //
@@ -10,7 +10,7 @@ import dnssd
 
 nonisolated final class DNSSyscallConcurrencyBridge: Sendable {
     private let queue: DispatchQueue = DispatchQueue(
-        label: "com.argsment.Anywhere.DNSSyscallConcurrencyBridge",
+        label: "com.argsment.Turn.DNSSyscallConcurrencyBridge",
         qos: .userInitiated,
         attributes: .concurrent
     )

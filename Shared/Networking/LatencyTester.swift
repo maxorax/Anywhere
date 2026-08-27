@@ -1,13 +1,13 @@
 //
 //  LatencyTester.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "LatencyTester")
+nonisolated private let logger = TurnLogger(category: "LatencyTester")
 
 nonisolated enum LatencyTester {
 
@@ -38,7 +38,7 @@ nonisolated enum LatencyTester {
                 return result
             }
             return .success(latencyMilliseconds)
-        } catch let error as AnywhereError {
+        } catch let error as TurnError {
             if case .tls(.certificateValidationFailed) = error {
                 logger.error("Latency test insecure for \(configuration.name): \(error.localizedDescription)")
                 return .insecure
@@ -104,7 +104,7 @@ nonisolated enum LatencyTester {
                 let statusLine = responseData.flatMap { String(data: $0, encoding: .utf8) }?
                     .split(separator: "\r\n", maxSplits: 1).first.map(String.init)
                 guard let statusLine, statusLine.contains("200") else {
-                    throw AnywhereError.diagnostics(.latencyProbeFailed(status: statusLine ?? "no response"))
+                    throw TurnError.diagnostics(.latencyProbeFailed(status: statusLine ?? "no response"))
                 }
 
                 return Int(elapsed.components.seconds * 1000 + elapsed.components.attoseconds / 1_000_000_000_000_000)
@@ -132,7 +132,7 @@ nonisolated enum LatencyTester {
         let warmupStatus = warmupData.flatMap { String(data: $0, encoding: .utf8) }?
             .split(separator: "\r\n", maxSplits: 1).first.map(String.init)
         guard let warmupStatus, warmupStatus.contains("200") else {
-            throw AnywhereError.diagnostics(.latencyProbeFailed(status: warmupStatus ?? "no response"))
+            throw TurnError.diagnostics(.latencyProbeFailed(status: warmupStatus ?? "no response"))
         }
 
         return proxyConnection

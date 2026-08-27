@@ -1,13 +1,13 @@
 //
 //  DNSUpstreamClient.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/24/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "DNSUpstreamClient")
+nonisolated private let logger = TurnLogger(category: "DNSUpstreamClient")
 
 nonisolated enum DNSUpstreamClient {
     static let queryTimeout: Duration = .seconds(4)
@@ -26,7 +26,7 @@ nonisolated enum DNSUpstreamClient {
         do {
             switch upstream {
             case .system:
-                throw AnywhereError.dns(.resolutionFailed(host: host, detail: "no upstream configured"))
+                throw TurnError.dns(.resolutionFailed(host: host, detail: "no upstream configured"))
             case .plain(let server, let port):
                 addresses = try await queryAll(host, family: family) { name, type in
                     try await queryPlain(name, type: type, server: server, port: port)
@@ -43,7 +43,7 @@ nonisolated enum DNSUpstreamClient {
 
         guard !addresses.isEmpty else {
             logger.warning("[DNSUpstreamClient] \(describe(upstream)) returned no address for \(host)")
-            throw AnywhereError.dns(.noAddresses(host: host))
+            throw TurnError.dns(.noAddresses(host: host))
         }
         return addresses
     }
@@ -55,7 +55,7 @@ nonisolated enum DNSUpstreamClient {
         do {
             switch upstream {
             case .system:
-                throw AnywhereError.dns(.resolutionFailed(host: host, detail: "no upstream configured"))
+                throw TurnError.dns(.resolutionFailed(host: host, detail: "no upstream configured"))
             case .plain(let server, let port):
                 return try await queryRecordPlain(host, type: type, server: server, port: port, accept: accept)
             case .doh(let url):
@@ -95,7 +95,7 @@ nonisolated enum DNSUpstreamClient {
                                    server: String, port: UInt16) async throws -> [String] {
         let id = UInt16.random(in: UInt16.min...UInt16.max)
         guard let query = DNSMessage.makeQuery(domain: name, type: type, id: id) else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
         }
 
         let transport = UDPTransport(host: server, port: port)
@@ -104,7 +104,7 @@ nonisolated enum DNSUpstreamClient {
         return try await withDialDeadline(queryTimeout) {
             transport.cancel()
         } error: {
-            AnywhereError.dns(.timedOut(host: name))
+            TurnError.dns(.timedOut(host: name))
         } operation: {
             try await transport.connect()
             try await transport.send(query)
@@ -126,7 +126,7 @@ nonisolated enum DNSUpstreamClient {
             id: id,
             udpPayloadSize: recordUDPPayloadSize
         ) else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
         }
 
         let transport = UDPTransport(host: server, port: port)
@@ -135,7 +135,7 @@ nonisolated enum DNSUpstreamClient {
         return try await withDialDeadline(queryTimeout) {
             transport.cancel()
         } error: {
-            AnywhereError.dns(.timedOut(host: name))
+            TurnError.dns(.timedOut(host: name))
         } operation: {
             try await transport.connect()
             try await transport.send(query)
@@ -153,7 +153,7 @@ nonisolated enum DNSUpstreamClient {
     private static func queryDoH(_ name: String, type: UInt16, url: URL) async throws -> [String] {
         let id: UInt16 = 0
         guard let query = DNSMessage.makeQuery(domain: name, type: type, id: id) else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
         }
 
         var request = URLRequest(url: url)
@@ -168,10 +168,10 @@ nonisolated enum DNSUpstreamClient {
         let (data, response) = try await URLSession.shared.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? -1
         guard status == 200 else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "DoH HTTP \(status)"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "DoH HTTP \(status)"))
         }
         guard let addresses = try decode(data, id: id, name: name) else {
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
         }
         return addresses
     }
@@ -182,7 +182,7 @@ nonisolated enum DNSUpstreamClient {
     ) async throws -> (payload: Data, ttl: UInt32)? {
         let id: UInt16 = 0
         guard let query = DNSMessage.makeQuery(domain: name, type: type, id: id) else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "name not encodable"))
         }
 
         var request = URLRequest(url: url)
@@ -197,10 +197,10 @@ nonisolated enum DNSUpstreamClient {
         let (data, response) = try await URLSession.shared.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? -1
         guard status == 200 else {
-            throw AnywhereError.dns(.resolutionFailed(host: name, detail: "DoH HTTP \(status)"))
+            throw TurnError.dns(.resolutionFailed(host: name, detail: "DoH HTTP \(status)"))
         }
         guard let records = try decodeRecords(data, id: id, name: name, type: type) else {
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
         }
         return firstAccepted(records, accept: accept)
     }
@@ -216,7 +216,7 @@ nonisolated enum DNSUpstreamClient {
             logger.debug("[DNSUpstreamClient] \(name) answered with RCODE \(rcode)")
             return []
         } catch {
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
         }
     }
 
@@ -230,7 +230,7 @@ nonisolated enum DNSUpstreamClient {
             logger.debug("[DNSUpstreamClient] \(name) answered with RCODE \(rcode)")
             return []
         } catch {
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
         }
     }
 

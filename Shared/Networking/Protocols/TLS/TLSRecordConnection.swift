@@ -1,6 +1,6 @@
 //
 //  TLSRecordConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 1/26/26.
 //
@@ -10,7 +10,7 @@ import CryptoKit
 import CommonCrypto
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TLSRecordConnection")
+nonisolated private let logger = TurnLogger(category: "TLSRecordConnection")
 
 nonisolated final class TLSRecordConnection: Sendable {
 
@@ -216,7 +216,7 @@ nonisolated final class TLSRecordConnection: Sendable {
     /// Derives connection-bound keying material without exposing the exporter master secret.
     func exportKeyingMaterial(label: String, context: Data, length: Int) throws -> Data {
         guard tlsVersion == 0x0304, let exporterMasterSecret, length > 0 else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "TLS exporter unavailable"))
+            throw TurnError.tls(.handshakeFailed(detail: "TLS exporter unavailable"))
         }
         return TLS13KeyDerivation(cipherSuite: cipherSuite).exportKeyingMaterial(
             exporterMasterSecret: exporterMasterSecret,
@@ -241,7 +241,7 @@ nonisolated final class TLSRecordConnection: Sendable {
     /// orders with the encrypted sends and the internal KeyUpdate response.
     func sendRaw(_ data: Data) async throws {
         try await chainedSend { [self] in
-            guard let connection else { throw AnywhereError.tls(.record(.connectionUnavailable)) }
+            guard let connection else { throw TurnError.tls(.record(.connectionUnavailable)) }
             try await connection.send(data)
         }
     }
@@ -257,7 +257,7 @@ nonisolated final class TLSRecordConnection: Sendable {
         }
         if let buffered { return buffered }
 
-        guard let connection else { throw AnywhereError.tls(.record(.connectionUnavailable)) }
+        guard let connection else { throw TurnError.tls(.record(.connectionUnavailable)) }
         switch try await connection.receive() {
         case .bytes(let data): return data
         case .end: return nil
@@ -279,7 +279,7 @@ nonisolated final class TLSRecordConnection: Sendable {
     /// concurrent callers — and it orders with the internal KeyUpdate response.
     func send(_ data: Data) async throws {
         try await chainedSend { [self] in
-            guard let connection else { throw AnywhereError.tls(.record(.connectionUnavailable)) }
+            guard let connection else { throw TurnError.tls(.record(.connectionUnavailable)) }
             let record = try buildTLSRecords(for: data)
             try await connection.send(record)
         }
@@ -315,7 +315,7 @@ nonisolated final class TLSRecordConnection: Sendable {
             }
 
             guard let connection else {
-                throw AnywhereError.tls(.record(.connectionUnavailable))
+                throw TurnError.tls(.record(.connectionUnavailable))
             }
             switch try await connection.receive() {
             case .bytes(let data):
@@ -384,7 +384,7 @@ nonisolated final class TLSRecordConnection: Sendable {
             let maxCiphertext = tlsVersion >= 0x0304 ? 16384 + 256 : 16384 + 2048
             guard Int(recordLen) <= maxCiphertext else {
                 state.buffer.removeAll()
-                return .error(AnywhereError.tls(.record(.malformed(detail: "record overflow (\(recordLen) bytes)"))))
+                return .error(TurnError.tls(.record(.malformed(detail: "record overflow (\(recordLen) bytes)"))))
             }
 
             let totalLen = 5 + Int(recordLen)
@@ -411,7 +411,7 @@ nonisolated final class TLSRecordConnection: Sendable {
                     }
                     if state.receivedCloseNotify { break }
                 } catch {
-                    if case AnywhereError.tls(.alert) = error {
+                    if case TurnError.tls(.alert) = error {
                         state.buffer.removeAll()
                         consumed = 0
                         hasError = error
@@ -434,15 +434,15 @@ nonisolated final class TLSRecordConnection: Sendable {
                         if alert[alert.startIndex + 1] == TLSAlertDescription.closeNotify {
                             state.receivedCloseNotify = true
                         } else {
-                            hasError = AnywhereError.tls(.alert(level: alert[alert.startIndex],
+                            hasError = TurnError.tls(.alert(level: alert[alert.startIndex],
                                                                 code: alert[alert.startIndex + 1]))
                         }
                     } else {
-                        hasError = AnywhereError.tls(.unexpectedAlert)
+                        hasError = TurnError.tls(.unexpectedAlert)
                     }
                 } else {
                     consumed += totalLen
-                    hasError = AnywhereError.tls(.unexpectedAlert)
+                    hasError = TurnError.tls(.unexpectedAlert)
                 }
                 break
             } else {
@@ -546,7 +546,7 @@ nonisolated final class TLSRecordConnection: Sendable {
                 return Data(try AES.GCM.open(sealedBox, using: key, authenticating: aad))
             }
         } catch CryptoKitError.authenticationFailure {
-            throw AnywhereError.tls(.record(.authenticationFailed))
+            throw TurnError.tls(.record(.authenticationFailed))
         }
     }
 

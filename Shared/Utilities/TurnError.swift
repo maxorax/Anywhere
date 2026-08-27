@@ -1,13 +1,13 @@
 //
-//  AnywhereError.swift
-//  Anywhere
+//  TurnError.swift
+//  Turn
 //
 //  Created by NodePassProject on 7/19/26.
 //
 
 import Foundation
 
-nonisolated enum AnywhereError: Error {
+nonisolated enum TurnError: Error {
     case dns(DNS)
     case transport(Transport)
     case tls(TLS)
@@ -286,7 +286,7 @@ nonisolated enum AnywhereError: Error {
 
 // MARK: - Descriptions
 
-nonisolated extension AnywhereError: LocalizedError {
+nonisolated extension TurnError: LocalizedError {
     var errorDescription: String? {
         domainTag.isEmpty ? conciseDescription : "\(domainTag): \(conciseDescription)"
     }
@@ -329,7 +329,7 @@ nonisolated extension AnywhereError: LocalizedError {
     }
 }
 
-nonisolated extension AnywhereError.DNS {
+nonisolated extension TurnError.DNS {
     var failureDescription: String {
         switch self {
         case .resolutionFailed(let host, let detail):
@@ -341,7 +341,7 @@ nonisolated extension AnywhereError.DNS {
     }
 }
 
-nonisolated extension AnywhereError.Transport {
+nonisolated extension TurnError.Transport {
     var failureDescription: String {
         switch self {
         case .posix(let op, let errno): "\(op.rawValue) failed: \(String(cString: strerror(errno)))"
@@ -381,7 +381,7 @@ nonisolated extension AnywhereError.Transport {
     }
 }
 
-nonisolated extension AnywhereError.TLS {
+nonisolated extension TurnError.TLS {
     var failureDescription: String {
         switch self {
         case .handshakeFailed(let detail): "handshake failed: \(detail)"
@@ -398,7 +398,7 @@ nonisolated extension AnywhereError.TLS {
     }
 }
 
-nonisolated extension AnywhereError.TLS.Record {
+nonisolated extension TurnError.TLS.Record {
     var failureDescription: String {
         switch self {
         case .ciphertextTooShort: "record ciphertext too short"
@@ -415,7 +415,7 @@ nonisolated extension AnywhereError.TLS.Record {
     }
 }
 
-nonisolated extension AnywhereError.TLS.ClientHello {
+nonisolated extension TurnError.TLS.ClientHello {
     var failureDescription: String {
         switch self {
         case .truncated: "ClientHello truncated"
@@ -427,7 +427,7 @@ nonisolated extension AnywhereError.TLS.ClientHello {
     }
 }
 
-nonisolated extension AnywhereError.TLS.ECH {
+nonisolated extension TurnError.TLS.ECH {
     var failureDescription: String {
         switch self {
         case .malformedConfigList: "ECH config list malformed"
@@ -447,7 +447,7 @@ nonisolated extension AnywhereError.TLS.ECH {
     }
 }
 
-nonisolated extension AnywhereError.TLS.Reality {
+nonisolated extension TurnError.TLS.Reality {
     var failureDescription: String {
         switch self {
         case .invalidPublicKey: "invalid REALITY public key"
@@ -457,7 +457,7 @@ nonisolated extension AnywhereError.TLS.Reality {
     }
 }
 
-nonisolated extension AnywhereError.QUIC {
+nonisolated extension TurnError.QUIC {
     var failureDescription: String {
         switch self {
         case .connectionFailed(let detail): "connection failed: \(detail)"
@@ -473,7 +473,7 @@ nonisolated extension AnywhereError.QUIC {
     }
 }
 
-nonisolated extension AnywhereError.Proxy {
+nonisolated extension TurnError.Proxy {
     var failureDescription: String {
         switch self {
         case .invalidConfiguration(let detail): "invalid configuration: \(detail)"
@@ -507,7 +507,7 @@ nonisolated extension AnywhereError.Proxy {
     }
 }
 
-nonisolated extension AnywhereError.Proxy.Cipher {
+nonisolated extension TurnError.Proxy.Cipher {
     var failureDescription: String {
         switch self {
         case .unsupportedMethod(let name): "unsupported cipher method: \(name)"
@@ -521,7 +521,7 @@ nonisolated extension AnywhereError.Proxy.Cipher {
     }
 }
 
-nonisolated extension AnywhereError.Routing {
+nonisolated extension TurnError.Routing {
     var failureDescription: String {
         switch self {
         case .rejectedByRule(let host): "rejected by routing rule: \(host)"
@@ -532,7 +532,7 @@ nonisolated extension AnywhereError.Routing {
     }
 }
 
-nonisolated extension AnywhereError.BinaryPayload {
+nonisolated extension TurnError.BinaryPayload {
     var label: String {
         switch self {
         case .badMagic: "bad magic"
@@ -543,7 +543,7 @@ nonisolated extension AnywhereError.BinaryPayload {
     }
 }
 
-nonisolated extension AnywhereError.MITM {
+nonisolated extension TurnError.MITM {
     var failureDescription: String {
         switch self {
         case .notHTTP: "stream is not HTTP"
@@ -562,14 +562,14 @@ nonisolated extension AnywhereError.MITM {
     }
 }
 
-nonisolated extension AnywhereError.Certificate {
+nonisolated extension TurnError.Certificate {
     var failureDescription: String {
         switch self {
         case .keyGenerationFailed(let detail): "key generation failed: \(detail)"
         case .keychainWriteFailed(let status): "keychain write failed (OSStatus \(status))"
         case .keychainReadFailed(let status): "keychain read failed (OSStatus \(status))"
         case .missingCAComponents: "CA key or certificate missing"
-        case .buildFailed(let underlying): "certificate build failed: \(AnywhereError.describe(underlying))"
+        case .buildFailed(let underlying): "certificate build failed: \(TurnError.describe(underlying))"
         case .signingFailed(let detail): "signing failed: \(detail)"
         case .publicKeyExportFailed: "public key export failed"
         case .invalidPublicKey: "invalid public key"
@@ -578,24 +578,24 @@ nonisolated extension AnywhereError.Certificate {
     }
 }
 
-nonisolated extension AnywhereError.Store {
+nonisolated extension TurnError.Store {
     var failureDescription: String {
         switch self {
         case .loadFailed(let resource, let underlying):
-            "failed to load \(resource.rawValue): \(AnywhereError.describe(underlying))"
+            "failed to load \(resource.rawValue): \(TurnError.describe(underlying))"
         case .saveFailed(let resource, let underlying):
-            "failed to save \(resource.rawValue): \(AnywhereError.describe(underlying))"
+            "failed to save \(resource.rawValue): \(TurnError.describe(underlying))"
         case .missing(let resource): "\(resource.rawValue) not found"
         case .corrupted(let resource, let detail):
             "\(resource.rawValue) corrupted" + (detail.map { ": \($0)" } ?? "")
         case .migrationFailed(let file, let underlying):
-            "failed to migrate \(file): \(AnywhereError.describe(underlying))"
-        case .syncFailed(let underlying): "sync failed: \(AnywhereError.describe(underlying))"
+            "failed to migrate \(file): \(TurnError.describe(underlying))"
+        case .syncFailed(let underlying): "sync failed: \(TurnError.describe(underlying))"
         }
     }
 }
 
-nonisolated extension AnywhereError.Parse {
+nonisolated extension TurnError.Parse {
     var failureDescription: String {
         switch self {
         case .yaml(let detail): "YAML: \(detail)"
@@ -606,7 +606,7 @@ nonisolated extension AnywhereError.Parse {
     }
 }
 
-nonisolated extension AnywhereError.Parse.ProxyURI {
+nonisolated extension TurnError.Parse.ProxyURI {
     var failureDescription: String {
         switch self {
         case .unsupportedScheme(let scheme):
@@ -618,7 +618,7 @@ nonisolated extension AnywhereError.Parse.ProxyURI {
     }
 }
 
-nonisolated extension AnywhereError.Subscription {
+nonisolated extension TurnError.Subscription {
     var failureDescription: String {
         switch self {
         case .invalidURL:
@@ -631,20 +631,20 @@ nonisolated extension AnywhereError.Subscription {
     }
 }
 
-nonisolated extension AnywhereError.Tunnel {
+nonisolated extension TurnError.Tunnel {
     var failureDescription: String {
         switch self {
         case .invalidConfiguration: "invalid or missing configuration"
         case .settingsApplyFailed(let underlying):
-            "failed to apply tunnel settings: \(AnywhereError.describe(underlying))"
+            "failed to apply tunnel settings: \(TurnError.describe(underlying))"
         case .ipcFailed(let underlying):
-            "provider message failed: \(AnywhereError.describe(underlying))"
+            "provider message failed: \(TurnError.describe(underlying))"
         case .sessionUnavailable: "tunnel session unavailable"
         }
     }
 }
 
-nonisolated extension AnywhereError.Diagnostics {
+nonisolated extension TurnError.Diagnostics {
     var failureDescription: String {
         switch self {
         case .latencyProbeFailed(let status): "latency probe returned unexpected status: \(status)"
@@ -654,7 +654,7 @@ nonisolated extension AnywhereError.Diagnostics {
 
 // MARK: - Classification
 
-nonisolated extension AnywhereError {
+nonisolated extension TurnError {
     enum PeerClose {
         case cascade
         case reset
@@ -685,7 +685,7 @@ nonisolated extension AnywhereError {
             nil
         }
     }
-    var suggestedLogLevel: AnywhereLogger.Level {
+    var suggestedLogLevel: TurnLogger.Level {
         switch self {
         case .transport(.posix(_, errno: EPIPE)),
              .quic(.closed(graceful: true)),
@@ -708,40 +708,40 @@ nonisolated extension AnywhereError {
 
 // MARK: - Capture & Interop
 
-nonisolated extension AnywhereError {
+nonisolated extension TurnError {
     static func capture(_ error: any Error, context: @autoclosure () -> String) -> any Error {
         switch error {
-        case is CancellationError, is AnywhereError: error
-        default: AnywhereError.wrapped(context: context(), underlying: error)
+        case is CancellationError, is TurnError: error
+        default: TurnError.wrapped(context: context(), underlying: error)
         }
     }
     
     static func describe(_ error: any Error) -> String {
         switch error {
-        case let error as AnywhereError: error.conciseDescription
+        case let error as TurnError: error.conciseDescription
         case is CancellationError: "cancelled"
         default: error.localizedDescription
         }
     }
-    static func severity(of error: any Error) -> AnywhereLogger.Level {
+    static func severity(of error: any Error) -> TurnLogger.Level {
         switch error {
-        case let error as AnywhereError: error.suggestedLogLevel
+        case let error as TurnError: error.suggestedLogLevel
         case is CancellationError: .debug
         default: .error
         }
     }
 }
 
-// MARK: - AnywhereLogger Coordination
+// MARK: - TurnLogger Coordination
 
-nonisolated extension AnywhereLogger {
+nonisolated extension TurnLogger {
     func report(_ message: @autoclosure () -> String, error: any Error) {
-        emit("\(message()): \(AnywhereError.describe(error))", at: AnywhereError.severity(of: error))
+        emit("\(message()): \(TurnError.describe(error))", at: TurnError.severity(of: error))
     }
     
     func report(_ error: any Error) {
-        emit((error as? AnywhereError)?.errorDescription ?? AnywhereError.describe(error),
-             at: AnywhereError.severity(of: error))
+        emit((error as? TurnError)?.errorDescription ?? TurnError.describe(error),
+             at: TurnError.severity(of: error))
     }
 
     private func emit(_ line: String, at level: Level) {

@@ -1,6 +1,6 @@
 //
 //  OutboundConnector.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "OutboundConnector")
+nonisolated private let logger = TurnLogger(category: "OutboundConnector")
 
 nonisolated enum OutboundConnector {
 
@@ -77,7 +77,7 @@ nonisolated enum OutboundConnector {
         )
         switch route {
         case .reject:
-            throw AnywhereError.routing(.rejectedByRule(host: host))
+            throw TurnError.routing(.rejectedByRule(host: host))
         case .direct:
             return try await dialDirect(host: host, port: port)
         case .proxy:

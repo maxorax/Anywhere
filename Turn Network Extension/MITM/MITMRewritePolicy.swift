@@ -1,6 +1,6 @@
 //
 //  MITMRewritePolicy.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/4/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMRewritePolicy")
+nonisolated private let logger = TurnLogger(category: "MITMRewritePolicy")
 
 nonisolated struct CompiledMITMRule {
     let phase: MITMPhase
@@ -227,7 +227,7 @@ nonisolated final class MITMRewritePolicy: Sendable {
         // Purge JS engine state for deleted sets; edited sets (stable id) keep theirs.
         let activeIDs = Set(ruleSets.map { $0.id })
         MITMScriptEngine.purgeEngines(activeIDs: activeIDs)
-        // Surface each set's resolved parameters to scripts as Anywhere.params.
+        // Surface each set's resolved parameters to scripts as Turn.params.
         MITMParamStore.shared.replaceAll(ruleSets.map { (scope: $0.id, values: $0.parameterValues) })
         // Prewarm compile caches so the first intercepted flow doesn't pay cold-start inline.
         MITMScriptTransform.prewarm(scopedRules: scopedRules)
@@ -531,11 +531,11 @@ nonisolated enum MITMBinaryReader {
 
         init(bytes: UnsafeBufferPointer<UInt8>) { self.bytes = bytes }
 
-        mutating func readSnapshot() throws(AnywhereError) -> (enabled: Bool, ruleSets: [MITMRuleSet]) {
+        mutating func readSnapshot() throws(TurnError) -> (enabled: Bool, ruleSets: [MITMRuleSet]) {
             try expectMagic()
             let payloadVersion = try u8()
             guard payloadVersion >= 1, payloadVersion <= MITMBinaryFormat.version else {
-                throw AnywhereError.mitm(.rewriteRulesCorrupted(.unsupportedVersion))
+                throw TurnError.mitm(.rewriteRulesCorrupted(.unsupportedVersion))
             }
             version = payloadVersion
             let enabled = try u8() != 0
@@ -550,7 +550,7 @@ nonisolated enum MITMBinaryReader {
             return (enabled, sets)
         }
 
-        private mutating func readSet() throws(AnywhereError) -> MITMRuleSet {
+        private mutating func readSet() throws(TurnError) -> MITMRuleSet {
             let id = try readUUID()
             let name = try str16()
             let enabled = try u8() != 0
@@ -583,19 +583,19 @@ nonisolated enum MITMBinaryReader {
             return set
         }
 
-        private mutating func readRule() throws(AnywhereError) -> MITMRule {
+        private mutating func readRule() throws(TurnError) -> MITMRule {
             let phase: MITMPhase
             switch try u8() {
             case MITMBinaryFormat.Phase.httpRequest.rawValue: phase = .httpRequest
             case MITMBinaryFormat.Phase.httpResponse.rawValue: phase = .httpResponse
-            default: throw AnywhereError.mitm(.rewriteRulesCorrupted(.malformed))
+            default: throw TurnError.mitm(.rewriteRulesCorrupted(.malformed))
             }
             let urlPattern = try str32()
             return MITMRule(phase: phase, urlPattern: urlPattern, operation: try readOperation())
         }
 
-        private mutating func readOperation() throws(AnywhereError) -> MITMOperation {
-            guard let kind = MITMBinaryFormat.OpKind(rawValue: try u8()) else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.malformed)) }
+        private mutating func readOperation() throws(TurnError) -> MITMOperation {
+            guard let kind = MITMBinaryFormat.OpKind(rawValue: try u8()) else { throw TurnError.mitm(.rewriteRulesCorrupted(.malformed)) }
             switch kind {
             case .rewrite:       return .rewrite(try readRewrite())
             case .headerAdd:     return .headerAdd(name: try str16(), value: try str32())
@@ -608,8 +608,8 @@ nonisolated enum MITMBinaryReader {
             }
         }
 
-        private mutating func readRewrite() throws(AnywhereError) -> MITMRewriteAction {
-            guard let kind = MITMBinaryFormat.RewriteKind(rawValue: try u8()) else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.malformed)) }
+        private mutating func readRewrite() throws(TurnError) -> MITMRewriteAction {
+            guard let kind = MITMBinaryFormat.RewriteKind(rawValue: try u8()) else { throw TurnError.mitm(.rewriteRulesCorrupted(.malformed)) }
             switch kind {
             case .transparent:   return .transparent(url: try str32())
             case .redirect302:   return .redirect302(url: try str32())
@@ -619,8 +619,8 @@ nonisolated enum MITMBinaryReader {
             }
         }
 
-        private mutating func readJSON() throws(AnywhereError) -> MITMJSONOperation {
-            guard let action = MITMBinaryFormat.JSONAction(rawValue: try u8()) else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.malformed)) }
+        private mutating func readJSON() throws(TurnError) -> MITMJSONOperation {
+            guard let action = MITMBinaryFormat.JSONAction(rawValue: try u8()) else { throw TurnError.mitm(.rewriteRulesCorrupted(.malformed)) }
             switch action {
             case .add:                  return .add(path: try str32(), value: try str32())
             case .replace:              return .replace(path: try str32(), value: try str32())
@@ -634,48 +634,48 @@ nonisolated enum MITMBinaryReader {
 
         // MARK: Primitives
 
-        private mutating func expectMagic() throws(AnywhereError) {
+        private mutating func expectMagic() throws(TurnError) {
             let magic = MITMBinaryFormat.magic
-            guard readOffset + magic.count <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
-            for k in 0..<magic.count where bytes[readOffset + k] != magic[k] { throw AnywhereError.mitm(.rewriteRulesCorrupted(.badMagic)) }
+            guard readOffset + magic.count <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
+            for k in 0..<magic.count where bytes[readOffset + k] != magic[k] { throw TurnError.mitm(.rewriteRulesCorrupted(.badMagic)) }
             readOffset += magic.count
         }
 
-        private mutating func u8() throws(AnywhereError) -> UInt8 {
-            guard readOffset < count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+        private mutating func u8() throws(TurnError) -> UInt8 {
+            guard readOffset < count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             defer { readOffset += 1 }
             return bytes[readOffset]
         }
 
-        private mutating func u16() throws(AnywhereError) -> UInt16 {
-            guard readOffset + 2 <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+        private mutating func u16() throws(TurnError) -> UInt16 {
+            guard readOffset + 2 <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             defer { readOffset += 2 }
             return UInt16(bytes[readOffset]) | (UInt16(bytes[readOffset + 1]) << 8)
         }
 
-        private mutating func u32() throws(AnywhereError) -> UInt32 {
-            guard readOffset + 4 <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+        private mutating func u32() throws(TurnError) -> UInt32 {
+            guard readOffset + 4 <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             defer { readOffset += 4 }
             return UInt32(bytes[readOffset]) | (UInt32(bytes[readOffset + 1]) << 8)
                  | (UInt32(bytes[readOffset + 2]) << 16) | (UInt32(bytes[readOffset + 3]) << 24)
         }
 
-        private mutating func str16() throws(AnywhereError) -> String {
+        private mutating func str16() throws(TurnError) -> String {
             let n = Int(try u16())
-            guard readOffset + n <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+            guard readOffset + n <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             defer { readOffset += n }
             return String(decoding: bytes[readOffset..<readOffset + n], as: UTF8.self)
         }
 
-        private mutating func str32() throws(AnywhereError) -> String {
+        private mutating func str32() throws(TurnError) -> String {
             let n = Int(try u32())
-            guard readOffset + n <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+            guard readOffset + n <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             defer { readOffset += n }
             return String(decoding: bytes[readOffset..<readOffset + n], as: UTF8.self)
         }
 
-        private mutating func readUUID() throws(AnywhereError) -> UUID {
-            guard readOffset + 16 <= count else { throw AnywhereError.mitm(.rewriteRulesCorrupted(.truncated)) }
+        private mutating func readUUID() throws(TurnError) -> UUID {
+            guard readOffset + 16 <= count else { throw TurnError.mitm(.rewriteRulesCorrupted(.truncated)) }
             let u = UUID(uuid: (
                 bytes[readOffset], bytes[readOffset + 1], bytes[readOffset + 2], bytes[readOffset + 3],
                 bytes[readOffset + 4], bytes[readOffset + 5], bytes[readOffset + 6], bytes[readOffset + 7],

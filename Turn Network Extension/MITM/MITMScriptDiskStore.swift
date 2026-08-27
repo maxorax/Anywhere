@@ -1,6 +1,6 @@
 //
 //  MITMScriptDiskStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/10/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMScriptDiskStore")
+nonisolated private let logger = TurnLogger(category: "MITMScriptDiskStore")
 
 nonisolated final class MITMScriptDiskStore: Sendable {
 
@@ -44,25 +44,25 @@ nonisolated final class MITMScriptDiskStore: Sendable {
         return state.withLock { $0.cache[scope]?[key] }
     }
 
-    func set(scope: UUID, key: String, value: Data) throws(AnywhereError) {
+    func set(scope: UUID, key: String, value: Data) throws(TurnError) {
         ensureLoaded(scope)
-        let serialized: Data = try state.withLock { (state) throws(AnywhereError) -> Data in
+        let serialized: Data = try state.withLock { (state) throws(TurnError) -> Data in
             var bucket = state.cache[scope] ?? [:]
             bucket[key] = value
             guard let serialized = serialize(bucket) else {
-                throw AnywhereError.mitm(.scriptStoreWriteFailed)
+                throw TurnError.mitm(.scriptStoreWriteFailed)
             }
             if serialized.count > Self.maxBytesPerScope {
-                throw AnywhereError.mitm(.scriptStoreCapacityExceeded)
+                throw TurnError.mitm(.scriptStoreCapacityExceeded)
             }
             let oldSize = state.fileSizes[scope] ?? 0
             if state.totalBytes - oldSize + serialized.count > Self.maxTotalBytes {
-                throw AnywhereError.mitm(.scriptStoreCapacityExceeded)
+                throw TurnError.mitm(.scriptStoreCapacityExceeded)
             }
             return serialized
         }
         guard writeToDisk(scope: scope, data: serialized) else {
-            throw AnywhereError.mitm(.scriptStoreWriteFailed)
+            throw TurnError.mitm(.scriptStoreWriteFailed)
         }
         state.withLock { state in
             var bucket = state.cache[scope] ?? [:]
@@ -172,10 +172,10 @@ nonisolated final class MITMScriptDiskStore: Sendable {
                 if let dictionary = object as? [String: Data] {
                     bucket = dictionary
                 } else {
-                    logger.report(AnywhereError.store(.corrupted(.scripts, detail: "\(scope): unexpected plist shape")))
+                    logger.report(TurnError.store(.corrupted(.scripts, detail: "\(scope): unexpected plist shape")))
                 }
             } catch {
-                logger.report(AnywhereError.store(.corrupted(.scripts, detail: "\(scope): \(AnywhereError.describe(error))")))
+                logger.report(TurnError.store(.corrupted(.scripts, detail: "\(scope): \(TurnError.describe(error))")))
             }
         }
 
@@ -199,8 +199,8 @@ nonisolated final class MITMScriptDiskStore: Sendable {
             }
         }
         if let error = coordError ?? (readError as NSError?), !Self.isFileNotFound(error) {
-            logger.report("[MITM][JS] Anywhere.store(onDisk): read failed for \(url.lastPathComponent)",
-                          error: AnywhereError.store(.loadFailed(.scripts, underlying: error)))
+            logger.report("[MITM][JS] Turn.store(onDisk): read failed for \(url.lastPathComponent)",
+                          error: TurnError.store(.loadFailed(.scripts, underlying: error)))
         }
         return result
     }
@@ -230,7 +230,7 @@ nonisolated final class MITMScriptDiskStore: Sendable {
             }
         }
         if let error = coordError ?? writeError {
-            logger.error("[MITM][JS] Anywhere.store(onDisk): write failed for \(scope): \(AnywhereError.describe(error))")
+            logger.error("[MITM][JS] Turn.store(onDisk): write failed for \(scope): \(TurnError.describe(error))")
             return false
         }
         return true

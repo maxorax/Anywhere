@@ -1,6 +1,6 @@
 //
 //  QUICDatagramTransport.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/19/26.
 //
@@ -68,7 +68,7 @@ nonisolated final class ProxyConnectionDatagramTransport: QUICDatagramTransport,
     /// True for per-datagram errors (packet didn't fit), false for terminal ones; the outer
     /// QUIC must not close on transient errors.
     private static func isTransientDatagramError(_ error: Error) -> Bool {
-        if case AnywhereError.quic(let quicError) = error {
+        if case TurnError.quic(let quicError) = error {
             switch quicError {
             case .handshakeFailed, .streamReset, .streamClosedWithError, .closed:
                 return false
@@ -76,7 +76,7 @@ nonisolated final class ProxyConnectionDatagramTransport: QUICDatagramTransport,
                 return true
             }
         }
-        if case AnywhereError.proxy(.hysteria, let failure) = error {
+        if case TurnError.proxy(.hysteria, let failure) = error {
             switch failure {
             case .authenticationRejected, .unsupported, .datagramTooLarge, .streamClosed:
                 return false
@@ -88,7 +88,7 @@ nonisolated final class ProxyConnectionDatagramTransport: QUICDatagramTransport,
                 return false
             }
         }
-        if case AnywhereError.proxy(.nowhere, let failure) = error {
+        if case TurnError.proxy(.nowhere, let failure) = error {
             // Conservatively allowlist only errors that describe a transient
             // per-datagram/session window. New protocol errors remain terminal
             // without coupling this transport adapter to every Nowhere case.

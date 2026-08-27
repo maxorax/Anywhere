@@ -1,6 +1,6 @@
 //
 //  VPNViewModel.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -10,7 +10,7 @@ import NetworkExtension
 import SwiftUI
 import Observation
 
-nonisolated private let logger = AnywhereLogger(category: "VPNViewModel")
+nonisolated private let logger = TurnLogger(category: "VPNViewModel")
 
 @MainActor
 @Observable
@@ -412,7 +412,7 @@ class VPNViewModel {
         }
     }
 
-    private static let providerBundleIdentifier = "com.argsment.Anywhere.Network-Extension"
+    private static let providerBundleIdentifier = "com.argsment.Turn.Network-Extension"
 
     private func setupVPNManager() {
         Task {
@@ -456,8 +456,8 @@ class VPNViewModel {
             let resolvedIP = await VPNViewModel.resolveServerAddress(configuration.serverAddress)
 
             let tunnelProtocol = NETunnelProviderProtocol()
-            tunnelProtocol.providerBundleIdentifier = "com.argsment.Anywhere.Network-Extension"
-            tunnelProtocol.serverAddress = "Anywhere"
+            tunnelProtocol.providerBundleIdentifier = "com.argsment.Turn.Network-Extension"
+            tunnelProtocol.serverAddress = "Turn"
             #if !os(tvOS)
             tunnelProtocol.includeAllNetworks = AWCore.getTunnelIncludeAllNetworks()
             tunnelProtocol.excludeLocalNetworks = !AWCore.getTunnelIncludeLocalNetworks()
@@ -466,7 +466,7 @@ class VPNViewModel {
             #endif
 
             manager.protocolConfiguration = tunnelProtocol
-            manager.localizedDescription = "Anywhere"
+            manager.localizedDescription = "Turn"
             manager.isEnabled = true
 
             let alwaysOn = AWCore.getAlwaysOnEnabled()

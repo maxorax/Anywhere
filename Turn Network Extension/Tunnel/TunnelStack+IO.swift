@@ -1,6 +1,6 @@
 //
 //  TunnelStack+IO.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/30/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import NetworkExtension
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TunnelStack+IO")
+nonisolated private let logger = TurnLogger(category: "TunnelStack+IO")
 
 extension TunnelStack {
 

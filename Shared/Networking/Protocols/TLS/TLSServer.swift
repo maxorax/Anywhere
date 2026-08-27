@@ -1,6 +1,6 @@
 //
 //  TLSServer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -23,7 +23,7 @@ nonisolated protocol TLSServerDelegate: AnyObject {
     )
 
     /// Handshake failed. Any alert bytes are delivered via ``didProduceOutput`` first; this is terminal.
-    func tlsServer(_ server: TLSServer, didFail error: AnywhereError)
+    func tlsServer(_ server: TLSServer, didFail error: TurnError)
 }
 
 nonisolated final class TLSServer {
@@ -117,7 +117,7 @@ nonisolated final class TLSServer {
         rxBuffer.append(data)
         do {
             try runStateMachine()
-        } catch let error as AnywhereError {
+        } catch let error as TurnError {
             failHandshake(error)
         } catch {
             failHandshake(.tls(.handshakeFailed(detail: error.localizedDescription)))
@@ -272,7 +272,7 @@ nonisolated final class TLSServer {
         emitChangeCipherSpec()
 
         guard let clientPub = try? Curve25519.KeyAgreement.PublicKey(rawRepresentation: clientKeyShare) else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "invalid client X25519 key share"))
+            throw TurnError.tls(.handshakeFailed(detail: "invalid client X25519 key share"))
         }
         let shared = try serverPriv.sharedSecretFromKeyAgreement(with: clientPub)
         let sharedData = shared.withUnsafeBytes { Data($0) }
@@ -334,12 +334,12 @@ nonisolated final class TLSServer {
             return
         }
         guard contentType == TLSContentType.applicationData else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "expected encrypted handshake (got \(contentType))"))
+            throw TurnError.tls(.handshakeFailed(detail: "expected encrypted handshake (got \(contentType))"))
         }
 
         guard let keys = handshake.handshakeKeys, let kd = handshake.keyDerivation,
               let hsSecret = handshake.handshakeSecret else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "missing handshake keys"))
+            throw TurnError.tls(.handshakeFailed(detail: "missing handshake keys"))
         }
 
         let header = record.subdata(in: record.startIndex..<(record.startIndex + 5))
@@ -378,7 +378,7 @@ nonisolated final class TLSServer {
                     | Int(buffer[offset + 3])
             // Length field is uint24; cap below 0xFFFF (not RFC-mandated) to bound allocations.
             guard length <= 0xFFFF else {
-                throw AnywhereError.tls(.handshakeFailed(detail: "handshake message too large"))
+                throw TurnError.tls(.handshakeFailed(detail: "handshake message too large"))
             }
             let total = 4 + length
             guard offset + total <= buffer.endIndex else { return }
@@ -393,14 +393,14 @@ nonisolated final class TLSServer {
                     transcript: handshake.transcript
                 )
                 guard expected.count == received.count else {
-                    throw AnywhereError.tls(.handshakeFailed(detail: "Finished length mismatch"))
+                    throw TurnError.tls(.handshakeFailed(detail: "Finished length mismatch"))
                 }
                 var diff: UInt8 = 0
                 for i in 0..<expected.count {
                     diff |= expected[expected.startIndex + i] ^ received[received.startIndex + i]
                 }
                 guard diff == 0 else {
-                    throw AnywhereError.tls(.handshakeFailed(detail: "Client Finished verify failed"))
+                    throw TurnError.tls(.handshakeFailed(detail: "Client Finished verify failed"))
                 }
 
                 // The application traffic secrets derive from the transcript through
@@ -522,7 +522,7 @@ nonisolated final class TLSServer {
 
     // MARK: - Failure
 
-    private func failHandshake(_ error: AnywhereError) {
+    private func failHandshake(_ error: TurnError) {
         state = .failed
         delegate?.tlsServer(self, didFail: error)
     }
@@ -546,7 +546,7 @@ nonisolated final class TLSServer {
         let length = (Int(rxBuffer[rxBuffer.startIndex + 3]) << 8)
                 | Int(rxBuffer[rxBuffer.startIndex + 4])
         guard length <= 16384 + 256 else {
-            throw AnywhereError.tls(.handshakeFailed(detail: "record length \(length) out of bounds"))
+            throw TurnError.tls(.handshakeFailed(detail: "record length \(length) out of bounds"))
         }
         let total = 5 + length
         guard rxBuffer.count >= total else { return nil }
@@ -569,14 +569,14 @@ nonisolated final class TLSServer {
             guard available - offset >= 5 else { return nil }
             let h = rxBuffer.index(base, offsetBy: offset)
             guard rxBuffer[h] == TLSContentType.handshake else {
-                throw AnywhereError.tls(.handshakeFailed(detail: "Expected handshake record"))
+                throw TurnError.tls(.handshakeFailed(detail: "Expected handshake record"))
             }
             let length = (Int(rxBuffer[rxBuffer.index(h, offsetBy: 3)]) << 8)
                     | Int(rxBuffer[rxBuffer.index(h, offsetBy: 4)])
             // Reject zero-length records: they never advance `messageLength`, so the per-message cap
             // never fires and a flood of them would grow rxBuffer without bound.
             guard length > 0, length <= 16384 + 256 else {
-                throw AnywhereError.tls(.handshakeFailed(detail: "record length \(length) out of bounds"))
+                throw TurnError.tls(.handshakeFailed(detail: "record length \(length) out of bounds"))
             }
             let recordTotal = 5 + length
             guard available - offset >= recordTotal else { return nil }
@@ -587,14 +587,14 @@ nonisolated final class TLSServer {
             if messageLength == nil, payload.count >= 4 {
                 let b = payload.startIndex
                 guard payload[b] == TLSHandshakeType.clientHello else {
-                    throw AnywhereError.tls(.handshakeFailed(detail: "Expected ClientHello"))
+                    throw TurnError.tls(.handshakeFailed(detail: "Expected ClientHello"))
                 }
                 let bodyLen = (Int(payload[payload.index(b, offsetBy: 1)]) << 16)
                             | (Int(payload[payload.index(b, offsetBy: 2)]) << 8)
                             | Int(payload[payload.index(b, offsetBy: 3)])
                 let total = 4 + bodyLen
                 guard total <= Self.maxClientHelloBytes else {
-                    throw AnywhereError.tls(.handshakeFailed(detail: "ClientHello too large (\(total) B)"))
+                    throw TurnError.tls(.handshakeFailed(detail: "ClientHello too large (\(total) B)"))
                 }
                 messageLength = total
             }

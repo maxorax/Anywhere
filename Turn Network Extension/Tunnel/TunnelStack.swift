@@ -1,6 +1,6 @@
 //
 //  TunnelStack.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 1/26/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import NetworkExtension
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TunnelStack")
+nonisolated private let logger = TurnLogger(category: "TunnelStack")
 
 // MARK: - Traffic Accounting
 
@@ -86,8 +86,8 @@ actor TunnelStack {
     private let _mitmLeafCache = Mutex<MITMLeafCertCache?>(nil)
     nonisolated let mitmCertificateStore = MITMCertificateStore()
     
-    nonisolated func mitmLeafCacheCreatingIfNeeded() throws(AnywhereError) -> MITMLeafCertCache {
-        try _mitmLeafCache.withLock { (cache) throws(AnywhereError) in
+    nonisolated func mitmLeafCacheCreatingIfNeeded() throws(TurnError) -> MITMLeafCertCache {
+        try _mitmLeafCache.withLock { (cache) throws(TurnError) in
             if let cache { return cache }
             let made = try MITMLeafCertCache(store: mitmCertificateStore)
             cache = made

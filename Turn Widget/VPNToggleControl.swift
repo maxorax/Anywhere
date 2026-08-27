@@ -1,6 +1,6 @@
 //
 //  VPNToggleControl.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/6/26.
 //
@@ -13,7 +13,7 @@ import WidgetKit
 struct VPNToggleControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(
-            kind: "com.argsment.Anywhere.Widget.VPNToggle",
+            kind: "com.argsment.Turn.Widget.VPNToggle",
             provider: VPNStatusProvider()
         ) { isOn in
             ControlWidgetToggle(
@@ -23,7 +23,7 @@ struct VPNToggleControl: ControlWidget {
             ) { isOn in
                 Label(
                     isOn ? "Connected" : "Disconnected",
-                    image: "anywhere"
+                    image: "turn"
                 )
             }
         }
@@ -32,12 +32,12 @@ struct VPNToggleControl: ControlWidget {
     }
 }
 
-private let anywhereNEBundleIdentifier = "com.argsment.Anywhere.Network-Extension"
+private let turnNEBundleIdentifier = "com.argsment.Turn.Network-Extension"
 
 private func loadManager() async throws -> NETunnelProviderManager? {
     let managers = try await NETunnelProviderManager.loadAllFromPreferences()
     return managers.first {
-        ($0.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == anywhereNEBundleIdentifier
+        ($0.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == turnNEBundleIdentifier
     }
 }
 

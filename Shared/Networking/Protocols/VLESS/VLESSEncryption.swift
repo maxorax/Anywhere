@@ -1,6 +1,6 @@
 //
 //  VLESSEncryption.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/10/26.
 //
@@ -42,10 +42,10 @@ nonisolated struct VLESSEncryptionConfig: Equatable, Hashable {
 
         let segments = string.split(separator: ".", omittingEmptySubsequences: false)
         guard segments.count >= 4 else {
-            throw AnywhereError.parse(.proxyURI(.missingFields))
+            throw TurnError.parse(.proxyURI(.missingFields))
         }
         guard segments[0] == "mlkem768x25519plus" else {
-            throw AnywhereError.parse(.proxyURI(.unsupportedScheme(nil)))
+            throw TurnError.parse(.proxyURI(.unsupportedScheme(nil)))
         }
 
         let xorMode: XORMode
@@ -54,7 +54,7 @@ nonisolated struct VLESSEncryptionConfig: Equatable, Hashable {
         case "xorpub": xorMode = .xorpub
         case "random": xorMode = .random
         default:
-            throw AnywhereError.parse(.proxyURI(.invalidValue(field: "xorMode", value: String(segments[1]))))
+            throw TurnError.parse(.proxyURI(.invalidValue(field: "xorMode", value: String(segments[1]))))
         }
 
         let rttMode: RTTMode
@@ -62,7 +62,7 @@ nonisolated struct VLESSEncryptionConfig: Equatable, Hashable {
         case "1rtt": rttMode = .oneRTT
         case "0rtt": rttMode = .zeroRTT
         default:
-            throw AnywhereError.parse(.proxyURI(.invalidValue(field: "rttMode", value: String(segments[2]))))
+            throw TurnError.parse(.proxyURI(.invalidValue(field: "rttMode", value: String(segments[2]))))
         }
 
         // Segments under 20 chars are padding specs; longer ones are base64url keys.
@@ -76,13 +76,13 @@ nonisolated struct VLESSEncryptionConfig: Equatable, Hashable {
             }
             guard let key = Data(base64URLEncoded: segment),
                   key.count == 32 || key.count == 1184 else {
-                throw AnywhereError.parse(.proxyURI(.invalidValue(field: "publicKey", value: segment)))
+                throw TurnError.parse(.proxyURI(.invalidValue(field: "publicKey", value: segment)))
             }
             publicKeys.append(key)
         }
 
         guard !publicKeys.isEmpty else {
-            throw AnywhereError.parse(.proxyURI(.noPublicKeys))
+            throw TurnError.parse(.proxyURI(.noPublicKeys))
         }
 
         return VLESSEncryptionConfig(

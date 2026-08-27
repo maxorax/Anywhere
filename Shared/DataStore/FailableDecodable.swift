@@ -1,6 +1,6 @@
 //
 //  FailableDecodable.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/9/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 
 nonisolated final class DecodeLossTally: @unchecked Sendable {
-    static let key = CodingUserInfoKey(rawValue: "AnywhereDecodeLossTally")!
+    static let key = CodingUserInfoKey(rawValue: "TurnDecodeLossTally")!
     var dropped = 0
 }
 

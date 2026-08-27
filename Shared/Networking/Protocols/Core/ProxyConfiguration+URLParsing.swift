@@ -1,6 +1,6 @@
 //
 //  ProxyConfiguration+URLParsing.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -42,7 +42,7 @@ nonisolated extension ProxyConfiguration {
         if url.hasPrefix("sudoku://") {
             return try parseSudoku(url: url)
         }
-        throw AnywhereError.parse(.invalidURL("URL must start with nowhere://, vless://, hysteria2://, trojan://, anytls://, ss://, socks5://, or sudoku://"))
+        throw TurnError.parse(.invalidURL("URL must start with nowhere://, vless://, hysteria2://, trojan://, anytls://, ss://, socks5://, or sudoku://"))
     }
 
     // MARK: - Per-Scheme Parsers
@@ -52,10 +52,10 @@ nonisolated extension ProxyConfiguration {
         let parameters = body.firstParameters
 
         guard !body.userInfo.contains(":"), let key = body.userInfo.removingPercentEncoding else {
-            throw AnywhereError.parse(.invalidURL("Invalid Nowhere key encoding"))
+            throw TurnError.parse(.invalidURL("Invalid Nowhere key encoding"))
         }
         guard !key.isEmpty, key.utf8.count <= UInt8.max else {
-            throw AnywhereError.parse(.invalidURL("Missing Nowhere key"))
+            throw TurnError.parse(.invalidURL("Missing Nowhere key"))
         }
 
         let rawNetwork = parameters["net"]
@@ -64,13 +64,13 @@ nonisolated extension ProxyConfiguration {
         func carrier(_ explicit: String?, name: String) throws -> NowhereNetwork {
             if let explicit {
                 guard let value = NowhereNetwork(rawValue: explicit) else {
-                    throw AnywhereError.parse(.invalidURL("Invalid Nowhere \(name) value"))
+                    throw TurnError.parse(.invalidURL("Invalid Nowhere \(name) value"))
                 }
                 return value
             }
             if let rawNetwork {
                 guard let value = NowhereNetwork(rawValue: rawNetwork) else {
-                    throw AnywhereError.parse(.invalidURL("Invalid Nowhere net value"))
+                    throw TurnError.parse(.invalidURL("Invalid Nowhere net value"))
                 }
                 return value
             }
@@ -84,7 +84,7 @@ nonisolated extension ProxyConfiguration {
             pool = 0
         } else if let rawPool = parameters["pool"] {
             guard let parsed = Int(rawPool), parsed >= 0 else {
-                throw AnywhereError.parse(.invalidURL("Invalid Nowhere pool value"))
+                throw TurnError.parse(.invalidURL("Invalid Nowhere pool value"))
             }
             pool = min(parsed, NowherePool.validRange.upperBound)
         } else {
@@ -96,7 +96,7 @@ nonisolated extension ProxyConfiguration {
         let alpn: [String]?
         if let rawALPN = parameters["alpn"] {
             guard !rawALPN.isEmpty, rawALPN.utf8.count <= UInt8.max else {
-                throw AnywhereError.parse(.invalidURL("Invalid Nowhere ALPN"))
+                throw TurnError.parse(.invalidURL("Invalid Nowhere ALPN"))
             }
             alpn = [rawALPN]
         } else {
@@ -123,7 +123,7 @@ nonisolated extension ProxyConfiguration {
         let body = try splitLinkBody(url, scheme: "vless://", label: "vless", allowBase64Body: true)
 
         guard let uuid = UUID(uuidString: body.userInfo) else {
-            throw AnywhereError.parse(.invalidURL("Invalid UUID: \(body.userInfo)"))
+            throw TurnError.parse(.invalidURL("Invalid UUID: \(body.userInfo)"))
         }
 
         let parameters = body.parameters
@@ -141,7 +141,7 @@ nonisolated extension ProxyConfiguration {
                     xraySecurityLayer = .none
                 }
             } catch {
-                throw AnywhereError.parse(.invalidURL("Reality configuration error: \(error.localizedDescription)"))
+                throw TurnError.parse(.invalidURL("Reality configuration error: \(error.localizedDescription)"))
             }
         } else if security == "tls" {
             do {
@@ -151,7 +151,7 @@ nonisolated extension ProxyConfiguration {
                     xraySecurityLayer = .none
                 }
             } catch {
-                throw AnywhereError.parse(.invalidURL("TLS configuration error: \(error.localizedDescription)"))
+                throw TurnError.parse(.invalidURL("TLS configuration error: \(error.localizedDescription)"))
             }
         } else {
             xraySecurityLayer = .none
@@ -194,7 +194,7 @@ nonisolated extension ProxyConfiguration {
             let obfsMax = parameters["obfs-max-packet-size"].flatMap { Int($0) }
             guard let parsed = HysteriaObfuscation.make(type: obfsType, password: parameters["obfs-password"],
                                                         geckoMinPacketSize: obfsMin, geckoMaxPacketSize: obfsMax) else {
-                throw AnywhereError.parse(.invalidURL("Unsupported Hysteria obfs type: \(obfsType)"))
+                throw TurnError.parse(.invalidURL("Unsupported Hysteria obfs type: \(obfsType)"))
             }
             obfuscation = parsed
         } else {
@@ -284,15 +284,15 @@ nonisolated extension ProxyConfiguration {
             // Legacy pre-SIP002 form: base64(method:password@host:port)
             guard let decoded = Data(base64URLEncoded: urlWithoutScheme),
                   let decodedString = String(data: decoded, encoding: .utf8) else {
-                throw AnywhereError.parse(.invalidURL("Invalid SS URL encoding"))
+                throw TurnError.parse(.invalidURL("Invalid SS URL encoding"))
             }
             guard let colonIndex = decodedString.firstIndex(of: ":") else {
-                throw AnywhereError.parse(.invalidURL("Missing method:password separator"))
+                throw TurnError.parse(.invalidURL("Missing method:password separator"))
             }
             method = String(decodedString[..<colonIndex])
             let rest = String(decodedString[decodedString.index(after: colonIndex)...])
             guard let atIndex = rest.lastIndex(of: "@") else {
-                throw AnywhereError.parse(.invalidURL("Missing @ separator in decoded SS URL"))
+                throw TurnError.parse(.invalidURL("Missing @ separator in decoded SS URL"))
             }
             password = String(rest[..<atIndex])
             let serverPart = String(rest[rest.index(after: atIndex)...])
@@ -300,7 +300,7 @@ nonisolated extension ProxyConfiguration {
         }
 
         guard ShadowsocksCipher(method: method) != nil else {
-            throw AnywhereError.parse(.invalidURL("Unsupported SS method: \(method)"))
+            throw TurnError.parse(.invalidURL("Unsupported SS method: \(method)"))
         }
 
         return ProxyConfiguration(
@@ -320,7 +320,7 @@ nonisolated extension ProxyConfiguration {
         guard let decoded = Data(base64URLEncoded: userInfo),
               let decodedString = String(data: decoded, encoding: .utf8),
               let colonIndex = decodedString.firstIndex(of: ":") else {
-            throw AnywhereError.parse(.invalidURL("Invalid SS user info encoding"))
+            throw TurnError.parse(.invalidURL("Invalid SS user info encoding"))
         }
         let method = String(decodedString[..<colonIndex])
         let password = String(decodedString[decodedString.index(after: colonIndex)...])
@@ -334,7 +334,7 @@ nonisolated extension ProxyConfiguration {
         } else if url.hasPrefix("socks://") {
             urlWithoutScheme = String(url.dropFirst("socks://".count))
         } else {
-            throw AnywhereError.parse(.invalidURL("SOCKS5 URL must start with socks5:// or socks://"))
+            throw TurnError.parse(.invalidURL("SOCKS5 URL must start with socks5:// or socks://"))
         }
 
         var remaining = urlWithoutScheme
@@ -379,7 +379,7 @@ nonisolated extension ProxyConfiguration {
         let encoded = String(url.dropFirst("sudoku://".count))
         guard let payload = Data(base64URLEncoded: encoded),
               let json = try JSONSerialization.jsonObject(with: payload) as? [String: Any] else {
-            throw AnywhereError.parse(.invalidURL("Invalid Sudoku short link payload"))
+            throw TurnError.parse(.invalidURL("Invalid Sudoku short link payload"))
         }
 
         guard let host = json["h"] as? String,
@@ -387,7 +387,7 @@ nonisolated extension ProxyConfiguration {
               let key = json["k"] as? String,
               !host.isEmpty,
               !key.isEmpty else {
-            throw AnywhereError.parse(.invalidURL("Sudoku short link is missing required fields"))
+            throw TurnError.parse(.invalidURL("Sudoku short link is missing required fields"))
         }
 
         let portInt: Int
@@ -397,7 +397,7 @@ nonisolated extension ProxyConfiguration {
             portInt = Int("\(portValue)") ?? 0
         }
         guard let port = UInt16(exactly: portInt), port > 0 else {
-            throw AnywhereError.parse(.invalidURL("Invalid Sudoku short link port"))
+            throw TurnError.parse(.invalidURL("Invalid Sudoku short link port"))
         }
 
         let aead = SudokuAEADMethod(rawValue: (json["e"] as? String) ?? SudokuAEADMethod.none.rawValue) ?? .none
@@ -482,7 +482,7 @@ nonisolated extension ProxyConfiguration {
         }
 
         guard let atIndex = remaining.lastIndex(of: "@") else {
-            throw AnywhereError.parse(.invalidURL("Missing @ separator in \(label) URL"))
+            throw TurnError.parse(.invalidURL("Missing @ separator in \(label) URL"))
         }
         let userInfo = String(remaining[..<atIndex])
         var serverPart = String(remaining[remaining.index(after: atIndex)...])
@@ -606,23 +606,23 @@ nonisolated extension ProxyConfiguration {
         let portString: String
         if string.hasPrefix("[") {
             guard let closeBracket = string.firstIndex(of: "]") else {
-                throw AnywhereError.parse(.invalidURL("Missing closing bracket for IPv6"))
+                throw TurnError.parse(.invalidURL("Missing closing bracket for IPv6"))
             }
             host = String(string[string.index(after: string.startIndex)..<closeBracket])
             let afterBracket = string[string.index(after: closeBracket)...]
             guard afterBracket.hasPrefix(":") else {
-                throw AnywhereError.parse(.invalidURL("Missing port after IPv6 address"))
+                throw TurnError.parse(.invalidURL("Missing port after IPv6 address"))
             }
             portString = String(afterBracket.dropFirst())
         } else {
             guard let colonIndex = string.lastIndex(of: ":") else {
-                throw AnywhereError.parse(.invalidURL("Missing port"))
+                throw TurnError.parse(.invalidURL("Missing port"))
             }
             host = String(string[..<colonIndex])
             portString = String(string[string.index(after: colonIndex)...])
         }
         guard let port = UInt16(portString) else {
-            throw AnywhereError.parse(.invalidURL("Invalid port: \(portString)"))
+            throw TurnError.parse(.invalidURL("Invalid port: \(portString)"))
         }
         return (host, port)
     }

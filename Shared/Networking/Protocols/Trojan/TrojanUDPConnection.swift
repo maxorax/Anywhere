@@ -1,6 +1,6 @@
 //
 //  TrojanUDPConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/22/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TrojanUDPConnection")
+nonisolated private let logger = TurnLogger(category: "TrojanUDPConnection")
 
 nonisolated final class TrojanUDPConnection: ProxyConnection {
     private let inner: ProxyConnection

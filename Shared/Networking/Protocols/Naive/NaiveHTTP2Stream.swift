@@ -1,6 +1,6 @@
 //
 //  NaiveHTTP2Stream.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/18/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "NaiveHTTP2Stream")
+nonisolated private let logger = TurnLogger(category: "NaiveHTTP2Stream")
 
 nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
 
@@ -92,7 +92,7 @@ nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
     // yields to the inbox; the async surface awaits them there, preserving the state machine.
 
     func openTunnel() async throws {
-        guard let multiplexer = multiplexerBox.withLock({ $0.value }) else { throw AnywhereError.proxy(.naive, .notReady) }
+        guard let multiplexer = multiplexerBox.withLock({ $0.value }) else { throw TurnError.proxy(.naive, .notReady) }
         try await multiplexer.ensureReady()
 
         // The peer's INITIAL_WINDOW_SIZE is known once SETTINGS is exchanged (ensureReady done);
@@ -113,9 +113,9 @@ nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
     }
 
     func sendData(_ data: Data) async throws {
-        guard let multiplexer = multiplexerBox.withLock({ $0.value }) else { throw AnywhereError.proxy(.naive, .notReady) }
+        guard let multiplexer = multiplexerBox.withLock({ $0.value }) else { throw TurnError.proxy(.naive, .notReady) }
         let open = lock.withLock { $0.phase == .open }
-        guard open else { throw AnywhereError.proxy(.naive, .notReady) }
+        guard open else { throw TurnError.proxy(.naive, .notReady) }
         try await multiplexer.sendData(data, on: self)
     }
 
@@ -146,7 +146,7 @@ nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
                 NaiveHTTP2Framer.rstStreamFrame(streamID: streamID, errorCode: 0x8 /* CANCEL */)
             )
         }
-        connectSignal.finish(throwing: AnywhereError.proxy(.naive, .connectionClosed(detail: "Stream closed")))
+        connectSignal.finish(throwing: TurnError.proxy(.naive, .connectionClosed(detail: "Stream closed")))
         inbox.finish()
     }
 
@@ -174,11 +174,11 @@ nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
         case .success:
             connectSignal.finish()
         case .authRequired:
-            handleStreamError(AnywhereError.proxy(.naive, .authenticationRequired))
+            handleStreamError(TurnError.proxy(.naive, .authenticationRequired))
         case .tunnelFailed(let status):
-            handleStreamError(AnywhereError.proxy(.naive, .tunnelRejected(detail: status)))
+            handleStreamError(TurnError.proxy(.naive, .tunnelRejected(detail: status)))
         case .missingStatus:
-            handleStreamError(AnywhereError.proxy(.naive, .protocolViolation(detail: "Missing :status on stream \(streamID)")))
+            handleStreamError(TurnError.proxy(.naive, .protocolViolation(detail: "Missing :status on stream \(streamID)")))
         }
     }
 
@@ -206,7 +206,7 @@ nonisolated final class NaiveHTTP2Stream: HTTPTunnel, Sendable {
             handleData(Data(), endStream: true)
             return
         }
-        handleStreamError(AnywhereError.proxy(.naive, .streamReset(code: streamID)))
+        handleStreamError(TurnError.proxy(.naive, .streamReset(code: streamID)))
     }
 
     func handleSessionError(_ error: Error) {

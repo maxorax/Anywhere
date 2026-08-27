@@ -1,12 +1,12 @@
 //
 //  TunneledHTTP2Client.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/21/26.
 //
 
 import Foundation
-@testable import Anywhere
+@testable import Turn
 
 enum TunneledHTTP2Client {
     private static let connectionPreface = Data("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n".utf8)
@@ -38,7 +38,7 @@ enum TunneledHTTP2Client {
             (":scheme", "https"),
             (":authority", authority),
             (":path", path),
-            ("user-agent", "Anywhere"),
+            ("user-agent", "Turn"),
             ("accept", "*/*"),
         ]
         let headerBlock = HPACKEncoder.encodeHeaderBlock(requestHeaders)

@@ -1,6 +1,6 @@
 //
 //  FakeIPPool.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "FakeIPPool")
+nonisolated private let logger = TurnLogger(category: "FakeIPPool")
 
 nonisolated final class FakeIPPool: Sendable {
     struct Entry {

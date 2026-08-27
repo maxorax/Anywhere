@@ -2668,265 +2668,265 @@
     "AnyTLS" : {
       "shouldTranslate" : false
     },
-    "Anywhere" : {
+    "Turn" : {
       "shouldTranslate" : false
     },
-    "Anywhere is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below." : {
+    "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere هو مشروع مستقل وليس تابعًا لأي من الشركات المذكورة أدناه أو معتمدًا أو مدعومًا منها."
+            "value" : "Turn هو مشروع مستقل وليس تابعًا لأي من الشركات المذكورة أدناه أو معتمدًا أو مدعومًا منها."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below."
+            "value" : "Turn is an independent project and is not affiliated with, endorsed by, or sponsored by any of the companies listed below."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere es un proyecto independiente y no está afiliado, respaldado ni patrocinado por ninguna de las empresas que se indican a continuación."
+            "value" : "Turn es un proyecto independiente y no está afiliado, respaldado ni patrocinado por ninguna de las empresas que se indican a continuación."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere یک پروژه مستقل است و هیچ‌گونه وابستگی، تأیید یا حمایت مالی از سوی شرکت‌های ذکر شده در زیر ندارد."
+            "value" : "Turn یک پروژه مستقل است و هیچ‌گونه وابستگی، تأیید یا حمایت مالی از سوی شرکت‌های ذکر شده در زیر ندارد."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere — независимый проект, не связанный ни с одной из перечисленных ниже компаний и не одобренный или спонсируемый ими."
+            "value" : "Turn — независимый проект, не связанный ни с одной из перечисленных ниже компаний и не одобренный или спонсируемый ими."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere bağımsız bir projedir ve aşağıda listelenen şirketlerin hiçbiriyle ilişkili değildir, onlar tarafından onaylanmaz veya desteklenmez."
+            "value" : "Turn bağımsız bir projedir ve aşağıda listelenen şirketlerin hiçbiriyle ilişkili değildir, onlar tarafından onaylanmaz veya desteklenmez."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere là một dự án độc lập, không liên kết, được xác nhận hay tài trợ bởi bất kỳ công ty nào được liệt kê dưới đây."
+            "value" : "Turn là một dự án độc lập, không liên kết, được xác nhận hay tài trợ bởi bất kỳ công ty nào được liệt kê dưới đây."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere 是一个独立项目，与以下列出的任何公司无关，未获其认可或赞助。"
+            "value" : "Turn 是一个独立项目，与以下列出的任何公司无关，未获其认可或赞助。"
           }
         }
       }
     },
-    "Anywhere MITM Rule Set URL" : {
+    "Turn MITM Rule Set URL" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "رابط مجموعة قواعد Anywhere MITM"
+            "value" : "رابط مجموعة قواعد Turn MITM"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere MITM Rule Set URL"
+            "value" : "Turn MITM Rule Set URL"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL del conjunto de reglas Anywhere MITM"
+            "value" : "URL del conjunto de reglas Turn MITM"
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نشانی مجموعه قانون Anywhere MITM"
+            "value" : "نشانی مجموعه قانون Turn MITM"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL набора правил Anywhere MITM"
+            "value" : "URL набора правил Turn MITM"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere MITM Kural Seti URL'si"
+            "value" : "Turn MITM Kural Seti URL'si"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL bộ quy tắc Anywhere MITM"
+            "value" : "URL bộ quy tắc Turn MITM"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere MITM 规则列表 URL"
+            "value" : "Turn MITM 规则列表 URL"
           }
         }
       }
     },
-    "Anywhere Root Certificate is installed and trusted." : {
+    "Turn Root Certificate is installed and trusted." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "شهادة Anywhere الجذرية مثبتة وموثوقة."
+            "value" : "شهادة Turn الجذرية مثبتة وموثوقة."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Root Certificate is installed and trusted."
+            "value" : "Turn Root Certificate is installed and trusted."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El certificado raíz de Anywhere está instalado y es de confianza."
+            "value" : "El certificado raíz de Turn está instalado y es de confianza."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "گواهی ریشه Anywhere نصب و مورد اعتماد است."
+            "value" : "گواهی ریشه Turn نصب و مورد اعتماد است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Корневой сертификат Anywhere установлен и доверен."
+            "value" : "Корневой сертификат Turn установлен и доверен."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Kök Sertifikası yüklendi ve güveniliyor."
+            "value" : "Turn Kök Sertifikası yüklendi ve güveniliyor."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chứng chỉ gốc Anywhere đã được cài đặt và tin cậy."
+            "value" : "Chứng chỉ gốc Turn đã được cài đặt và tin cậy."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Root Certificate 已安装且受信任。"
+            "value" : "Turn Root Certificate 已安装且受信任。"
           }
         }
       }
     },
-    "Anywhere Routing Rule Set URL" : {
+    "Turn Routing Rule Set URL" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "رابط مجموعة قواعد التوجيه Anywhere"
+            "value" : "رابط مجموعة قواعد التوجيه Turn"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Routing Rule Set URL"
+            "value" : "Turn Routing Rule Set URL"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL del conjunto de reglas de enrutamiento Anywhere"
+            "value" : "URL del conjunto de reglas de enrutamiento Turn"
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نشانی مجموعه قانون مسیریابی Anywhere"
+            "value" : "نشانی مجموعه قانون مسیریابی Turn"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL набора правил маршрутизации Anywhere"
+            "value" : "URL набора правил маршрутизации Turn"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Yönlendirme Kural Seti URL'si"
+            "value" : "Turn Yönlendirme Kural Seti URL'si"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL bộ quy tắc định tuyến Anywhere"
+            "value" : "URL bộ quy tắc định tuyến Turn"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere 路由规则列表 URL"
+            "value" : "Turn 路由规则列表 URL"
           }
         }
       }
     },
-    "Anywhere Voyager is currently unavailable. Please try again later." : {
+    "Turn Voyager is currently unavailable. Please try again later." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager غير متوفر حاليًا. يُرجى المحاولة مرة أخرى لاحقًا."
+            "value" : "Turn Voyager غير متوفر حاليًا. يُرجى المحاولة مرة أخرى لاحقًا."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager is currently unavailable. Please try again later."
+            "value" : "Turn Voyager is currently unavailable. Please try again later."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager no está disponible en este momento. Inténtalo de nuevo más tarde."
+            "value" : "Turn Voyager no está disponible en este momento. Inténtalo de nuevo más tarde."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager در حال حاضر در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
+            "value" : "Turn Voyager در حال حاضر در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager сейчас недоступен. Повторите попытку позже."
+            "value" : "Turn Voyager сейчас недоступен. Повторите попытку позже."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+            "value" : "Turn Voyager şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager hiện không khả dụng. Vui lòng thử lại sau."
+            "value" : "Turn Voyager hiện không khả dụng. Vui lòng thử lại sau."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere Voyager 暂不可用，请稍后重试。"
+            "value" : "Turn Voyager 暂不可用，请稍后重试。"
           }
         }
       }
@@ -4826,54 +4826,54 @@
         }
       }
     },
-    "Custom app icons are available to Anywhere Voyager members." : {
+    "Custom app icons are available to Turn Voyager members." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "أيقونات التطبيق المخصّصة متاحة لأعضاء Anywhere Voyager."
+            "value" : "أيقونات التطبيق المخصّصة متاحة لأعضاء Turn Voyager."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Custom app icons are available to Anywhere Voyager members."
+            "value" : "Custom app icons are available to Turn Voyager members."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los iconos de app personalizados están disponibles para los miembros de Anywhere Voyager."
+            "value" : "Los iconos de app personalizados están disponibles para los miembros de Turn Voyager."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نمادهای سفارشی برنامه برای اعضای Anywhere Voyager در دسترس است."
+            "value" : "نمادهای سفارشی برنامه برای اعضای Turn Voyager در دسترس است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Пользовательские значки приложения доступны участникам Anywhere Voyager."
+            "value" : "Пользовательские значки приложения доступны участникам Turn Voyager."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Özel uygulama simgeleri, Anywhere Voyager üyelerine açıktır."
+            "value" : "Özel uygulama simgeleri, Turn Voyager üyelerine açıktır."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Biểu tượng ứng dụng tùy chỉnh dành cho thành viên Anywhere Voyager."
+            "value" : "Biểu tượng ứng dụng tùy chỉnh dành cho thành viên Turn Voyager."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自定义 app 图标对 Anywhere Voyager 成员开放。"
+            "value" : "自定义 app 图标对 Turn Voyager 成员开放。"
           }
         }
       }
@@ -4882,54 +4882,54 @@
       "comment" : "Custom Tables for Sudoku protocol",
       "shouldTranslate" : false
     },
-    "Custom themes are available to Anywhere Voyager members." : {
+    "Custom themes are available to Turn Voyager members." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "السمات المخصّصة متاحة لأعضاء Anywhere Voyager."
+            "value" : "السمات المخصّصة متاحة لأعضاء Turn Voyager."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Custom themes are available to Anywhere Voyager members."
+            "value" : "Custom themes are available to Turn Voyager members."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los temas personalizados están disponibles para los miembros de Anywhere Voyager."
+            "value" : "Los temas personalizados están disponibles para los miembros de Turn Voyager."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "پوسته‌های سفارشی برای اعضای Anywhere Voyager در دسترس است."
+            "value" : "پوسته‌های سفارشی برای اعضای Turn Voyager در دسترس است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Пользовательские темы доступны участникам Anywhere Voyager."
+            "value" : "Пользовательские темы доступны участникам Turn Voyager."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Özel temalar, Anywhere Voyager üyelerine açıktır."
+            "value" : "Özel temalar, Turn Voyager üyelerine açıktır."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chủ đề tùy chỉnh dành cho thành viên Anywhere Voyager."
+            "value" : "Chủ đề tùy chỉnh dành cho thành viên Turn Voyager."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自定义主题对 Anywhere Voyager 成员开放。"
+            "value" : "自定义主题对 Turn Voyager 成员开放。"
           }
         }
       }
@@ -6564,54 +6564,54 @@
         }
       }
     },
-    "Enjoy Anywhere features with no restrictions." : {
+    "Enjoy Turn features with no restrictions." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "استمتع بميزات Anywhere دون أي قيود."
+            "value" : "استمتع بميزات Turn دون أي قيود."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enjoy Anywhere features with no restrictions."
+            "value" : "Enjoy Turn features with no restrictions."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Disfruta de las funciones de Anywhere sin restricciones."
+            "value" : "Disfruta de las funciones de Turn sin restricciones."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "از ویژگی‌های Anywhere بدون هیچ محدودیتی لذت ببرید."
+            "value" : "از ویژگی‌های Turn بدون هیچ محدودیتی لذت ببرید."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Пользуйтесь возможностями Anywhere без ограничений."
+            "value" : "Пользуйтесь возможностями Turn без ограничений."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anywhere özelliklerini kısıtlama olmadan kullanın."
+            "value" : "Turn özelliklerini kısıtlama olmadan kullanın."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tận hưởng các tính năng của Anywhere mà không bị giới hạn."
+            "value" : "Tận hưởng các tính năng của Turn mà không bị giới hạn."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "享受无限制的 Anywhere 特色功能。"
+            "value" : "享受无限制的 Turn 特色功能。"
           }
         }
       }
@@ -8710,210 +8710,210 @@
         }
       }
     },
-    "Invalid Anywhere MITM Rule Set File." : {
+    "Invalid Turn MITM Rule Set File." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ملف مجموعة قواعد Anywhere MITM غير صالح."
+            "value" : "ملف مجموعة قواعد Turn MITM غير صالح."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invalid Anywhere MITM Rule Set File."
+            "value" : "Invalid Turn MITM Rule Set File."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Archivo del conjunto de reglas Anywhere MITM no válido."
+            "value" : "Archivo del conjunto de reglas Turn MITM no válido."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فایل مجموعه قانون Anywhere MITM نامعتبر است."
+            "value" : "فایل مجموعه قانون Turn MITM نامعتبر است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Недействительный файл набора правил Anywhere MITM."
+            "value" : "Недействительный файл набора правил Turn MITM."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçersiz Anywhere MITM Kural Seti Dosyası."
+            "value" : "Geçersiz Turn MITM Kural Seti Dosyası."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tệp bộ quy tắc Anywhere MITM không hợp lệ."
+            "value" : "Tệp bộ quy tắc Turn MITM không hợp lệ."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无效 Anywhere MITM 规则列表文件。"
+            "value" : "无效 Turn MITM 规则列表文件。"
           }
         }
       }
     },
-    "Invalid Anywhere MITM Rule Set URL." : {
+    "Invalid Turn MITM Rule Set URL." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "رابط مجموعة قواعد Anywhere MITM غير صالح."
+            "value" : "رابط مجموعة قواعد Turn MITM غير صالح."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invalid Anywhere MITM Rule Set URL."
+            "value" : "Invalid Turn MITM Rule Set URL."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL del conjunto de reglas Anywhere MITM no válida."
+            "value" : "URL del conjunto de reglas Turn MITM no válida."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نشانی مجموعه قانون Anywhere MITM نامعتبر است."
+            "value" : "نشانی مجموعه قانون Turn MITM نامعتبر است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Недействительный URL набора правил Anywhere MITM."
+            "value" : "Недействительный URL набора правил Turn MITM."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçersiz Anywhere MITM Kural Seti URL'si."
+            "value" : "Geçersiz Turn MITM Kural Seti URL'si."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL bộ quy tắc Anywhere MITM không hợp lệ."
+            "value" : "URL bộ quy tắc Turn MITM không hợp lệ."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无效 Anywhere MITM 规则列表 URL。"
+            "value" : "无效 Turn MITM 规则列表 URL。"
           }
         }
       }
     },
-    "Invalid Anywhere Routing Rule Set File." : {
+    "Invalid Turn Routing Rule Set File." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ملف مجموعة قواعد التوجيه Anywhere غير صالح."
+            "value" : "ملف مجموعة قواعد التوجيه Turn غير صالح."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invalid Anywhere Routing Rule Set File."
+            "value" : "Invalid Turn Routing Rule Set File."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Archivo de conjunto de reglas de enrutamiento Anywhere no válido."
+            "value" : "Archivo de conjunto de reglas de enrutamiento Turn no válido."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فایل مجموعه قانون مسیریابی Anywhere نامعتبر است."
+            "value" : "فایل مجموعه قانون مسیریابی Turn نامعتبر است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Недействительный файл набора правил маршрутизации Anywhere."
+            "value" : "Недействительный файл набора правил маршрутизации Turn."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçersiz Anywhere Yönlendirme Kural Seti Dosyası."
+            "value" : "Geçersiz Turn Yönlendirme Kural Seti Dosyası."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tệp bộ quy tắc định tuyến Anywhere không hợp lệ."
+            "value" : "Tệp bộ quy tắc định tuyến Turn không hợp lệ."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无效 Anywhere 路由规则列表文件。"
+            "value" : "无效 Turn 路由规则列表文件。"
           }
         }
       }
     },
-    "Invalid Anywhere Routing Rule Set URL." : {
+    "Invalid Turn Routing Rule Set URL." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "رابط مجموعة قواعد التوجيه Anywhere غير صالح."
+            "value" : "رابط مجموعة قواعد التوجيه Turn غير صالح."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Invalid Anywhere Routing Rule Set URL."
+            "value" : "Invalid Turn Routing Rule Set URL."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL del conjunto de reglas de enrutamiento Anywhere no válida."
+            "value" : "URL del conjunto de reglas de enrutamiento Turn no válida."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نشانی مجموعه قانون مسیریابی Anywhere نامعتبر است."
+            "value" : "نشانی مجموعه قانون مسیریابی Turn نامعتبر است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Недействительный URL набора правил маршрутизации Anywhere."
+            "value" : "Недействительный URL набора правил маршрутизации Turn."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçersiz Anywhere Yönlendirme Kural Seti URL'si."
+            "value" : "Geçersiz Turn Yönlendirme Kural Seti URL'si."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URL bộ quy tắc định tuyến Anywhere không hợp lệ."
+            "value" : "URL bộ quy tắc định tuyến Turn không hợp lệ."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无效 Anywhere 路由规则列表 URL。"
+            "value" : "无效 Turn 路由规则列表 URL。"
           }
         }
       }
@@ -11490,54 +11490,54 @@
         }
       }
     },
-    "Open Anywhere on your iPhone to sync." : {
+    "Open Turn on your iPhone to sync." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "افتح Anywhere على iPhone الخاص بك للمزامنة."
+            "value" : "افتح Turn على iPhone الخاص بك للمزامنة."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open Anywhere on your iPhone to sync."
+            "value" : "Open Turn on your iPhone to sync."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre Anywhere en tu iPhone para sincronizar."
+            "value" : "Abre Turn en tu iPhone para sincronizar."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "برای همگام‌سازی، Anywhere را روی iPhone خود باز کنید."
+            "value" : "برای همگام‌سازی، Turn را روی iPhone خود باز کنید."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Откройте Anywhere на вашем iPhone для синхронизации."
+            "value" : "Откройте Turn на вашем iPhone для синхронизации."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eşitlemek için iPhone'unuzda Anywhere'i açın."
+            "value" : "Eşitlemek için iPhone'unuzda Turn'i açın."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mở Anywhere trên iPhone của bạn để đồng bộ."
+            "value" : "Mở Turn trên iPhone của bạn để đồng bộ."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在你的 iPhone 上打开 Anywhere 来同步。"
+            "value" : "在你的 iPhone 上打开 Turn 来同步。"
           }
         }
       }
@@ -12805,54 +12805,54 @@
         }
       }
     },
-    "Public Beta is available to Anywhere Voyager members." : {
+    "Public Beta is available to Turn Voyager members." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "النسخة التجريبية العامة متاحة لأعضاء Anywhere Voyager."
+            "value" : "النسخة التجريبية العامة متاحة لأعضاء Turn Voyager."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Public Beta is available to Anywhere Voyager members."
+            "value" : "Public Beta is available to Turn Voyager members."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La beta pública está disponible para los miembros de Anywhere Voyager."
+            "value" : "La beta pública está disponible para los miembros de Turn Voyager."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نسخه آزمایشی عمومی برای اعضای Anywhere Voyager در دسترس است."
+            "value" : "نسخه آزمایشی عمومی برای اعضای Turn Voyager در دسترس است."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Публичная бета-версия доступна участникам Anywhere Voyager."
+            "value" : "Публичная бета-версия доступна участникам Turn Voyager."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Herkese Açık Beta, Anywhere Voyager üyelerine sunulur."
+            "value" : "Herkese Açık Beta, Turn Voyager üyelerine sunulur."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bản beta công khai dành cho thành viên Anywhere Voyager."
+            "value" : "Bản beta công khai dành cho thành viên Turn Voyager."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公开测试版对 Anywhere Voyager 成员开放。"
+            "value" : "公开测试版对 Turn Voyager 成员开放。"
           }
         }
       }
@@ -14223,54 +14223,54 @@
         }
       }
     },
-    "Restart Anywhere for the change to take effect." : {
+    "Restart Turn for the change to take effect." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "أعد تشغيل Anywhere لتطبيق التغيير."
+            "value" : "أعد تشغيل Turn لتطبيق التغيير."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restart Anywhere for the change to take effect."
+            "value" : "Restart Turn for the change to take effect."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reinicia Anywhere para que el cambio surta efecto."
+            "value" : "Reinicia Turn para que el cambio surta efecto."
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "برای اعمال تغییر، Anywhere را دوباره راه‌اندازی کنید."
+            "value" : "برای اعمال تغییر، Turn را دوباره راه‌اندازی کنید."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перезапустите Anywhere, чтобы изменение вступило в силу."
+            "value" : "Перезапустите Turn, чтобы изменение вступило в силу."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Değişikliğin etkili olması için Anywhere'i yeniden başlatın."
+            "value" : "Değişikliğin etkili olması için Turn'i yeniden başlatın."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Khởi động lại Anywhere để thay đổi có hiệu lực."
+            "value" : "Khởi động lại Turn để thay đổi có hiệu lực."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重新启动 Anywhere 以使更改生效。"
+            "value" : "重新启动 Turn 以使更改生效。"
           }
         }
       }

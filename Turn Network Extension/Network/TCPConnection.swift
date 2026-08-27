@@ -1,6 +1,6 @@
 //
 //  TCPConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TCPConnection")
+nonisolated private let logger = TurnLogger(category: "TCPConnection")
 
 actor TCPConnection: MITMSessionHost {
 
@@ -200,7 +200,7 @@ actor TCPConnection: MITMSessionHost {
         failureReporter.report(
             operation: "Handshake",
             endpoint: endpointDescription,
-            error: AnywhereError.transport(.timedOut(.connect, endpoint: nil, detail: phase))
+            error: TurnError.transport(.timedOut(.connect, endpoint: nil, detail: phase))
         )
         abort()
     }
@@ -236,7 +236,7 @@ actor TCPConnection: MITMSessionHost {
             rejectSilently()
         case .proxy(let id):
             guard let resolved = router.resolveConfiguration(action: match.action) else {
-                logger.report("[TCP] IP-rule route", error: AnywhereError.routing(.configurationMissing(host: dstHost)))
+                logger.report("[TCP] IP-rule route", error: TurnError.routing(.configurationMissing(host: dstHost)))
                 return
             }
             ruleMatched = true
@@ -376,7 +376,7 @@ actor TCPConnection: MITMSessionHost {
             rejectSilently()
         case .proxy(let id):
             guard let resolved = router.resolveConfiguration(action: match.action) else {
-                logger.report("[TCP] SNI route", error: AnywhereError.routing(.configurationMissing(host: sni)))
+                logger.report("[TCP] SNI route", error: TurnError.routing(.configurationMissing(host: sni)))
                 return
             }
             ruleMatched = true
@@ -524,7 +524,7 @@ actor TCPConnection: MITMSessionHost {
             endpoint: endpointDescription,
             error: error
         )
-        guard case AnywhereError.dns(.resolutionFailed) = error else {
+        guard case TurnError.dns(.resolutionFailed) = error else {
             abort()
             return .done
         }
@@ -618,7 +618,7 @@ actor TCPConnection: MITMSessionHost {
                 do {
                     try await stream.sendDownload(data)
                 } catch {
-                    if case AnywhereError.transport(.writeFailed) = error {
+                    if case TurnError.transport(.writeFailed) = error {
                         await relayFailed("Write", error: error)
                     }
                     return
@@ -706,7 +706,7 @@ actor TCPConnection: MITMSessionHost {
     }
 
     func handleError(err: Int32) {
-        let reason = AnywhereError.Transport.lwipName(err)
+        let reason = TurnError.Transport.lwipName(err)
         if err == -15 { // ERR_CLSD — orderly close, not a failure
             logger.debug("[TCP] lwIP closed connection: \(endpointDescription): \(reason)")
         } else if err == -14 { // ERR_RST — always local-app-initiated in TUN mode
@@ -887,11 +887,11 @@ actor TCPConnection: MITMSessionHost {
     // MARK: - MITMSessionHost
     
     func mitmDialUpstream(host: String, port: UInt16) async throws -> MITMDialResult {
-        guard !closed else { throw AnywhereError.transport(.notConnected) }
+        guard !closed else { throw TurnError.transport(.notConnected) }
         let route: DialRoute
         switch await commitUpstreamRoute(forDialHost: host, port: port) {
         case .reject:
-            throw AnywhereError.routing(.rejectedByRule(host: host))
+            throw TurnError.routing(.rejectedByRule(host: host))
         case .direct:
             route = .direct
         case .proxy(_, let configuration):
@@ -903,7 +903,7 @@ actor TCPConnection: MITMSessionHost {
         let id = nextDialID
         return try await withCheckedThrowingContinuation { continuation in
             guard !closed else {
-                continuation.resume(throwing: AnywhereError.transport(.terminated))
+                continuation.resume(throwing: TurnError.transport(.terminated))
                 return
             }
             dialWaiters[id] = continuation
@@ -914,7 +914,7 @@ actor TCPConnection: MITMSessionHost {
     private func runDial(_ job: DialJob) async {
         let result: Result<MITMDialResult, Error>
         if closed {
-            result = .failure(AnywhereError.transport(.terminated))
+            result = .failure(TurnError.transport(.terminated))
         } else {
             do {
                 result = .success(try await performDial(job))
@@ -936,7 +936,7 @@ actor TCPConnection: MITMSessionHost {
         waiter.resume(with: result)
     }
 
-    private static var upstreamDialTimeout: AnywhereError {
+    private static var upstreamDialTimeout: TurnError {
         .transport(.timedOut(.connect, endpoint: nil, detail: "upstream dial"))
     }
 
@@ -1058,7 +1058,7 @@ actor TCPConnection: MITMSessionHost {
             return (.reject, false, match.ruleSetName)
         case .proxy:
             guard let configuration = stack?.domainRouter.resolveConfiguration(action: match.action) else {
-                logger.report("[TCP] MITM dial route", error: AnywhereError.routing(.configurationMissing(host: host)))
+                logger.report("[TCP] MITM dial route", error: TurnError.routing(.configurationMissing(host: host)))
                 return nil
             }
             return (.proxy(routeTarget: match.action, configuration: configuration), false, match.ruleSetName)
@@ -1188,7 +1188,7 @@ actor TCPConnection: MITMSessionHost {
     
     private func teardown(abortive: Bool) {
         for (_, waiter) in dialWaiters {
-            waiter.resume(throwing: AnywhereError.transport(.terminated))
+            waiter.resume(throwing: TurnError.transport(.terminated))
         }
         dialWaiters.removeAll()
         

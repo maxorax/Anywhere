@@ -1,6 +1,6 @@
 //
 //  UDPFlow.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "UDPFlow")
+nonisolated private let logger = TurnLogger(category: "UDPFlow")
 
 actor UDPFlow {
 
@@ -144,7 +144,7 @@ actor UDPFlow {
     }
 
     nonisolated private static func isTerminalProxySendError(_ error: Error, connection: ProxyConnection) -> Bool {
-        if case AnywhereError.quic(let quicError) = error {
+        if case TurnError.quic(let quicError) = error {
             switch quicError {
             case .handshakeFailed, .streamReset, .streamClosedWithError, .closed:
                 return true
@@ -152,7 +152,7 @@ actor UDPFlow {
                 return false
             }
         }
-        if case AnywhereError.proxy(.hysteria, let failure) = error {
+        if case TurnError.proxy(.hysteria, let failure) = error {
             switch failure {
             case .authenticationRejected, .unsupported, .datagramTooLarge, .streamClosed:
                 return true
@@ -162,7 +162,7 @@ actor UDPFlow {
                 return !connection.isConnected
             }
         }
-        if case AnywhereError.proxy(.nowhere, let failure) = error {
+        if case TurnError.proxy(.nowhere, let failure) = error {
             switch failure {
             case .authenticationRejected, .protocolViolation, .datagramTooLarge, .streamClosed,
                     .flowRejected, .openTimeout:
@@ -359,7 +359,7 @@ actor UDPFlow {
             }
 
         case .failure(let error):
-            if case AnywhereError.routing(.dropped) = error {} else {
+            if case TurnError.routing(.dropped) = error {} else {
                 reportFailure("Connect", error: error)
             }
             await closeAndRemove()
@@ -466,7 +466,7 @@ actor UDPFlow {
             }
 
         case .failure(let error):
-            if case AnywhereError.routing(.dropped) = error {} else {
+            if case TurnError.routing(.dropped) = error {} else {
                 reportFailure("Connect", error: error)
             }
             await closeAndRemove()

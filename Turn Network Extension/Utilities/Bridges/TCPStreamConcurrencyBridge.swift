@@ -1,6 +1,6 @@
 //
 //  TCPStreamConcurrencyBridge.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/16/26.
 //
@@ -19,7 +19,7 @@ actor TCPStreamConcurrencyBridge {
     
     private var terminated = false
     
-    var onFatalWrite: (@Sendable (AnywhereError) -> Void)?
+    var onFatalWrite: (@Sendable (TurnError) -> Void)?
 
     // MARK: Upload (app → upstream)
 
@@ -34,7 +34,7 @@ actor TCPStreamConcurrencyBridge {
     private var downloadFinishing = false
     private var downloadFinished = false
     private var finishWaiter: CheckedContinuation<Void, Never>?
-    private var writeError: AnywhereError?
+    private var writeError: TurnError?
     
     private let backlogBytesMirror = Atomic<Int>(0)
     
@@ -146,7 +146,7 @@ actor TCPStreamConcurrencyBridge {
     }
     
     func sendDownload(_ data: Data) async throws {
-        guard !terminated else { throw AnywhereError.transport(.terminated) }
+        guard !terminated else { throw TurnError.transport(.terminated) }
         deliverDownload(data)
         while !terminated, writeError == nil, pendingWriteCount >= TunnelConstants.drainLowWaterMark {
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
@@ -154,7 +154,7 @@ actor TCPStreamConcurrencyBridge {
             }
         }
         if let writeError { throw writeError }
-        if terminated { throw AnywhereError.transport(.terminated) }
+        if terminated { throw TurnError.transport(.terminated) }
     }
     
     func awaitDownloadDrained() async {
@@ -178,7 +178,7 @@ actor TCPStreamConcurrencyBridge {
                 return feedLWIP(base + pendingWriteOffset, count: live, retryOnEmpty: true)
             }
             if written < 0 {
-                let error = AnywhereError.transport(.writeFailed(pending: live, sndbuf: Int(lwip_bridge_tcp_sndbuf(pcb))))
+                let error = TurnError.transport(.writeFailed(pending: live, sndbuf: Int(lwip_bridge_tcp_sndbuf(pcb))))
                 writeError = error
                 downloadNeedsAwaitedSend.store(true, ordering: .relaxed)
                 resumeCreditWaiter()

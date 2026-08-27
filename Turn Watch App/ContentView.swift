@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/4/26.
 //
@@ -262,7 +262,7 @@ private struct SyncPlaceholder: View {
                 Image(systemName: "iphone.slash")
                     .font(.title3)
                     .foregroundStyle(.secondary)
-                Text("Open Anywhere on your iPhone to sync.")
+                Text("Open Turn on your iPhone to sync.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

@@ -83,12 +83,12 @@ They are expected to be undefined in the C objects — that is normal.
 - `HEADER_SEARCH_PATHS = $(SRCROOT)/Shared/Networking/Protocols/QUIC/ngtcp2` → makes both `<ngtcp2/ngtcp2.h>`
   and `<config.h>` resolve.
 - Project uses **file-system-synchronized groups**. `Shared/` is a synchronized group of the
-  **Anywhere** and **Anywhere TV** targets, so every `.c` here joins those two automatically.
+  **Turn** and **Turn TV** targets, so every `.c` here joins those two automatically.
   The **Network Extension** target does *not* synchronize `Shared/`; it picks files up one by
   one through a `membershipExceptions` list in `project.pbxproj` — despite the name, that list
   *adds* membership rather than removing it.
 - **When upstream adds or removes a file**, the synchronized group picks it up automatically for
-  Anywhere / Anywhere TV, BUT you must add/remove it in the Network-Extension
+  Turn / Turn TV, BUT you must add/remove it in the Network-Extension
   `membershipExceptions` list or the NE link will fail on the missing symbols.
   (1.22.90 → 1.23.0 added/removed nothing. 1.23.0 → 1.25.0 **renamed**
   `ngtcp2_window_filter.{c,h}` → `ngtcp2_wf.{c,h}`, which did require editing the NE list.)
@@ -105,7 +105,7 @@ They are expected to be undefined in the C objects — that is normal.
 Set `UP` to the unpacked upstream release, then run from this directory.
 
 ```sh
-cd /Volumes/Work/Anywhere/Shared/Networking/Protocols/QUIC/ngtcp2
+cd /Volumes/Work/Turn/Shared/Networking/Protocols/QUIC/ngtcp2
 UP=/Volumes/Work/ngtcp2-<NEW_VERSION>     # e.g. ngtcp2-1.26.0
 CUSTOM="config.h ngtcp2_bridge.h ngtcp2_crypto_apple.c ngtcp2_swift_bridge.h ngtcp2_swift_brutal.c"
 ```
@@ -180,9 +180,9 @@ Anything else in (b) is a **missing backend function** to implement in `ngtcp2_c
 
 Finally, confirm only stock files + `version.h` changed and the 5 other custom files are untouched:
 ```sh
-git -C /Volumes/Work/Anywhere status --short -- Shared/Networking/Protocols/QUIC/ngtcp2
+git -C /Volumes/Work/Turn status --short -- Shared/Networking/Protocols/QUIC/ngtcp2
 for f in config.h ngtcp2_bridge.h ngtcp2_crypto_apple.c ngtcp2_swift_bridge.h ngtcp2_swift_brutal.c; do
-  git -C /Volumes/Work/Anywhere diff --quiet -- "Shared/Networking/Protocols/QUIC/ngtcp2/$f" || echo "REVIEW: $f changed"
+  git -C /Volumes/Work/Turn diff --quiet -- "Shared/Networking/Protocols/QUIC/ngtcp2/$f" || echo "REVIEW: $f changed"
 done
 ```
 

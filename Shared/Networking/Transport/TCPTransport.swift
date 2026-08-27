@@ -1,6 +1,6 @@
 //
 //  TCPTransport.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/14/26.
 //
@@ -28,7 +28,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         var flowSlot: FlowSlot?
         var ready = false
         var cancelled = false
-        var failure: AnywhereError?
+        var failure: TurnError?
         var eofLatched = false
     }
 
@@ -61,7 +61,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
 
     func connect(initialData: Data? = nil) async throws {
         guard let nwPort = NWEndpoint.Port(rawValue: port) else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "invalid port \(port)"))
+            throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "invalid port \(port)"))
         }
         let endpointHost = await NWEndpoint.Host.dialHost(for: host, viaProxyDNS: resolvesViaProxyDNS)
         let endpoint = NWEndpoint.hostPort(host: endpointHost, port: nwPort)
@@ -82,7 +82,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         }
         guard live else {
             slot.release()
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
 
         if let initialData, !initialData.isEmpty {
@@ -90,7 +90,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
                 try await engine.send(initialData)
             } catch {
                 cancel()
-                throw latchedFailure() ?? AnywhereError.networkFailure(error, operation: .connect)
+                throw latchedFailure() ?? TurnError.networkFailure(error, operation: .connect)
             }
         }
         state.withLock { $0.ready = true }
@@ -103,7 +103,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         do {
             try await engine.send(data)
         } catch {
-            throw latchedFailure() ?? AnywhereError.networkFailure(error, operation: .send)
+            throw latchedFailure() ?? TurnError.networkFailure(error, operation: .send)
         }
     }
 
@@ -116,7 +116,7 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
             do {
                 message = try await engine.receive(atMost: Self.maxReceiveLength)
             } catch {
-                throw latchedFailure() ?? AnywhereError.networkFailure(error, operation: .receive)
+                throw latchedFailure() ?? TurnError.networkFailure(error, operation: .receive)
             }
 
             if !message.content.isEmpty {
@@ -150,13 +150,13 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
     private func activeEngine() throws -> any TCPTransportEngine {
         try state.withLock { state in
             if let failure = state.failure { throw failure }
-            if state.cancelled { throw AnywhereError.transport(.terminated) }
-            guard let engine = state.engine else { throw AnywhereError.transport(.notConnected) }
+            if state.cancelled { throw TurnError.transport(.terminated) }
+            guard let engine = state.engine else { throw TurnError.transport(.notConnected) }
             return engine
         }
     }
 
-    private func latchedFailure() -> AnywhereError? {
+    private func latchedFailure() -> TurnError? {
         state.withLock { $0.failure }
     }
 }

@@ -1,6 +1,6 @@
 //
 //  MITMBodyCodec.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/8/26.
 //
@@ -8,7 +8,7 @@
 import Compression
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "MITMBodyCodec")
+nonisolated private let logger = TurnLogger(category: "MITMBodyCodec")
 
 /// `Content-Encoding` decoders so body rules operate on plaintext. Decode-only:
 /// after rewriting we emit identity, always implicitly accepted (RFC 7231 §5.3.4).
@@ -125,9 +125,9 @@ nonisolated enum MITMBodyCodec {
         data.prefix(maxBytes).map { String(format: "%02x", $0) }.joined(separator: " ")
     }
 
-    // MARK: - Single-codec encode/decode (JS `Anywhere.codec` bridge)
+    // MARK: - Single-codec encode/decode (JS `Turn.codec` bridge)
 
-    /// Single-codec decode for the JS `Anywhere.codec` bridge; output capped at `maxBufferedBodyBytes`.
+    /// Single-codec decode for the JS `Turn.codec` bridge; output capped at `maxBufferedBodyBytes`.
     static func decode(_ data: Data, codec: Codec) -> Data? {
         switch codec {
         case .identity: return data
@@ -137,7 +137,7 @@ nonisolated enum MITMBodyCodec {
         }
     }
 
-    /// Single-codec encode for the JS `Anywhere.codec` bridge. gzip emits a single
+    /// Single-codec encode for the JS `Turn.codec` bridge. gzip emits a single
     /// member; deflate emits raw DEFLATE — what servers actually send despite RFC 1950.
     static func encode(_ data: Data, codec: Codec) -> Data? {
         switch codec {

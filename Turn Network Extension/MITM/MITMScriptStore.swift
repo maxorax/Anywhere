@@ -1,6 +1,6 @@
 //
 //  MITMScriptStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/9/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-/// Backs `Anywhere.store`; namespaced per rule set, stale scopes reclaimed by purgeExcept on reload.
+/// Backs `Turn.store`; namespaced per rule set, stale scopes reclaimed by purgeExcept on reload.
 nonisolated final class MITMScriptStore: Sendable {
 
     static let shared = MITMScriptStore()
@@ -36,9 +36,9 @@ nonisolated final class MITMScriptStore: Sendable {
     }
 
     /// Upserts `key` within `scope`; throws without modifying state if the write would exceed either cap.
-    func set(scope: UUID, key: String, value: Data, onDisk: Bool = false) throws(AnywhereError) {
+    func set(scope: UUID, key: String, value: Data, onDisk: Bool = false) throws(TurnError) {
         if onDisk { return try MITMScriptDiskStore.shared.set(scope: scope, key: key, value: value) }
-        try state.withLock { (state) throws(AnywhereError) in
+        try state.withLock { (state) throws(TurnError) in
             // Mutate via subscript to stay in-place; aliasing COW storage copies the whole bucket per write.
             let keyBytes = key.utf8.count
             let oldEntryBytes = state.buckets[scope]?[key].map { $0.count + keyBytes } ?? 0
@@ -46,11 +46,11 @@ nonisolated final class MITMScriptStore: Sendable {
             let delta = newEntryBytes - oldEntryBytes
             let projected = (state.bucketSizes[scope] ?? 0) + delta
             if projected > Self.maxBytesPerScope {
-                throw AnywhereError.mitm(.scriptStoreCapacityExceeded)
+                throw TurnError.mitm(.scriptStoreCapacityExceeded)
             }
             let projectedTotal = state.totalBytes + delta
             if projectedTotal > Self.maxTotalBytes {
-                throw AnywhereError.mitm(.scriptStoreCapacityExceeded)
+                throw TurnError.mitm(.scriptStoreCapacityExceeded)
             }
             state.buckets[scope, default: [:]][key] = value
             state.bucketSizes[scope] = projected

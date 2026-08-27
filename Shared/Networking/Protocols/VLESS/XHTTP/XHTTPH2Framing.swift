@@ -1,6 +1,6 @@
 //
 //  XHTTPH2Framing.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/14/26.
 //
@@ -83,7 +83,7 @@ nonisolated final class H2FrameReader: Sendable {
     }
 
     /// Yields the next complete frame, reading from the transport as needed. Throws
-    /// `AnywhereError.proxy(.xhttp, .streamClosed)` on a clean transport FIN at a frame boundary
+    /// `TurnError.proxy(.xhttp, .streamClosed)` on a clean transport FIN at a frame boundary
     /// (a graceful end of stream, which consumers convert to EOF).
     func readFrame() async throws -> H2Framing.Frame {
         while true {
@@ -93,7 +93,7 @@ nonisolated final class H2FrameReader: Sendable {
 
             let chunk = try await receive()
             guard case .bytes(let data) = chunk, !data.isEmpty else {
-                throw AnywhereError.proxy(.xhttp, .streamClosed)
+                throw TurnError.proxy(.xhttp, .streamClosed)
             }
 
             let overflowed = buffer.withLock { buffer -> Bool in
@@ -105,7 +105,7 @@ nonisolated final class H2FrameReader: Sendable {
                 return false
             }
             if overflowed {
-                throw AnywhereError.proxy(.xhttp, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.xhttp, .connectionClosed(detail: nil))
             }
         }
     }

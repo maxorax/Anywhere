@@ -1,6 +1,6 @@
 //
 //  RuleSetListView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -143,7 +143,7 @@ struct RuleSetListView: View {
             Text(importError ?? "")
         }
         .alert("Subscribe Rule Set", isPresented: $showSubscribeAlert) {
-            TextField("Anywhere Routing Rule Set URL", text: $subscribeURL)
+            TextField("Turn Routing Rule Set URL", text: $subscribeURL)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
@@ -216,7 +216,7 @@ struct RuleSetListView: View {
         do {
             let url = try result.get()
             guard url.pathExtension.lowercased() == "arrs" else {
-                importError = String(localized: "Invalid Anywhere Routing Rule Set File.")
+                importError = String(localized: "Invalid Turn Routing Rule Set File.")
                 return
             }
             let accessing = url.startAccessingSecurityScopedResource()
@@ -244,7 +244,7 @@ struct RuleSetListView: View {
 
     private func subscribe(to rawValue: String) {
         guard let url = CustomRoutingRuleSet.validSubscriptionURL(from: rawValue) else {
-            subscribeError = String(localized: "Invalid Anywhere Routing Rule Set URL.")
+            subscribeError = String(localized: "Invalid Turn Routing Rule Set URL.")
             return
         }
         Task {

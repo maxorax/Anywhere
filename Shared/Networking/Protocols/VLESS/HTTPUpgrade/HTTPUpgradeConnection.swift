@@ -1,6 +1,6 @@
 //
 //  HTTPUpgradeConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -70,13 +70,13 @@ nonisolated final class HTTPUpgradeConnection: Sendable {
         request += "\r\n"
 
         guard let requestData = request.data(using: .utf8) else {
-            throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Failed to encode upgrade request"))
+            throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Failed to encode upgrade request"))
         }
 
         do {
             try await transport.send(requestData)
         } catch {
-            throw AnywhereError.capture(error, context: "HTTPUpgrade request")
+            throw TurnError.capture(error, context: "HTTPUpgrade request")
         }
 
         try await receiveUpgradeResponse()
@@ -89,11 +89,11 @@ nonisolated final class HTTPUpgradeConnection: Sendable {
             do {
                 chunk = try await transport.receive()
             } catch {
-                throw AnywhereError.capture(error, context: "HTTPUpgrade response")
+                throw TurnError.capture(error, context: "HTTPUpgrade response")
             }
 
             guard case .bytes(let data) = chunk, !data.isEmpty else {
-                throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Empty response from server"))
+                throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Empty response from server"))
             }
 
             let headerData: Data? = state.withLock { state in
@@ -115,16 +115,16 @@ nonisolated final class HTTPUpgradeConnection: Sendable {
             }
 
             guard let headerString = String(data: headerData, encoding: .utf8) else {
-                throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Cannot decode response headers"))
+                throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Cannot decode response headers"))
             }
 
             let lines = headerString.split(separator: "\r\n")
             guard let statusLine = lines.first else {
-                throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Empty response"))
+                throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Empty response"))
             }
 
             guard statusLine.contains("101") else {
-                throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Expected HTTP 101, got: \(statusLine)"))
+                throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Expected HTTP 101, got: \(statusLine)"))
             }
 
             var hasUpgradeWebSocket = false
@@ -143,7 +143,7 @@ nonisolated final class HTTPUpgradeConnection: Sendable {
             }
 
             guard hasUpgradeWebSocket && hasConnectionUpgrade else {
-                throw AnywhereError.proxy(.httpUpgrade, .upgradeFailed(detail: "Missing Upgrade/Connection headers in 101 response"))
+                throw TurnError.proxy(.httpUpgrade, .upgradeFailed(detail: "Missing Upgrade/Connection headers in 101 response"))
             }
 
             return

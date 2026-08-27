@@ -1,6 +1,6 @@
 //
 //  ModeToggleControl.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/26/26.
 //
@@ -12,7 +12,7 @@ import WidgetKit
 struct ModeToggleControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(
-            kind: "com.argsment.Anywhere.Widget.ModeToggle",
+            kind: "com.argsment.Turn.Widget.ModeToggle",
             provider: ProxyModeProvider()
         ) { isGlobal in
             ControlWidgetToggle(
@@ -22,7 +22,7 @@ struct ModeToggleControl: ControlWidget {
             ) { isGlobal in
                 Label(
                     isGlobal ? "Global Mode" : "Proxy Mode",
-                    image: isGlobal ? "anywhere.global" : "anywhere.proxy"
+                    image: isGlobal ? "turn.global" : "turn.proxy"
                 )
             }
         }

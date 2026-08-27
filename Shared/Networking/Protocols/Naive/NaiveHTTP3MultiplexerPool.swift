@@ -1,6 +1,6 @@
 //
 //  NaiveHTTP3MultiplexerPool.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/11/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "NaiveHTTP3MultiplexerPool")
+nonisolated private let logger = TurnLogger(category: "NaiveHTTP3MultiplexerPool")
 
 nonisolated final class NaiveHTTP3MultiplexerPool: TransportPool {
 

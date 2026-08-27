@@ -1,6 +1,6 @@
 //
 //  ShadowsocksUDPSession.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/23/26.
 //
@@ -11,7 +11,7 @@ import CommonCrypto
 import Security
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "ShadowsocksUDPSession")
+nonisolated private let logger = TurnLogger(category: "ShadowsocksUDPSession")
 
 actor ShadowsocksUDPSession {
 
@@ -210,7 +210,7 @@ actor ShadowsocksUDPSession {
         payload: Data
     ) async throws {
         guard registrations[token] != nil else {
-            throw AnywhereError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
+            throw TurnError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
         }
         try await ensureReadyForSend()
         let encrypted = try encryptPacket(payload: payload, dstHost: dstHost, dstPort: dstPort)
@@ -230,7 +230,7 @@ actor ShadowsocksUDPSession {
     private func performCancel() {
         if case .cancelled = state { return }
         state = .cancelled
-        notifyAllFlows(error: AnywhereError.transport(.terminated))
+        notifyAllFlows(error: TurnError.transport(.terminated))
         readyTask?.cancel()
         readyTask = nil
         receiveTask?.cancel()
@@ -249,7 +249,7 @@ actor ShadowsocksUDPSession {
         case .failed(let error):
             throw error
         case .cancelled:
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         case .idle, .connecting:
             guard let task = startConnectIfNeeded() else { return }
             try await task.value
@@ -264,7 +264,7 @@ actor ShadowsocksUDPSession {
         case .idle, .connecting:
             if let existing = readyTask { return existing }
             let task = Task<Void, Error> { [weak self] in
-                guard let self else { throw AnywhereError.transport(.terminated) }
+                guard let self else { throw TurnError.transport(.terminated) }
                 try await self.performConnect()
             }
             readyTask = task
@@ -277,14 +277,14 @@ actor ShadowsocksUDPSession {
         do {
             try await asyncTransport.connect()
         } catch {
-            if case .cancelled = state { throw AnywhereError.transport(.terminated) }
+            if case .cancelled = state { throw TurnError.transport(.terminated) }
             state = .failed(error)
             asyncTransport.cancel()
             notifyAllFlows(error: error)
             throw error
         }
         if case .cancelled = state {
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
         state = .ready
         startReceiveLoop()
@@ -399,7 +399,7 @@ actor ShadowsocksUDPSession {
         cipher: ShadowsocksCipher,
         pskList: [Data]
     ) throws -> Data {
-        guard let sessionKey = outboundCipherKey else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+        guard let sessionKey = outboundCipherKey else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
 
         // 16-byte packet header: sessionID(8) + packetID(8), both big-endian.
         var header = Data(capacity: 16)
@@ -498,12 +498,12 @@ actor ShadowsocksUDPSession {
         case .legacy(let cipher, let masterKey):
             let decrypted = try ShadowsocksUDPCrypto.decrypt(cipher: cipher, masterKey: masterKey, data: data)
             guard let parsed = ShadowsocksProtocol.decodeUDPPacket(data: decrypted) else {
-                throw AnywhereError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
+                throw TurnError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
             }
             return parsed
 
         case .ss2022AES(let cipher, let pskList):
-            guard data.count >= 16 + 16 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+            guard data.count >= 16 + 16 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
 
             // Header AES-ECB decrypt uses the user PSK (pskList.last).
             let header = try ssAESECBDecryptBlock(key: pskList.last!, block: Data(data.prefix(16)))
@@ -534,14 +534,14 @@ actor ShadowsocksUDPSession {
             return try parseServerUDPBody(body)
 
         case .ss2022ChaCha(let psk):
-            guard data.count >= 24 + 16 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+            guard data.count >= 24 + 16 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
 
             let nonce = Data(data.prefix(24))
             let ciphertext = Data(data.suffix(from: data.startIndex + 24))
             let body = try XChaCha20Poly1305.open(key: psk, nonce: nonce, ciphertext: ciphertext)
 
             // Body: sessionID(8) + packetID(8) + standard server body.
-            guard body.count >= 16 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+            guard body.count >= 16 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
             let innerBody = Data(body.suffix(from: body.startIndex + 16))
             return try parseServerUDPBody(innerBody)
         }
@@ -549,13 +549,13 @@ actor ShadowsocksUDPSession {
     
     private func parseServerUDPBody(_ body: Data) throws -> (host: String, port: UInt16, payload: Data) {
         guard body.count >= 1 + 8 + 8 + 2 else {
-            throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed))
+            throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed))
         }
 
         var offset = body.startIndex
         let headerType = body[offset]
         offset += 1
-        guard headerType == 1 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.malformedHeader)) }
+        guard headerType == 1 else { throw TurnError.proxy(.shadowsocks, .cipher(.malformedHeader)) }
 
         var epochBE: UInt64 = 0
         _ = withUnsafeMutableBytes(of: &epochBE) { pointer in
@@ -564,7 +564,7 @@ actor ShadowsocksUDPSession {
         let epoch = Int64(UInt64(bigEndian: epochBE))
         let now = Int64(Date().timeIntervalSince1970)
         if abs(now - epoch) > 30 {
-            throw AnywhereError.proxy(.shadowsocks, .cipher(.staleTimestamp))
+            throw TurnError.proxy(.shadowsocks, .cipher(.staleTimestamp))
         }
         offset += 8
 
@@ -574,17 +574,17 @@ actor ShadowsocksUDPSession {
         }
         let clientSid = UInt64(bigEndian: clientSidBE)
         guard clientSid == sessionID else {
-            throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed))
+            throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed))
         }
         offset += 8
 
-        guard body.endIndex - offset >= 2 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+        guard body.endIndex - offset >= 2 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
         let paddingLen = Int(UInt16(body[offset]) << 8 | UInt16(body[offset + 1]))
         offset += 2
         offset += paddingLen
 
         guard let parsed = ShadowsocksProtocol.decodeUDPPacket(data: Data(body[offset...])) else {
-            throw AnywhereError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
+            throw TurnError.proxy(.shadowsocks, .protocolViolation(detail: "invalid address header"))
         }
         return parsed
     }
@@ -605,7 +605,7 @@ actor ShadowsocksUDPSession {
 // MARK: - AES-ECB Single Block
 
 private nonisolated func ssAESECBEncryptBlock(key: Data, block: Data) throws -> Data {
-    guard block.count == 16 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+    guard block.count == 16 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
     var outBytes = [UInt8](repeating: 0, count: 16 + kCCBlockSizeAES128)
     var outLen: Int = 0
     let status = key.withUnsafeBytes { keyPtr in
@@ -622,12 +622,12 @@ private nonisolated func ssAESECBEncryptBlock(key: Data, block: Data) throws -> 
             )
         }
     }
-    guard status == kCCSuccess else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+    guard status == kCCSuccess else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
     return Data(outBytes.prefix(16))
 }
 
 private nonisolated func ssAESECBDecryptBlock(key: Data, block: Data) throws -> Data {
-    guard block.count == 16 else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+    guard block.count == 16 else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
     var outBytes = [UInt8](repeating: 0, count: 16 + kCCBlockSizeAES128)
     var outLen: Int = 0
     let status = key.withUnsafeBytes { keyPtr in
@@ -644,6 +644,6 @@ private nonisolated func ssAESECBDecryptBlock(key: Data, block: Data) throws -> 
             )
         }
     }
-    guard status == kCCSuccess else { throw AnywhereError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
+    guard status == kCCSuccess else { throw TurnError.proxy(.shadowsocks, .cipher(.decryptionFailed)) }
     return Data(outBytes.prefix(16))
 }

@@ -1,6 +1,6 @@
 //
 //  QUICConnection+IO.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -10,7 +10,7 @@ import Network
 import CryptoKit
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "QUICConnection")
+nonisolated private let logger = TurnLogger(category: "QUICConnection")
 
 extension QUICConnection {
 
@@ -31,7 +31,7 @@ extension QUICConnection {
     
     func armActiveCarrier(_ carrier: QUICDatagramCarrier, localAddr: sockaddr_storage) {
         armReceive(carrier, localAddr: localAddr) { [weak self] errno in
-            self?.close(error: AnywhereError.quic(.connectionFailed(detail: "recv errno=\(errno)")))
+            self?.close(error: TurnError.quic(.connectionFailed(detail: "recv errno=\(errno)")))
         }
         installMigrationTriggers(on: carrier)
     }
@@ -92,17 +92,17 @@ extension QUICConnection {
             switch rv {
             case NGTCP2_ERR_DRAINING:
                 if let ccerr = closeError(connectionOpaquePointer), isBenignConnectionClose(ccerr.pointee) {
-                    error = AnywhereError.quic(.closed(graceful: true))
+                    error = TurnError.quic(.closed(graceful: true))
                 } else {
-                    error = AnywhereError.quic(.closed(graceful: false))
+                    error = TurnError.quic(.closed(graceful: false))
                 }
             case NGTCP2_ERR_CLOSING:
-                error = AnywhereError.quic(.closed(graceful: false))
+                error = TurnError.quic(.closed(graceful: false))
             case NGTCP2_ERR_CALLBACK_FAILURE, NGTCP2_ERR_CRYPTO:
                 error = tlsHandler?.handshakeError
-                    ?? AnywhereError.quic(.handshakeFailed(detail: "ngtcp2 error: \(rv) (\(errorString(rv)))"))
+                    ?? TurnError.quic(.handshakeFailed(detail: "ngtcp2 error: \(rv) (\(errorString(rv)))"))
             default:
-                error = AnywhereError.quic(.connectionFailed(detail: "ngtcp2 read_pkt: \(rv) (\(errorString(rv)))"))
+                error = TurnError.quic(.connectionFailed(detail: "ngtcp2 read_pkt: \(rv) (\(errorString(rv)))"))
             }
             finishConnect(error)
             close(error: error)
@@ -160,7 +160,7 @@ extension QUICConnection {
             if nwrite < 0 {
                 logger.warning("[QUIC] Dropping \(datagram.count)-byte datagram: ngtcp2 err \(nwrite)")
                 let popped = pendingDatagrams.removeFirst()
-                settlements.append((popped.latch, AnywhereError.quic(.connectionFailed(detail: "ngtcp2 write_datagram err \(nwrite)"))))
+                settlements.append((popped.latch, TurnError.quic(.connectionFailed(detail: "ngtcp2 write_datagram err \(nwrite)"))))
                 continue
             }
             if nwrite > 0 {
@@ -179,7 +179,7 @@ extension QUICConnection {
             if datagram.count > bound {
                 logger.warning("[QUIC] Dropping \(datagram.count)-byte datagram: exceeds path-MTU bound (\(bound) B)")
                 let popped = pendingDatagrams.removeFirst()
-                settlements.append((popped.latch, AnywhereError.quic(.datagramTooLarge(limit: bound))))
+                settlements.append((popped.latch, TurnError.quic(.datagramTooLarge(limit: bound))))
                 continue
             }
             
@@ -239,7 +239,7 @@ extension QUICConnection {
                     let rv = me.handleExpiry(connectionOpaquePointer, ts: ts)
                     me.exitConnHeld(prevBusy)
                     if rv != 0 {
-                        let error = AnywhereError.quic(.connectionFailed(detail: "expiry error: \(rv) (\(me.errorString(rv)))"))
+                        let error = TurnError.quic(.connectionFailed(detail: "expiry error: \(rv) (\(me.errorString(rv)))"))
                         me.finishConnect(error)
                         me.close(error: error)
                         return

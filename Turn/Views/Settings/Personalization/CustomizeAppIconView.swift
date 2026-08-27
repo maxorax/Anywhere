@@ -1,6 +1,6 @@
 //
 //  CustomizeAppIconView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/20/26.
 //
@@ -42,7 +42,7 @@ struct CustomizeAppIconView: View {
     var body: some View {
         Form {
             if !voyagerStore.isMember {
-                VoyagerNotice("Custom app icons are available to Anywhere Voyager members.")
+                VoyagerNotice("Custom app icons are available to Turn Voyager members.")
             }
             Section {
                 ForEach(AppIconOption.all) { option in

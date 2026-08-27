@@ -1,6 +1,6 @@
 //
 //  MITMScriptHTTP2Stream.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/2/26.
 //
@@ -89,7 +89,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
             return first
         }
         guard timedOut else { return }
-        fail(AnywhereError.transport(.timedOut(.receive, endpoint: nil, detail: "request exceeded \(Int(resourceTimeout))s deadline")))
+        fail(TurnError.transport(.timedOut(.receive, endpoint: nil, detail: "request exceeded \(Int(resourceTimeout))s deadline")))
     }
     
     func runIdleLoop() async {
@@ -112,7 +112,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
             if finished { return }
             let expired = lock.withLock { !$0.finished && $0.idleGeneration == generation }
             guard expired else { continue }
-            fail(AnywhereError.transport(.timedOut(.receive, endpoint: nil, detail: "request idle for \(Int(interval))s")))
+            fail(TurnError.transport(.timedOut(.receive, endpoint: nil, detail: "request idle for \(Int(interval))s")))
             return
         }
     }
@@ -124,9 +124,9 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
     // MARK: - Request
     
     private func sendRequest() async {
-        guard let connection else { fail(AnywhereError.proxy(.http2, .notReady)); return }
+        guard let connection else { fail(TurnError.proxy(.http2, .notReady)); return }
         guard let headerBlock = buildHeaderBlock() else {
-            fail(AnywhereError.mitm(.invalidScriptRequest))
+            fail(TurnError.mitm(.invalidScriptRequest))
             return
         }
         let requestBody = request.httpBody ?? Data()
@@ -205,7 +205,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
         case .ignore:
             break
         case .failStatus:
-            fail(AnywhereError.proxy(.http2, .protocolViolation(detail: "missing or invalid :status")))
+            fail(TurnError.proxy(.http2, .protocolViolation(detail: "missing or invalid :status")))
         case .finishOK:
             finishSuccess()
         }
@@ -226,10 +226,10 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
             
             if !body.isEmpty {
                 if state.body.count + body.count > maxBytes {
-                    return .fail(AnywhereError.mitm(.responseTooLarge(limit: maxBytes)))
+                    return .fail(TurnError.mitm(.responseTooLarge(limit: maxBytes)))
                 }
                 guard MITMScriptHTTPClient.reserveInFlight(body.count) else {
-                    return .fail(AnywhereError.mitm(.scriptBudgetExceeded(limit: MITMScriptHTTPClient.maxGlobalInFlightBytes)))
+                    return .fail(TurnError.mitm(.scriptBudgetExceeded(limit: MITMScriptHTTPClient.maxGlobalInFlightBytes)))
                 }
                 state.reservedBytes += body.count
                 state.body.append(body)
@@ -250,7 +250,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
         case .ignore:
             break
         case .failNoHead:
-            fail(AnywhereError.proxy(.http2, .protocolViolation(detail: "DATA before response head")))
+            fail(TurnError.proxy(.http2, .protocolViolation(detail: "DATA before response head")))
         case .fail(let error):
             fail(error)
         case .ok(let windowUpdate, let finish):
@@ -260,7 +260,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
     }
 
     func handleReset(errorCode: UInt32) {
-        finish(.failure(AnywhereError.proxy(.http2, .streamReset(code: errorCode))), removeFromConnection: false, sendRST: false)
+        finish(.failure(TurnError.proxy(.http2, .streamReset(code: errorCode))), removeFromConnection: false, sendRST: false)
     }
     
     func failFromSession(_ error: Error) {
@@ -287,7 +287,7 @@ nonisolated final class MITMScriptHTTP2Stream: Sendable {
         if plan.requiresDecompression,
            let decoded = MITMBodyCodec.decompress(snapshot.body, plan: plan, host: request.url?.host ?? "") {
             if decoded.count > maxBytes {
-                fail(AnywhereError.mitm(.responseTooLarge(limit: maxBytes)))
+                fail(TurnError.mitm(.responseTooLarge(limit: maxBytes)))
                 return
             }
             responseBody = decoded

@@ -1,6 +1,6 @@
 //
 //  FlowSlot.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/14/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "FlowSlot")
+nonisolated private let logger = TurnLogger(category: "FlowSlot")
 
 nonisolated final class FlowSlot: Sendable {
     

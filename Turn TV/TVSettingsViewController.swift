@@ -1,6 +1,6 @@
 //
 //  TVSettingsViewController.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/19/26.
 //
@@ -66,7 +66,7 @@ class TVSettingsViewController: UIViewController {
     // MARK: - Left Side
 
     private func setupLeftSide() {
-        iconView.image = UIImage(named: "AnywhereSymbol")
+        iconView.image = UIImage(named: "TurnSymbol")
         iconView.contentMode = .scaleAspectFit
         iconView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -227,7 +227,7 @@ class TVSettingsViewController: UIViewController {
         if iCloudSyncEnabled != JSONBlobStore.shared.usesCloudKit {
             let alert = UIAlertController(
                 title: String(localized: "Restart Required"),
-                message: String(localized: "Restart Anywhere for the change to take effect."),
+                message: String(localized: "Restart Turn for the change to take effect."),
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .cancel))

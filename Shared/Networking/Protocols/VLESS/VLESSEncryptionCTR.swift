@@ -1,6 +1,6 @@
 //
 //  VLESSEncryptionCTR.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/13/26.
 //
@@ -13,7 +13,7 @@ nonisolated final class VLESSEncryptionCTR {
 
     init(key: Data, iv: Data) throws {
         guard iv.count == 16 else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: VLESS CTR IV must be 16 bytes, got \(iv.count)"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: VLESS CTR IV must be 16 bytes, got \(iv.count)"))
         }
         let derivedKey = BLAKE3Hasher.deriveKey(context: "VLESS", input: key, count: 32)
 
@@ -36,7 +36,7 @@ nonisolated final class VLESSEncryptionCTR {
             }
         }
         guard status == kCCSuccess, let ref else {
-            throw AnywhereError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: CCCryptorCreateWithMode failed: \(status)"))
+            throw TurnError.proxy(.vlessEncryption, .protocolViolation(detail: "framing: CCCryptorCreateWithMode failed: \(status)"))
         }
         self.cryptor = ref
     }

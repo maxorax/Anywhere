@@ -1,6 +1,6 @@
 //
 //  HysteriaConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/13/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "HysteriaConnection")
+nonisolated private let logger = TurnLogger(category: "HysteriaConnection")
 
 actor HysteriaConnection {
 
@@ -55,7 +55,7 @@ actor HysteriaConnection {
         var buffer = Data()
         while true {
             guard let chunk = try await nextChunk() else {
-                throw AnywhereError.proxy(.hysteria, .connectionClosed(detail: "Stream closed before response"))
+                throw TurnError.proxy(.hysteria, .connectionClosed(detail: "Stream closed before response"))
             }
             buffer.append(chunk)
             guard let parsed = HysteriaProtocol.parseTCPResponse(from: buffer) else { continue }
@@ -63,7 +63,7 @@ actor HysteriaConnection {
             // lazily in `receiveRaw` as the app consumes them.
             if parsed.consumed > 0 { session.extendStreamOffset(sid, count: parsed.consumed) }
             guard parsed.status == HysteriaProtocol.tcpResponseStatusOK else {
-                throw AnywhereError.proxy(.hysteria, .tunnelRejected(detail: parsed.message))
+                throw TurnError.proxy(.hysteria, .tunnelRejected(detail: parsed.message))
             }
             buffer.removeFirst(parsed.consumed)
             pendingData = buffer
@@ -89,7 +89,7 @@ actor HysteriaConnection {
 
     nonisolated func handleSessionError(_ error: Error) {
         _isReady.store(false, ordering: .relaxed)
-        if case AnywhereError.quic(.closed(graceful: true)) = error {
+        if case TurnError.quic(.closed(graceful: true)) = error {
             rawInbox.finish()
         } else {
             rawInbox.finish(throwing: error)
@@ -100,7 +100,7 @@ actor HysteriaConnection {
 
     func sendRaw(_ data: Data) async throws {
         guard _isReady.load(ordering: .relaxed) else {
-            throw AnywhereError.proxy(.hysteria, .streamClosed)
+            throw TurnError.proxy(.hysteria, .streamClosed)
         }
         try await session.writeStream(streamID, data: data)
     }

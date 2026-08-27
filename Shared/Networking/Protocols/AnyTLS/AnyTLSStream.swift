@@ -1,6 +1,6 @@
 //
 //  AnyTLSStream.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/16/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "AnyTLSStream")
+nonisolated private let logger = TurnLogger(category: "AnyTLSStream")
 
 actor AnyTLSStream {
 
@@ -53,7 +53,7 @@ actor AnyTLSStream {
 
     func sendRaw(_ data: Data) async throws {
         guard let multiplexer else {
-            throw AnywhereError.proxy(.anyTLS, .connectionClosed(detail: "AnyTLS multiplexer deallocated"))
+            throw TurnError.proxy(.anyTLS, .connectionClosed(detail: "AnyTLS multiplexer deallocated"))
         }
         try await multiplexer.writeData(sid: sid, data: data)
     }

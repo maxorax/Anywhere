@@ -1,6 +1,6 @@
 //
 //  TLSRecordConnection+TLS13.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/19/26.
 //
@@ -46,7 +46,7 @@ nonisolated extension TLSRecordConnection {
     /// holds under the `receiveState` lock.
     func decryptTLS13Record(ciphertext: Data, header: Data, ingress: DirectionState, receive state: inout ReceiveState) throws -> Data {
         guard ciphertext.count >= 16 else {
-            throw AnywhereError.tls(.record(.ciphertextTooShort))
+            throw TurnError.tls(.record(.ciphertextTooShort))
         }
 
         var nonce = ingress.iv
@@ -58,7 +58,7 @@ nonisolated extension TLSRecordConnection {
         let decrypted = try openAEAD(ciphertext: ct, tag: tag, nonce: nonce, aad: header, key: ingress.symmetricKey)
 
         guard !decrypted.isEmpty else {
-            throw AnywhereError.tls(.record(.emptyPlaintext))
+            throw TurnError.tls(.record(.emptyPlaintext))
         }
 
         var innerContentType: UInt8 = 0
@@ -72,7 +72,7 @@ nonisolated extension TLSRecordConnection {
         }
 
         guard contentLen >= 0 else {
-            throw AnywhereError.tls(.record(.missingContentType))
+            throw TurnError.tls(.record(.missingContentType))
         }
 
         // A KeyUpdate must rekey the read side here or every subsequent record fails AEAD
@@ -90,7 +90,7 @@ nonisolated extension TLSRecordConnection {
                 state.receivedCloseNotify = true
                 return Data()
             }
-            throw AnywhereError.tls(.alert(level: level, code: description))
+            throw TurnError.tls(.alert(level: level, code: description))
         }
 
         return decrypted.prefix(Int(contentLen))

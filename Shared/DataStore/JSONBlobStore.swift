@@ -1,6 +1,6 @@
 //
 //  JSONBlobStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/6/26.
 //
@@ -10,7 +10,7 @@ import SwiftData
 import Synchronization
 import CryptoKit
 
-nonisolated private let logger = AnywhereLogger(category: "JSONBlobStore")
+nonisolated private let logger = TurnLogger(category: "JSONBlobStore")
 
 @Model
 nonisolated final class JSONBlob {

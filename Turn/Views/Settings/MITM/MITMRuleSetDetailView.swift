@@ -1,6 +1,6 @@
 //
 //  MITMRuleSetDetailView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/4/26.
 //
@@ -232,7 +232,7 @@ struct MITMRuleSetDetailView: View {
     private var domainSuffixesSection: some View {
         Section("Domain Suffixes") {
             ForEach($suffixDrafts) { $draft in
-                TextField(String("anywhere.com"), text: $draft.value)
+                TextField(String("turn.com"), text: $draft.value)
                     .keyboardType(.URL)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)

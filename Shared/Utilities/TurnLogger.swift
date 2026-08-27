@@ -1,6 +1,6 @@
 //
-//  AnywhereLogger.swift
-//  Anywhere
+//  TurnLogger.swift
+//  Turn
 //
 //  Created by NodePassProject on 4/8/26.
 //
@@ -11,7 +11,7 @@ import os.log
 
 /// `info`+ also reach the bounded user-facing viewer; keep `info` low-volume or
 /// it evicts warnings and errors.
-nonisolated struct AnywhereLogger {
+nonisolated struct TurnLogger {
     private let osLogger: Logger
 
     /// The user-facing viewer sink, guarded because it is installed on one thread and read from
@@ -41,7 +41,7 @@ nonisolated struct AnywhereLogger {
     }
 
     init(category: String) {
-        self.osLogger = Logger(subsystem: "com.argsment.Anywhere", category: category)
+        self.osLogger = Logger(subsystem: "com.argsment.Turn", category: category)
     }
 
     /// os.log only; compiled out of release, where the autoclosure is never built.

@@ -1,6 +1,6 @@
 //
 //  ChainStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/8/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Observation
 import SwiftUI
 
-nonisolated private let logger = AnywhereLogger(category: "ChainStore")
+nonisolated private let logger = TurnLogger(category: "ChainStore")
 
 @MainActor
 @Observable
@@ -123,7 +123,7 @@ class ChainStore {
             let data = try encoder.encode(chains + tombstones)
             JSONBlobStore.shared.save(.chains, data: data)
         } catch {
-            logger.report(AnywhereError.store(.saveFailed(.chains, underlying: error)))
+            logger.report(TurnError.store(.saveFailed(.chains, underlying: error)))
         }
     }
 }

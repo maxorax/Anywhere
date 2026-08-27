@@ -1,6 +1,6 @@
 //
 //  QUICDatagramCarrier+Compatibility.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/27/26.
 //
@@ -23,7 +23,7 @@ nonisolated final class LegacyQUICDatagramEngine: QUICDatagramEngine, Sendable {
 
     private let connection: NWConnection
     private let obfuscator: QUICPacketObfuscator?
-    private let queue = DispatchQueue(label: "com.argsment.Anywhere.QUICDatagramCarrier", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.argsment.Turn.QUICDatagramCarrier", qos: .userInitiated)
 
     private let terminated = TerminationLatch()
 
@@ -37,9 +37,9 @@ nonisolated final class LegacyQUICDatagramEngine: QUICDatagramEngine, Sendable {
             case .ready:
                 sink.ready(interfaceType: connection?.currentPath?.availableInterfaces.first?.type)
             case .failed(let error):
-                sink.failed(AnywhereError.errnoCode(from: error))
+                sink.failed(TurnError.errnoCode(from: error))
             case .waiting(let error):
-                sink.waiting(AnywhereError.errnoCode(from: error))
+                sink.waiting(TurnError.errnoCode(from: error))
             default:
                 break
             }
@@ -91,7 +91,7 @@ nonisolated final class LegacyQUICDatagramEngine: QUICDatagramEngine, Sendable {
         connection.receiveMessage { content, _, _, error in
             if let error {
                 if terminated.trip() {
-                    sink.failed(AnywhereError.errnoCode(from: error))
+                    sink.failed(TurnError.errnoCode(from: error))
                     sink.finished()
                 }
                 return

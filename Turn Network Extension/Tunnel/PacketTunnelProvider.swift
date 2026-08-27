@@ -1,6 +1,6 @@
 //
 //  PacketTunnelProvider.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 1/23/26.
 //
@@ -12,7 +12,7 @@ import Synchronization
 import WidgetKit
 #endif
 
-nonisolated private let logger = AnywhereLogger(category: "PacketTunnelProvider")
+nonisolated private let logger = TurnLogger(category: "PacketTunnelProvider")
 
 nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Sendable {
     private let tunnelStack = TunnelStack()
@@ -26,7 +26,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     
     override func startTunnel(options: [String : NSObject]? = nil) async throws {
         guard let configuration = resolveStartConfiguration(options: options) else {
-            let error = AnywhereError.tunnel(.invalidConfiguration)
+            let error = TurnError.tunnel(.invalidConfiguration)
             logger.report("[VPN] Start failed", error: error)
             throw error
         }
@@ -36,13 +36,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         do {
             try await setTunnelNetworkSettings(settings)
         } catch {
-            let wrapped = AnywhereError.tunnel(.settingsApplyFailed(underlying: error))
+            let wrapped = TurnError.tunnel(.settingsApplyFailed(underlying: error))
             logger.report("[VPN]", error: wrapped)
             throw wrapped
         }
 
 #if os(iOS)
-        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Anywhere.Widget.VPNToggle")
+        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
 #endif
 
         await tunnelStack.start(packetFlow: packetFlow, configuration: configuration)
@@ -69,14 +69,14 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                     return config
                 }
             } catch {
-                logger.report("[VPN] Start options decode failed", error: AnywhereError.tunnel(.ipcFailed(underlying: error)))
+                logger.report("[VPN] Start options decode failed", error: TurnError.tunnel(.ipcFailed(underlying: error)))
             }
         }
         guard let savedData = AWCore.getLastConfigurationData() else { return nil }
         do {
             return try JSONDecoder().decode(ProxyConfiguration.self, from: savedData)
         } catch {
-            logger.report(AnywhereError.store(.corrupted(.configurations, detail: AnywhereError.describe(error))))
+            logger.report(TurnError.store(.corrupted(.configurations, detail: TurnError.describe(error))))
             return nil
         }
     }
@@ -200,7 +200,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
     override func stopTunnel(with reason: NEProviderStopReason) async {
 #if os(iOS)
-        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Anywhere.Widget.VPNToggle")
+        ControlCenter.shared.reloadControls(ofKind: "com.argsment.Turn.Widget.VPNToggle")
 #endif
         
         statsRecorder.stop()
@@ -223,7 +223,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         do {
             message = try JSONDecoder().decode(TunnelMessage.self, from: messageData)
         } catch {
-            logger.report("[IPC] App message decode failed", error: AnywhereError.tunnel(.ipcFailed(underlying: error)))
+            logger.report("[IPC] App message decode failed", error: TurnError.tunnel(.ipcFailed(underlying: error)))
             return nil
         }
 
@@ -251,7 +251,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         do {
             return try JSONEncoder().encode(reply)
         } catch {
-            logger.report("[IPC] Reply encode failed", error: AnywhereError.tunnel(.ipcFailed(underlying: error)))
+            logger.report("[IPC] Reply encode failed", error: TurnError.tunnel(.ipcFailed(underlying: error)))
             return nil
         }
     }

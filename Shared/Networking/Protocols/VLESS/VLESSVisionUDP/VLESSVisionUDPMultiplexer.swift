@@ -1,6 +1,6 @@
 //
 //  VLESSVisionUDPMultiplexer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "VLESSVisionUDPMultiplexer")
+nonisolated private let logger = TurnLogger(category: "VLESSVisionUDPMultiplexer")
 
 nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
 
@@ -55,10 +55,10 @@ nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
     
     private func ensureReady() async throws {
         let task: Task<Void, Error> = try lock.withLock { state in
-            if state.closed { throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client closed")) }
+            if state.closed { throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client closed")) }
             if let existing = state.readyTask { return existing }
             let task = Task<Void, Error> { [weak self] in
-                guard let self else { throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client released")) }
+                guard let self else { throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client released")) }
                 try await self.performConnect()
             }
             state.readyTask = task
@@ -74,7 +74,7 @@ nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
             state.proxyClient = client
             return true
         }
-        guard live else { throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client closed")) }
+        guard live else { throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client closed")) }
 
         let connection: ProxyConnection
         do {
@@ -92,7 +92,7 @@ nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
         }
         guard published else {
             connection.cancel()
-            throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
+            throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
         }
         startSession(connection)
     }
@@ -152,7 +152,7 @@ nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
         let isXUDP: Bool
         (stream, sessionID, isXUDP) = try lock.withLock { state in
             guard !state.closed else {
-                throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
+                throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
             }
             let sessionID: UInt16
             let xudp: Bool
@@ -225,7 +225,7 @@ nonisolated final class VLESSVisionUDPMultiplexer: Multiplexer, Sendable {
     func writeFrame(_ data: Data) async throws {
         let pending: SerialSender.Pending = try lock.withLock { state in
             guard !state.closed, let connection = state.proxyConnection else {
-                throw AnywhereError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
+                throw TurnError.proxy(.vless, .connectionClosed(detail: "Mux client closed"))
             }
             return sendChain.submit { try await connection.sendRaw(data) }
         }

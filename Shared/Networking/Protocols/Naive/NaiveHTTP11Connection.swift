@@ -1,6 +1,6 @@
 //
 //  NaiveHTTP11Connection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/10/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "NaiveHTTP11Connection")
+nonisolated private let logger = TurnLogger(category: "NaiveHTTP11Connection")
 
 // MARK: - NaiveHTTP11Connection
 
@@ -80,7 +80,7 @@ nonisolated final class NaiveHTTP11Connection: HTTPTunnel, Sendable {
         var accumulated = Data()
         while true {
             guard let data = try await transport.receive(), !data.isEmpty else {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Connection closed during CONNECT"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Connection closed during CONNECT"))
             }
             accumulated.append(data)
 
@@ -90,31 +90,31 @@ nonisolated final class NaiveHTTP11Connection: HTTPTunnel, Sendable {
 
             let headerData = accumulated[..<headerEnd]
             guard let headerString = String(data: headerData, encoding: .utf8) else {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Invalid CONNECT response encoding"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Invalid CONNECT response encoding"))
             }
 
             let statusLine = headerString.prefix(while: { $0 != "\r" && $0 != "\n" })
             let parts = statusLine.split(separator: " ", maxSplits: 2)
             guard parts.count >= 2 else {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Malformed CONNECT status line"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Malformed CONNECT status line"))
             }
 
             guard parts[0].hasPrefix("HTTP/1.") else {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Invalid HTTP version in CONNECT response"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Invalid HTTP version in CONNECT response"))
             }
 
             let statusCode = String(parts[1])
             guard statusCode == "200" else {
                 if statusCode == "407" {
-                    throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Proxy authentication required (407)"))
+                    throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Proxy authentication required (407)"))
                 }
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "CONNECT failed with status \(statusCode)"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "CONNECT failed with status \(statusCode)"))
             }
 
             // Security hardening: the proxy must not send data before the tunnel is established.
             let afterHeaders = headerEnd + 4  // skip \r\n\r\n
             if afterHeaders < accumulated.count {
-                throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "Proxy sent extraneous data after CONNECT response"))
+                throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "Proxy sent extraneous data after CONNECT response"))
             }
 
             _connected.store(true, ordering: .relaxed)

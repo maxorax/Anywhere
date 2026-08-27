@@ -1,6 +1,6 @@
 //
 //  DeepLinkManager.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/24/26.
 //
@@ -16,8 +16,8 @@ final class DeepLinkManager {
 
     func handle(url: URL) {
         switch url.scheme?.lowercased() {
-        case "anywhere":
-            handleAnywhereScheme(url)
+        case "turn":
+            handleTurnScheme(url)
         case "nowhere", "vless", "hysteria2", "hy2", "trojan", "anytls", "ss", "quic", "sudoku":
             self.url = url.absoluteString
         default:
@@ -25,7 +25,7 @@ final class DeepLinkManager {
         }
     }
 
-    private func handleAnywhereScheme(_ url: URL) {
+    private func handleTurnScheme(_ url: URL) {
         switch url.host?.lowercased() {
         case "add-proxy":
             handleAddProxy(url)

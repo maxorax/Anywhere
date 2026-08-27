@@ -1,6 +1,6 @@
 //
 //  RoutingRulesDatabase.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/5/26.
 //
@@ -8,9 +8,9 @@
 import Foundation
 import SQLite3
 import Synchronization
-import AnywhereRules
+import TurnRules
 
-nonisolated private let logger = AnywhereLogger(category: "RoutingRulesDatabase")
+nonisolated private let logger = TurnLogger(category: "RoutingRulesDatabase")
 
 nonisolated final class RoutingRulesDatabase: Sendable {
     static let shared = RoutingRulesDatabase()
@@ -18,8 +18,8 @@ nonisolated final class RoutingRulesDatabase: Sendable {
     private let databaseHandle: Mutex<OpaquePointer?>
 
     private init() {
-        guard let url = AnywhereRules.databaseURL else {
-            logger.error("[RoutingRulesDatabase] Rules.db not found in AnywhereRules bundle")
+        guard let url = TurnRules.databaseURL else {
+            logger.error("[RoutingRulesDatabase] Rules.db not found in TurnRules bundle")
             self.databaseHandle = Mutex(nil)
             return
         }

@@ -1,6 +1,6 @@
 //
-//  AnywhereApp.swift
-//  Anywhere
+//  TurnApp.swift
+//  Turn
 //
 //  Created by NodePassProject on 1/23/26.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct AnywhereApp: App {
+struct TurnApp: App {
     init() {
         CloudBlobSync.start()
         WatchSessionManager.shared.start()

@@ -310,7 +310,7 @@ udp_input(struct pbuf *p, struct netif *inp)
     pcb = uncon_pcb;
   }
 
-  /* Anywhere patch: fallback to wildcard PCB with local_port == 0 */
+  /* Turn patch: fallback to wildcard PCB with local_port == 0 */
   if (pcb == NULL) {
     for (pcb = udp_pcbs; pcb != NULL; pcb = pcb->next) {
       if (pcb->local_port == 0 &&

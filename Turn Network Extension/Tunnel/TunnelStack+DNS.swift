@@ -1,6 +1,6 @@
 //
 //  TunnelStack+DNS.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/30/26.
 //
@@ -12,13 +12,13 @@ extension TunnelStack {
     // MARK: - DNS Interception (Fake-IP)
 
     enum DNSDestination {
-        case anywhereResolver
+        case turnResolver
         case publicResolver
     }
     
     static let interceptedDNSServers: [String: DNSDestination] = [
-        TunnelConstants.tunnelAddressIPv4: .anywhereResolver,
-        TunnelConstants.tunnelAddressIPv6: .anywhereResolver,
+        TunnelConstants.tunnelAddressIPv4: .turnResolver,
+        TunnelConstants.tunnelAddressIPv6: .turnResolver,
         "8.8.8.8": .publicResolver,
         "8.8.4.4": .publicResolver,
         "2001:4860:4860::8888": .publicResolver,
@@ -43,8 +43,8 @@ extension TunnelStack {
     
     static func dnsDestination(for dstIP: String, exempting exempt: Set<String>) -> DNSDestination? {
         switch interceptedDNSServers[dstIP] {
-        case .anywhereResolver:
-            return .anywhereResolver
+        case .turnResolver:
+            return .turnResolver
         case .publicResolver:
             return exempt.contains(dstIP) ? nil : .publicResolver
         case nil:

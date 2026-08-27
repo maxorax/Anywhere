@@ -1,6 +1,6 @@
 //
 //  ClashProxyParser.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/2/26.
 //
@@ -17,12 +17,12 @@ nonisolated struct ClashProxyParser {
         let root = try YAML.load(yamlString)
 
         guard root.type == .map else {
-            throw AnywhereError.parse(.yaml(detail: "root document is not a mapping"))
+            throw TurnError.parse(.yaml(detail: "root document is not a mapping"))
         }
 
         let proxies = root["proxies"]
         guard proxies.type == .sequence else {
-            throw AnywhereError.parse(.clashConfigMissingProxies)
+            throw TurnError.parse(.clashConfigMissingProxies)
         }
 
         var configurations: [ProxyConfiguration] = []

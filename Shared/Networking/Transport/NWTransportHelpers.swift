@@ -1,6 +1,6 @@
 //
 //  NWTransportHelpers.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/6/26.
 //
@@ -11,7 +11,7 @@ import Network
 // MARK: - NWError
 
 extension NWError {
-    nonisolated func anywhereError(operation: AnywhereError.Transport.Operation) -> AnywhereError {
+    nonisolated func turnError(operation: TurnError.Transport.Operation) -> TurnError {
         switch self {
         case .posix(let code):
             return .transport(.posix(operation, errno: code.rawValue))
@@ -22,9 +22,9 @@ extension NWError {
         }
     }
     
-    nonisolated func legacyEngineError(operation: AnywhereError.Transport.Operation) -> any Error {
+    nonisolated func legacyEngineError(operation: TurnError.Transport.Operation) -> any Error {
         if case .posix(.ECANCELED) = self { return CancellationError() }
-        return anywhereError(operation: operation)
+        return turnError(operation: operation)
     }
     
     nonisolated var connectWaitingDescription: String {
@@ -40,13 +40,13 @@ extension NWError {
 
 }
 
-// MARK: - AnywhereError
+// MARK: - TurnError
 
-extension AnywhereError {
-    nonisolated static func networkFailure(_ error: Error, operation: Transport.Operation) -> AnywhereError {
+extension TurnError {
+    nonisolated static func networkFailure(_ error: Error, operation: Transport.Operation) -> TurnError {
         if error is CancellationError { return .transport(.terminated) }
-        if let nwError = error as? NWError { return nwError.anywhereError(operation: operation) }
-        if let anywhereError = error as? AnywhereError { return anywhereError }
+        if let nwError = error as? NWError { return nwError.turnError(operation: operation) }
+        if let turnError = error as? TurnError { return turnError }
         return .transport(.connectionFailed(endpoint: nil, detail: error.localizedDescription))
     }
     

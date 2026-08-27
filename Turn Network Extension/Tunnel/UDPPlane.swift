@@ -1,6 +1,6 @@
 //
 //  UDPPlane.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/17/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "UDPPlane")
+nonisolated private let logger = TurnLogger(category: "UDPPlane")
 
 nonisolated enum UDPPlaneCommand {
     case setMultiplexerPool(VLESSVisionUDPMultiplexerPool?)
@@ -270,23 +270,23 @@ actor UDPPlane {
     
     // MARK: - Shadowsocks UDP sessions
     
-    func shadowsocksSession(for configuration: ProxyConfiguration) -> Result<ShadowsocksUDPSession, AnywhereError> {
+    func shadowsocksSession(for configuration: ProxyConfiguration) -> Result<ShadowsocksUDPSession, TurnError> {
         if let existing = ssSessions[configuration.id], existing.isUsable {
             return .success(existing)
         }
         ssSessions.removeValue(forKey: configuration.id)
         
         guard case .shadowsocks(let password, let method) = configuration.outbound else {
-            return .failure(AnywhereError.proxy(.shadowsocks, .protocolViolation(detail: "Shadowsocks password not set")))
+            return .failure(TurnError.proxy(.shadowsocks, .protocolViolation(detail: "Shadowsocks password not set")))
         }
         guard let cipher = ShadowsocksCipher(method: method) else {
-            return .failure(AnywhereError.proxy(.shadowsocks, .cipher(.unsupportedMethod(method))))
+            return .failure(TurnError.proxy(.shadowsocks, .cipher(.unsupportedMethod(method))))
         }
         
         let mode: ShadowsocksUDPSession.Mode
         if cipher.isSS2022 {
             guard let pskList = ShadowsocksKeyDerivation.decodePSKList(password: password, keySize: cipher.keySize) else {
-                return .failure(AnywhereError.proxy(.shadowsocks, .cipher(.invalidKey)))
+                return .failure(TurnError.proxy(.shadowsocks, .cipher(.invalidKey)))
             }
             if cipher == .blake3chacha20poly1305 {
                 mode = .ss2022ChaCha(psk: pskList.last!)
@@ -362,7 +362,7 @@ actor UDPPlane {
         }
 
         guard qtype == 1 || qtype == 28 else {
-            if destination == .anywhereResolver {
+            if destination == .turnResolver {
                 if forwardToUpstreamResolver(datagram, domain: domain, qtype: qtype) {
                     return true
                 }
@@ -451,7 +451,7 @@ actor UDPPlane {
             dstHost: upstream,                  // outbound → real upstream resolver
             dstPort: datagram.dstPort,
             srcIPData: datagram.srcIPData,
-            dstIPData: datagram.dstIPData,      // reply source → the Anywhere resolver address
+            dstIPData: datagram.dstIPData,      // reply source → the Turn resolver address
             isIPv6: datagram.isIPv6,
             configuration: flowConfiguration,
             routeTarget: routeTarget

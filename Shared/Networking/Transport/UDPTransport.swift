@@ -1,6 +1,6 @@
 //
 //  UDPTransport.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/14/26.
 //
@@ -23,7 +23,7 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
         var flowSlot: FlowSlot?
         var ready = false
         var cancelled = false
-        var failure: AnywhereError?
+        var failure: TurnError?
     }
 
     private let state = Mutex(State())
@@ -52,7 +52,7 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
 
     func connect() async throws {
         guard let nwPort = NWEndpoint.Port(rawValue: port) else {
-            throw AnywhereError.transport(.connectionFailed(endpoint: nil, detail: "invalid port \(port)"))
+            throw TurnError.transport(.connectionFailed(endpoint: nil, detail: "invalid port \(port)"))
         }
         let endpointHost = await NWEndpoint.Host.dialHost(for: host, viaProxyDNS: resolvesViaProxyDNS)
         let endpoint = NWEndpoint.hostPort(host: endpointHost, port: nwPort)
@@ -74,7 +74,7 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
         }
         guard live else {
             slot.release()
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
     }
 
@@ -85,7 +85,7 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
         do {
             try await engine.send(datagram)
         } catch {
-            throw latchedFailure() ?? AnywhereError.networkFailure(error, operation: .send)
+            throw latchedFailure() ?? TurnError.networkFailure(error, operation: .send)
         }
     }
 
@@ -96,7 +96,7 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
             do {
                 content = try await engine.receive()
             } catch {
-                throw latchedFailure() ?? AnywhereError.networkFailure(error, operation: .receive)
+                throw latchedFailure() ?? TurnError.networkFailure(error, operation: .receive)
             }
             if !content.isEmpty { return content }
         }
@@ -121,13 +121,13 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
     private func activeEngine() throws -> any UDPTransportEngine {
         try state.withLock { state in
             if let failure = state.failure { throw failure }
-            if state.cancelled { throw AnywhereError.transport(.terminated) }
-            guard let engine = state.engine else { throw AnywhereError.transport(.notConnected) }
+            if state.cancelled { throw TurnError.transport(.terminated) }
+            guard let engine = state.engine else { throw TurnError.transport(.notConnected) }
             return engine
         }
     }
 
-    private func latchedFailure() -> AnywhereError? {
+    private func latchedFailure() -> TurnError? {
         state.withLock { $0.failure }
     }
 }

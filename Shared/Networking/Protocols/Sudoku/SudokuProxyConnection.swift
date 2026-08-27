@@ -1,6 +1,6 @@
 //
 //  SudokuProxyConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by saba-futai on 4/23/26.
 //
@@ -13,7 +13,7 @@ import CryptoKit
 import Security
 import Synchronization
 
-nonisolated private let sudokuLogger = AnywhereLogger(category: "SudokuProxyConnection")
+nonisolated private let sudokuLogger = TurnLogger(category: "SudokuProxyConnection")
 nonisolated private let sudokuObfsReadChunkSize = 128 * 1024
 nonisolated private let sudokuTCPReceiveChunkSize = 64 * 1024
 nonisolated private let sudokuHTTPMaskMaxQueueBytes = 4 * 1024 * 1024
@@ -151,7 +151,7 @@ nonisolated private enum SudokuNativeCrypto {
             guard let base = raw.baseAddress else { return errSecParam }
             return SecRandomCopyBytes(kSecRandomDefault, count, base)
         }
-        guard status == errSecSuccess else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "random generator failed")) }
+        guard status == errSecSuccess else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: "random generator failed")) }
         return data
     }
 
@@ -257,7 +257,7 @@ nonisolated private enum SudokuNativeCrypto {
     static func open(method: SudokuAEADMethod, key: Data, nonce: Data, ciphertext: Data, aad: Data) throws -> Data {
         switch method {
         case .aes128GCM:
-            guard ciphertext.count >= 16 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "short AES-GCM frame")) }
+            guard ciphertext.count >= 16 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "short AES-GCM frame")) }
             let split = ciphertext.count - 16
             do {
                 let box = try AES.GCM.SealedBox(
@@ -267,10 +267,10 @@ nonisolated private enum SudokuNativeCrypto {
                 )
                 return try AES.GCM.open(box, using: SymmetricKey(data: key.prefix(16)), authenticating: aad)
             } catch {
-                throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "AES-GCM open failed"))
+                throw TurnError.proxy(.sudoku, .protocolViolation(detail: "AES-GCM open failed"))
             }
         case .chacha20Poly1305:
-            guard ciphertext.count >= 16 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "short ChaCha20-Poly1305 frame")) }
+            guard ciphertext.count >= 16 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "short ChaCha20-Poly1305 frame")) }
             let split = ciphertext.count - 16
             do {
                 let box = try ChaChaPoly.SealedBox(
@@ -280,7 +280,7 @@ nonisolated private enum SudokuNativeCrypto {
                 )
                 return try ChaChaPoly.open(box, using: SymmetricKey(data: key.prefix(32)), authenticating: aad)
             } catch {
-                throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "ChaCha20-Poly1305 open failed"))
+                throw TurnError.proxy(.sudoku, .protocolViolation(detail: "ChaCha20-Poly1305 open failed"))
             }
         case .none:
             return ciphertext
@@ -306,7 +306,7 @@ nonisolated final class SudokuNativeConfig: Sendable {
 
     init(configuration: ProxyConfiguration) throws {
         guard case .sudoku(let sudoku) = configuration.outbound else {
-            throw AnywhereError.proxy(.sudoku, .invalidConfiguration(detail: "missing protocol settings"))
+            throw TurnError.proxy(.sudoku, .invalidConfiguration(detail: "missing protocol settings"))
         }
         self.serverHost = configuration.serverAddress
         self.serverPort = configuration.serverPort
@@ -436,7 +436,7 @@ nonisolated final class BlockingProxyStream: Sendable {
 
     func sendAll(_ data: Data) async throws {
         if data.isEmpty { return }
-        if isClosed { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if isClosed { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         try await connection.sendRaw(data)
     }
 
@@ -445,10 +445,10 @@ nonisolated final class BlockingProxyStream: Sendable {
         if let buffered = pending.withLock({ $0.isEmpty ? nil : $0.read(max: max) }) {
             return buffered
         }
-        if isClosed { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if isClosed { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         guard let data = try await connection.receiveRaw(), !data.isEmpty else {
             markClosed()
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         if data.count > max {
             pending.withLock { $0.append(data, from: max) }
@@ -464,10 +464,10 @@ nonisolated final class BlockingProxyStream: Sendable {
             if !pending.isEmpty { pending.drain(exact: count, into: &out) }
         }
         while out.count < count {
-            if isClosed { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+            if isClosed { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
             guard let data = try await connection.receiveRaw(), !data.isEmpty else {
                 markClosed()
-                throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
             }
             let need = count - out.count
             if data.count > need {
@@ -625,7 +625,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
     }
 
     func open(host: String, port: UInt16, useTLS: Bool, serverName: String?) async throws -> BlockingProxyStream {
-        if stateLock.withLock({ $0.closed }) { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if stateLock.withLock({ $0.closed }) { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         let key = preparedKey(host: host, port: port, useTLS: useTLS, serverName: serverName)
         if let prepared = await takePreparedConnection(for: key) {
             return BlockingProxyStream(connection: prepared.connection, owner: self)
@@ -633,7 +633,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
         let connection = try await openProxyConnection(host: host, port: port, useTLS: useTLS, serverName: serverName)
         guard retainConnection(connection) else {
             connection.cancel()
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         return BlockingProxyStream(connection: connection, owner: self)
     }
@@ -682,9 +682,9 @@ nonisolated final class SudokuConnectionFactory: Sendable {
                 (!(state.preparedConnections[key]?.isEmpty ?? true), state.preparedClosed, state.generation)
             }
             if ready { return }
-            if closed { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+            if closed { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
             if Date() >= deadline {
-                throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "timeout waiting for prepared HTTPMask upload"))
+                throw TurnError.proxy(.sudoku, .connectionClosed(detail: "timeout waiting for prepared HTTPMask upload"))
             }
             await waitPreparedSignal(observed: generation, until: deadline)
         }
@@ -742,11 +742,11 @@ nonisolated final class SudokuConnectionFactory: Sendable {
         path: String,
         headers: [String: String]
     ) async throws -> BlockingProxyStream {
-        if stateLock.withLock({ $0.closed }) { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if stateLock.withLock({ $0.closed }) { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         let base = try await openProxyConnection(host: host, port: port, useTLS: useTLS, serverName: serverName)
         guard retainConnection(base) else {
             base.cancel()
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         let ws = WebSocketConnection(
             tunnel: base,
@@ -768,7 +768,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
         let connection = WebSocketProxyConnection(wsConnection: ws)
         guard replaceConnection(base, with: connection) else {
             connection.cancel()
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         return BlockingProxyStream(connection: connection, owner: self)
     }
@@ -828,7 +828,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
     }
 
     fileprivate var preparedConnectionsEnabled: Bool {
-        ProcessInfo.processInfo.environment["ANYWHERE_SUDOKU_DISABLE_PRECONNECT"] != "1"
+        ProcessInfo.processInfo.environment["TURN_SUDOKU_DISABLE_PRECONNECT"] != "1"
             && supportsPreparedConnections
     }
 
@@ -997,7 +997,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
         if useTLS {
             let tls = TLSClient(configuration: TLSConfiguration(serverName: serverName ?? host, alpn: ["http/1.1"]))
             guard retainTLSClient(tls) else {
-                throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
             }
             do {
                 let connection = try await tls.connect(host: directDialHost, port: port)
@@ -1011,7 +1011,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
 
         let transport = TCPTransport(host: directDialHost, port: port, resolvesViaProxyDNS: true)
         guard retainTransport(transport) else {
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         do {
             try await transport.connect()
@@ -1044,7 +1044,7 @@ nonisolated final class SudokuConnectionFactory: Sendable {
         let client = ProxyClient(configuration: chainConfig, tunnel: currentTunnel)
         guard retainClient(client) else {
             currentTunnel?.cancel()
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
         }
         let connection = try await client.connect(to: nextHost, port: nextPort)
         if index + 1 < chain.count {
@@ -1129,7 +1129,7 @@ private nonisolated func sudokuReadHTTPLine(
         if byte == 0x0a { break }
         if byte != 0x0d { data.append(byte) }
         if data.count > maxBytes {
-            throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "HTTP line too long"))
+            throw TurnError.proxy(.sudoku, .protocolViolation(detail: "HTTP line too long"))
         }
     }
     return String(data: data, encoding: .utf8) ?? ""
@@ -1164,7 +1164,7 @@ nonisolated private final class SudokuHTTPBodyReader {
                 let line = try await sudokuReadHTTPLine(from: stream)
                 let lenText = line.split(separator: ";", maxSplits: 1).first.map(String.init) ?? line
                 guard let length = Int(lenText.trimmingCharacters(in: .whitespacesAndNewlines), radix: 16) else {
-                    throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad chunk length"))
+                    throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad chunk length"))
                 }
                 if length == 0 {
                     while true {
@@ -1200,7 +1200,7 @@ nonisolated private final class SudokuHTTPBodyReader {
             return data
         }
         do { return try await stream.readSome(max: max) }
-        catch AnywhereError.proxy(.sudoku, .connectionClosed) {
+        catch TurnError.proxy(.sudoku, .connectionClosed) {
             done = true
             return Data()
         }
@@ -1339,7 +1339,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
             try Task.checkCancellation()
             var toResume: [AsyncStream<Never>.Continuation] = []
             let step: Step<Void> = state.withLock { s in
-                if s.closed || s.writeClosed { return .fail(AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))) }
+                if s.closed || s.writeClosed { return .fail(TurnError.proxy(.sudoku, .connectionClosed(detail: nil))) }
                 if s.txQueue.count + data.count > queueLimit { return .wait(s.generation) }
                 s.txQueue.append(data)
                 toResume = drainWaitersLocked(&s)
@@ -1365,9 +1365,9 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
                     toResume = drainWaitersLocked(&s)
                     return .done(out)
                 }
-                if s.readEOF { return .fail(AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))) }
+                if s.readEOF { return .fail(TurnError.proxy(.sudoku, .connectionClosed(detail: nil))) }
                 if s.closed {
-                    return .fail(s.fatal ? AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask closed")) : AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)))
+                    return .fail(s.fatal ? TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask closed")) : TurnError.proxy(.sudoku, .connectionClosed(detail: nil)))
                 }
                 return .wait(s.generation)
             }
@@ -1401,7 +1401,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
             try Task.checkCancellation()
             let step: Step<Void> = state.withLock { s in
                 if s.pullReady && s.pushReady { return .done(()) }
-                if s.closed { return .fail(AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask closed before tunnel became ready"))) }
+                if s.closed { return .fail(TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask closed before tunnel became ready"))) }
                 return .wait(s.generation)
             }
             switch step {
@@ -1409,7 +1409,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
             case .fail(let error): throw error
             case .wait(let generation):
                 if Date() >= deadline {
-                    throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "timeout waiting for HTTPMask tunnel readiness"))
+                    throw TurnError.proxy(.sudoku, .connectionClosed(detail: "timeout waiting for HTTPMask tunnel readiness"))
                 }
                 await waitSignal(observed: generation, until: deadline)
             }
@@ -1478,9 +1478,9 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
 
     private func sendSessionControl(path: String, attempts: Int = 3) async throws {
         guard !path.isEmpty else {
-            throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "HTTPMask session control path is empty"))
+            throw TurnError.proxy(.sudoku, .protocolViolation(detail: "HTTPMask session control path is empty"))
         }
-        var lastError: Error = AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask session control failed"))
+        var lastError: Error = TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask session control failed"))
         for attempt in 0..<max(1, attempts) {
             do {
                 let opened = try await Self.request(
@@ -1500,7 +1500,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
                 if attempt > 0, [403, 404, 410].contains(opened.status) {
                     return
                 }
-                lastError = AnywhereError.proxy(.sudoku, .connectionClosed(detail:
+                lastError = TurnError.proxy(.sudoku, .connectionClosed(detail:
                     "HTTPMask session control status \(opened.status)"
                 ))
             } catch {
@@ -1513,7 +1513,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
     private static func readHeaders(stream: BlockingProxyStream) async throws -> SudokuHTTPBodyReader {
         let statusLine = try await sudokuReadHTTPLine(from: stream)
         let parts = statusLine.split(separator: " ")
-        guard parts.count >= 2, let status = Int(parts[1]) else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad HTTP response")) }
+        guard parts.count >= 2, let status = Int(parts[1]) else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad HTTP response")) }
         var chunked = false
         var contentLength: Int?
         while true {
@@ -1535,14 +1535,14 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
         let sessionPath = applyPathRoot(config: config, "/session")
         let opened = try await request(config: config, factory: factory, mode: mode, method: "GET", requestPath: appendEarlyData(sessionPath, payload: earlyRequestPayload), authPath: "/session", body: Data())
         defer { opened.finish() }
-        guard opened.status == 200 else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask authorize status \(opened.status)")) }
+        guard opened.status == 200 else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask authorize status \(opened.status)")) }
         let body = try await opened.readAll(limit: 4096)
         guard let text = String(data: body, encoding: .utf8), let range = text.range(of: "token=") else {
-            throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask authorize missing token"))
+            throw TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask authorize missing token"))
         }
         let tail = text[range.upperBound...]
         let token = String(tail.prefix { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" })
-        guard !token.isEmpty else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask empty token")) }
+        guard !token.isEmpty else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask empty token")) }
         var earlyResponse = Data()
         for line in text.split(whereSeparator: \.isNewline) {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1633,7 +1633,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
             defer { opened.finish() }
 
             do {
-                guard opened.status == 200 else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask pull status \(opened.status)")) }
+                guard opened.status == 200 else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask pull status \(opened.status)")) }
                 retryCount = 0
                 retryDelayMs = 10
                 let conts = state.withLock { s -> [AsyncStream<Never>.Continuation] in
@@ -1652,7 +1652,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
                             if byte == 0x0a {
                                 if !pollLine.isEmpty {
                                     guard let decoded = Data(base64Encoded: pollLine) else {
-                                        throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "invalid HTTPMask poll payload"))
+                                        throw TurnError.proxy(.sudoku, .protocolViolation(detail: "invalid HTTPMask poll payload"))
                                     }
                                     await enqueueRX(decoded)
                                     pollLine.removeAll()
@@ -1660,7 +1660,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
                             } else {
                                 pollLine.append(byte)
                                 if pollLine.count > sudokuHTTPMaskMaxPollLineBytes {
-                                    throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "HTTPMask poll line too long"))
+                                    throw TurnError.proxy(.sudoku, .protocolViolation(detail: "HTTPMask poll line too long"))
                                 }
                             }
                         }
@@ -1773,7 +1773,7 @@ nonisolated final class SudokuHTTPMaskTransport: Sendable {
                 let opened = try await Self.request(config: config, factory: factory, mode: mode, method: "POST", requestPath: paths.pushPath, authPath: "/api/v1/upload", contentType: contentType, body: body)
                 defer { opened.finish() }
                 _ = try await opened.readAll(limit: 256)
-                guard opened.status == 200 else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask push status \(opened.status)")) }
+                guard opened.status == 200 else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: "HTTPMask push status \(opened.status)")) }
                 let conts = state.withLock { s -> [AsyncStream<Never>.Continuation] in
                     s.pushReady = true
                     return drainWaitersLocked(&s)
@@ -1865,9 +1865,9 @@ nonisolated final class SudokuObfsTransport: Sendable {
         while out.count < count {
             do {
                 out.append(try await receive(max: count - out.count))
-            } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
+            } catch TurnError.proxy(.sudoku, .connectionClosed) {
                 if out.isEmpty { return nil }
-                throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "truncated \(what)"))
+                throw TurnError.proxy(.sudoku, .protocolViolation(detail: "truncated \(what)"))
             }
         }
         return out
@@ -2009,14 +2009,14 @@ nonisolated final class SudokuRecordStream: Sendable {
         if method == .none { return try await transport.receive(max: max) }
         while true {
             guard let lenData = try await transport.readExactAllowingEOF(2, what: "record length") else {
-                throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil))
+                throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil))
             }
             let bodyLen = try Self.parseRecordLength(lenData)
             let body: Data
             do {
                 body = try await transport.readExact(bodyLen)
-            } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
-                throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "truncated record body"))
+            } catch TurnError.proxy(.sudoku, .connectionClosed) {
+                throw TurnError.proxy(.sudoku, .protocolViolation(detail: "truncated record body"))
             }
             let out: Data? = try state.withLock { state in
                 let plain = try decryptRecord(&state, body: body, bodyLen: bodyLen)
@@ -2040,7 +2040,7 @@ nonisolated final class SudokuRecordStream: Sendable {
 
     private static func parseRecordLength(_ lenData: Data) throws -> Int {
         let bodyLen = Int(UInt16(lenData[0]) << 8 | UInt16(lenData[1]))
-        guard bodyLen >= 12 && bodyLen <= 65535 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad record length")) }
+        guard bodyLen >= 12 && bodyLen <= 65535 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad record length")) }
         return bodyLen
     }
 
@@ -2048,9 +2048,9 @@ nonisolated final class SudokuRecordStream: Sendable {
         let epoch = body.uint32BE(at: 0)
         let seq = body.uint64BE(at: 4)
         if state.recvInitialized {
-            if epoch < state.recvEpoch { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "replayed record epoch")) }
-            if epoch == state.recvEpoch && seq != state.recvSeq { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "out of order record")) }
-            if epoch > state.recvEpoch && epoch - state.recvEpoch > 8 { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "record epoch jump")) }
+            if epoch < state.recvEpoch { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "replayed record epoch")) }
+            if epoch == state.recvEpoch && seq != state.recvSeq { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "out of order record")) }
+            if epoch > state.recvEpoch && epoch - state.recvEpoch > 8 { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "record epoch jump")) }
         }
         let header = body.prefixData(12)
         let ciphertext = body.rangeData(offset: 12, count: bodyLen - 12)
@@ -2208,7 +2208,7 @@ nonisolated final class SudokuNativeClient {
         let recordData = try decodeEarlyObfs(response)
         let plain = try decodeEarlyRecord(recordData, base: SudokuNativeCrypto.pskBases(config.key).s2c)
         let message = try parseKIP(plain)
-        guard message.type == 0x02 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad early KIP server hello")) }
+        guard message.type == 0x02 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad early KIP server hello")) }
         return try finishKIP(state: state, message: message)
     }
 
@@ -2255,7 +2255,7 @@ nonisolated final class SudokuNativeClient {
         while offset + 2 <= data.count {
             let bodyLen = Int(UInt16(data[offset]) << 8 | UInt16(data[offset + 1]))
             guard bodyLen >= 12 && offset + 2 + bodyLen <= data.count else {
-                if out.isEmpty { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad early record length")) }
+                if out.isEmpty { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad early record length")) }
                 break
             }
             let bodyOffset = offset + 2
@@ -2270,7 +2270,7 @@ nonisolated final class SudokuNativeClient {
                 if out.count >= 6 + kipLen { break }
             }
         }
-        guard !out.isEmpty else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "short early record")) }
+        guard !out.isEmpty else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "short early record")) }
         return out
     }
 
@@ -2339,8 +2339,8 @@ nonisolated final class SudokuNativeClient {
     }
 
     private func finishKIP(state: SudokuKIPClientState, message msg: (type: UInt8, payload: Data)) throws -> (c2s: Data, s2c: Data) {
-        guard msg.type == 0x02, msg.payload.count == 52 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad KIP server hello")) }
-        guard msg.payload.prefixData(16) == state.nonce else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "KIP nonce mismatch")) }
+        guard msg.type == 0x02, msg.payload.count == 52 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad KIP server hello")) }
+        guard msg.payload.prefixData(16) == state.nonce else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "KIP nonce mismatch")) }
         let serverPub = msg.payload.rangeData(offset: 16, count: 32)
         let shared = try state.privateKey.sharedSecretFromKeyAgreement(with: Curve25519.KeyAgreement.PublicKey(rawRepresentation: serverPub)).withUnsafeBytes { Data($0) }
         return SudokuNativeCrypto.sessionBases(psk: config.key, shared: shared, nonce: state.nonce)
@@ -2360,23 +2360,23 @@ nonisolated final class SudokuNativeClient {
         let header: Data
         do {
             header = try await record.readExact(6)
-        } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
-            throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP header"))
+        } catch TurnError.proxy(.sudoku, .connectionClosed) {
+            throw TurnError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP header"))
         }
-        guard header[0] == 0x6b, header[1] == 0x69, header[2] == 0x70 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad KIP magic")) }
+        guard header[0] == 0x6b, header[1] == 0x69, header[2] == 0x70 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad KIP magic")) }
         let length = Int(UInt16(header[4]) << 8 | UInt16(header[5]))
         do {
             return (header[3], try await record.readExact(length))
-        } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
-            throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP payload"))
+        } catch TurnError.proxy(.sudoku, .connectionClosed) {
+            throw TurnError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP payload"))
         }
     }
 
     private func parseKIP(_ data: Data) throws -> (type: UInt8, payload: Data) {
-        guard data.count >= 6 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "short KIP frame")) }
-        guard data[0] == 0x6b, data[1] == 0x69, data[2] == 0x70 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad KIP magic")) }
+        guard data.count >= 6 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "short KIP frame")) }
+        guard data[0] == 0x6b, data[1] == 0x69, data[2] == 0x70 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad KIP magic")) }
         let length = Int(UInt16(data[4]) << 8 | UInt16(data[5]))
-        guard data.count >= 6 + length else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP frame \(data.count)/\(6 + length)")) }
+        guard data.count >= 6 + length else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "truncated KIP frame \(data.count)/\(6 + length)")) }
         return (data[3], data.rangeData(offset: 6, count: length))
     }
 }
@@ -2394,7 +2394,7 @@ nonisolated private enum SudokuAddress {
             withUnsafeBytes(of: ipv6) { out.append(contentsOf: $0) }
         } else {
             let bytes = Array(host.utf8)
-            guard bytes.count <= 255 else { throw AnywhereError.proxy(.sudoku, .invalidConfiguration(detail: "domain too long")) }
+            guard bytes.count <= 255 else { throw TurnError.proxy(.sudoku, .invalidConfiguration(detail: "domain too long")) }
             out.append(0x03)
             out.append(UInt8(bytes.count))
             out.append(contentsOf: bytes)
@@ -2458,7 +2458,7 @@ nonisolated final class SudokuMuxClient: Multiplexer, Sendable {
             state.streams[stream.id] = stream
             return false
         }
-        if closed { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if closed { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         do {
             try await sendFrame(type: 0x01, streamID: stream.id, payload: SudokuAddress.encode(host: host, port: port))
         } catch {
@@ -2470,9 +2470,9 @@ nonisolated final class SudokuMuxClient: Multiplexer, Sendable {
     }
 
     func sendFrame(type: UInt8, streamID: UInt32, payload: Data) async throws {
-        guard payload.count <= 256 * 1024 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "mux frame too large")) }
+        guard payload.count <= 256 * 1024 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "mux frame too large")) }
         let isClosed = state.withLock { $0.closed }
-        guard !isClosed else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        guard !isClosed else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         var frame = Data([type])
         var sid = streamID.bigEndian
         var length = UInt32(payload.count).bigEndian
@@ -2536,14 +2536,14 @@ nonisolated final class SudokuMuxClient: Multiplexer, Sendable {
                 let type = header[0]
                 let streamID = header.uint32BE(at: 1)
                 let length = Int(header.uint32BE(at: 5))
-                guard length <= 256 * 1024 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "mux frame too large")) }
+                guard length <= 256 * 1024 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "mux frame too large")) }
                 let payload = try await record.readExact(length)
                 let stream = state.withLock { $0.streams[streamID] }
                 switch type {
                 case 0x02:
                     guard let stream, !payload.isEmpty else { continue }
                     if case .overflow = stream.enqueue(payload) {
-                        let error = AnywhereError.proxy(.sudoku, .connectionClosed(detail: "mux receive queue full"))
+                        let error = TurnError.proxy(.sudoku, .connectionClosed(detail: "mux receive queue full"))
                         sudokuLogger.warning("[Sudoku-Mux] stream \(streamID) receive queue overflow, resetting stream")
                         stream.markClosed(discardQueuedData: true, error: error)
                         removeStream(id: streamID)
@@ -2562,12 +2562,12 @@ nonisolated final class SudokuMuxClient: Multiplexer, Sendable {
                     let message = rawMessage.isEmpty ? "mux stream reset" : rawMessage
                     stream?.markClosed(
                         discardQueuedData: true,
-                        error: AnywhereError.proxy(.sudoku, .connectionClosed(detail: message))
+                        error: TurnError.proxy(.sudoku, .connectionClosed(detail: message))
                     )
                     removeStream(id: streamID)
-                default: throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad mux frame"))
+                default: throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad mux frame"))
                 }
-            } catch AnywhereError.proxy(.sudoku, .connectionClosed(nil)) {
+            } catch TurnError.proxy(.sudoku, .connectionClosed(nil)) {
                 close()
                 return
             } catch {
@@ -2619,12 +2619,12 @@ nonisolated final class SudokuMuxStream: Sendable {
     func send(_ data: Data) async throws {
         if data.isEmpty { return }
         try await chainedSend { [self] in
-            guard let client = clientBox.withLock({ $0.value }) else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+            guard let client = clientBox.withLock({ $0.value }) else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
             let (cannotWrite, error) = state.withLock { state in
                 (state.fullyClosed || state.localWriteClosed, state.terminalError)
             }
             if let error { throw error }
-            guard !cannotWrite else { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+            guard !cannotWrite else { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
 
             var offset = 0
             while offset < data.count {
@@ -2660,7 +2660,7 @@ nonisolated final class SudokuMuxStream: Sendable {
             case .data(let out): return out
             case .eof: return nil
             case .error(let error): throw error
-            case .concurrent: throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "concurrent mux receive"))
+            case .concurrent: throw TurnError.proxy(.sudoku, .protocolViolation(detail: "concurrent mux receive"))
             case .wait(let stream):
                 for await _ in stream { break }
                 try Task.checkCancellation()
@@ -2774,7 +2774,7 @@ nonisolated final class SudokuTCPProxyConnection:
     var isConnected: Bool { !closed.load(ordering: .acquiring) }
 
     func sendRaw(_ data: Data) async throws {
-        if closed.load(ordering: .acquiring) { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if closed.load(ordering: .acquiring) { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         try await stream.send(data)
     }
 
@@ -2782,7 +2782,7 @@ nonisolated final class SudokuTCPProxyConnection:
         if closed.load(ordering: .acquiring) { return nil }
         do {
             return try await stream.receive(max: sudokuTCPReceiveChunkSize)
-        } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
+        } catch TurnError.proxy(.sudoku, .connectionClosed) {
             return nil
         }
     }
@@ -2819,7 +2819,7 @@ nonisolated final class SudokuMuxTCPProxyConnection:
     var isConnected: Bool { !state.withLock { $0.closed } && !client.isClosed }
 
     func sendRaw(_ data: Data) async throws {
-        if state.withLock({ $0.closed }) { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if state.withLock({ $0.closed }) { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         do {
             try await stream.send(data)
         } catch {
@@ -2875,10 +2875,10 @@ nonisolated final class SudokuUDPProxyConnection: ProxyConnection, Sendable {
     var isConnected: Bool { !closed.load(ordering: .acquiring) }
 
     func sendRaw(_ data: Data) async throws {
-        if closed.load(ordering: .acquiring) { throw AnywhereError.proxy(.sudoku, .connectionClosed(detail: nil)) }
+        if closed.load(ordering: .acquiring) { throw TurnError.proxy(.sudoku, .connectionClosed(detail: nil)) }
         let address = try SudokuAddress.encode(host: destinationHost, port: destinationPort)
-        guard address.count <= UInt16.max else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "UoT address too large")) }
-        guard data.count <= UInt16.max else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "UoT payload too large")) }
+        guard address.count <= UInt16.max else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "UoT address too large")) }
+        guard data.count <= UInt16.max else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "UoT payload too large")) }
         var frame = Data([UInt8(address.count >> 8), UInt8(address.count & 0xff), UInt8(data.count >> 8), UInt8(data.count & 0xff)])
         frame.append(address)
         frame.append(data)
@@ -2891,11 +2891,11 @@ nonisolated final class SudokuUDPProxyConnection: ProxyConnection, Sendable {
             let header = try await stream.readExact(4)
             let addrLen = Int(UInt16(header[0]) << 8 | UInt16(header[1]))
             let payloadLen = Int(UInt16(header[2]) << 8 | UInt16(header[3]))
-            guard addrLen > 0 && addrLen <= 64 * 1024 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad UoT address length")) }
-            guard payloadLen <= 64 * 1024 else { throw AnywhereError.proxy(.sudoku, .protocolViolation(detail: "bad UoT payload length")) }
+            guard addrLen > 0 && addrLen <= 64 * 1024 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad UoT address length")) }
+            guard payloadLen <= 64 * 1024 else { throw TurnError.proxy(.sudoku, .protocolViolation(detail: "bad UoT payload length")) }
             _ = try await stream.readExact(addrLen)
             return try await stream.readExact(payloadLen)
-        } catch AnywhereError.proxy(.sudoku, .connectionClosed) {
+        } catch TurnError.proxy(.sudoku, .connectionClosed) {
             return nil
         }
     }

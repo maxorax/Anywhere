@@ -1,6 +1,6 @@
 //
 //  ConnectionRouter.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/12/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "ConnectionRouter")
+nonisolated private let logger = TurnLogger(category: "ConnectionRouter")
 
 nonisolated struct RouteDecision {
     enum Action {
@@ -235,7 +235,7 @@ nonisolated final class ConnectionRouter: Sendable {
         case .proxy(let id):
             let configuration = domainRouter.resolveConfiguration(action: match.action)
             if configuration == nil {
-                logger.report("[\(proto)]", error: AnywhereError.routing(.configurationMissing(host: host)))
+                logger.report("[\(proto)]", error: TurnError.routing(.configurationMissing(host: host)))
             }
             return .route(target: .proxy(id), configuration: configuration, ruleSetName: match.ruleSetName)
         }

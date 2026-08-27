@@ -1,6 +1,6 @@
 //
 //  TLSStreamTransport.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/9/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "TLSStreamTransport")
+nonisolated private let logger = TurnLogger(category: "TLSStreamTransport")
 
 // MARK: - TLSStreamTransport
 
@@ -80,7 +80,7 @@ nonisolated final class TLSStreamTransport: Sendable {
 
     func send(_ data: Data) async throws {
         guard let tlsConnection = state.withLock({ $0.isReady ? $0.tlsConnection : nil }) else {
-            throw AnywhereError.transport(.notConnected)
+            throw TurnError.transport(.notConnected)
         }
         try await tlsConnection.send(data)
     }
@@ -89,7 +89,7 @@ nonisolated final class TLSStreamTransport: Sendable {
 
     func receive() async throws -> Data? {
         guard let tlsConnection = state.withLock({ $0.isReady ? $0.tlsConnection : nil }) else {
-            throw AnywhereError.transport(.notConnected)
+            throw TurnError.transport(.notConnected)
         }
         return try await tlsConnection.receive()
     }

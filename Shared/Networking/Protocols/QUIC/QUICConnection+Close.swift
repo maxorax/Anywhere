@@ -1,6 +1,6 @@
 //
 //  QUICConnection+Close.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -57,7 +57,7 @@ extension QUICConnection {
             self.streamSendQueues.removeAll()
             let datagrams = self.pendingDatagrams
             self.pendingDatagrams.removeAll()
-            let closeError = error ?? AnywhereError.quic(.closed(graceful: false))
+            let closeError = error ?? TurnError.quic(.closed(graceful: false))
             self.finishConnect(closeError)
             for continuation in failedWriters { continuation.resume(throwing: closeError) }
             for d in datagrams { d.latch?.settle(closeError) }

@@ -1,6 +1,6 @@
 //
 //  ProxyClient+Naive.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/15/26.
 //
@@ -115,10 +115,10 @@ extension ProxyClient {
     /// Session-level failures warrant a fresh-session retry; stream-level
     /// protocol errors (407, tunnel status) would fail identically.
     private static func isRetryableHTTP3Failure(_ error: Error) -> Bool {
-        if case AnywhereError.quic = error { return true }
-        if case AnywhereError.proxy(.http3, .streamIDsExhausted) = error { return true }
-        if case AnywhereError.proxy(.http3, .streamClosed) = error { return true }
-        if case AnywhereError.proxy(.http3, .connectionClosed(let msg)) = error {
+        if case TurnError.quic = error { return true }
+        if case TurnError.proxy(.http3, .streamIDsExhausted) = error { return true }
+        if case TurnError.proxy(.http3, .streamClosed) = error { return true }
+        if case TurnError.proxy(.http3, .connectionClosed(let msg)) = error {
             // connectionClosed mixes session and protocol errors; our session errors start with "Session ".
             return msg?.hasPrefix("Session ") == true
         }

@@ -1,6 +1,6 @@
 //
 //  X509Builder.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -24,7 +24,7 @@ nonisolated enum X509Builder {
         notAfter: Date
     ) throws -> Data {
         guard let publicKey = SecKeyCopyPublicKey(privateKey) else {
-            throw AnywhereError.certificate(.publicKeyExportFailed)
+            throw TurnError.certificate(.publicKeyExportFailed)
         }
         let spki = try buildECP256SPKI(publicKey: publicKey)
         let subject = encodeName(commonName: subjectCN, organization: organization)
@@ -69,7 +69,7 @@ nonisolated enum X509Builder {
         } else {
             cnHostname = hostname
         }
-        let subject = encodeName(commonName: cnHostname, organization: "Anywhere")
+        let subject = encodeName(commonName: cnHostname, organization: "Turn")
         let validity = encodeValidity(notBefore: notBefore, notAfter: notAfter)
 
         let extensions = encodeExtensions([
@@ -106,11 +106,11 @@ nonisolated enum X509Builder {
         notAfter: Date
     ) throws -> Data {
         guard let publicKey = SecKeyCopyPublicKey(signingKey) else {
-            throw AnywhereError.certificate(.publicKeyExportFailed)
+            throw TurnError.certificate(.publicKeyExportFailed)
         }
         let spki = try buildECP256SPKI(publicKey: publicKey)
         let caComponents = try parseCAComponents(certDER: caCertificateDER)
-        let subject = encodeName(commonName: commonName, organization: "Anywhere")
+        let subject = encodeName(commonName: commonName, organization: "Turn")
 
         let extensions = encodeExtensions([
             encodeBasicConstraintsLeaf(),
@@ -304,7 +304,7 @@ nonisolated enum X509Builder {
         var error: Unmanaged<CFError>?
         guard let raw = SecKeyCopyExternalRepresentation(publicKey, &error) as Data? else {
             _ = error?.takeRetainedValue()
-            throw AnywhereError.certificate(.publicKeyExportFailed)
+            throw TurnError.certificate(.publicKeyExportFailed)
         }
         return try buildECP256SPKI(publicKeyX963: raw)
     }
@@ -313,7 +313,7 @@ nonisolated enum X509Builder {
     /// that both CryptoKit and `SecKeyCopyExternalRepresentation` emit for P-256.
     private static func buildECP256SPKI(publicKeyX963: Data) throws -> Data {
         guard publicKeyX963.count == 65, publicKeyX963.first == 0x04 else {
-            throw AnywhereError.certificate(.invalidPublicKey)
+            throw TurnError.certificate(.invalidPublicKey)
         }
 
         var algorithm = Data()
@@ -583,7 +583,7 @@ nonisolated enum X509Builder {
         let algorithm: SecKeyAlgorithm = .ecdsaSignatureMessageX962SHA256
         guard let signature = SecKeyCreateSignature(privateKey, algorithm, data as CFData, &error) as Data? else {
             let err = error?.takeRetainedValue()
-            throw AnywhereError.certificate(.signingFailed(detail: err.flatMap { CFErrorCopyDescription($0) as String? } ?? "unknown"))
+            throw TurnError.certificate(.signingFailed(detail: err.flatMap { CFErrorCopyDescription($0) as String? } ?? "unknown"))
         }
         return signature
     }
@@ -634,7 +634,7 @@ nonisolated enum X509Builder {
                 return try ASN1Parser.contentOf(identifier)
             }
         }
-        throw AnywhereError.certificate(.asn1ParseFailed(detail: "CA cert missing SubjectKeyIdentifier"))
+        throw TurnError.certificate(.asn1ParseFailed(detail: "CA cert missing SubjectKeyIdentifier"))
     }
 
     private static func extractSubjectPublicKey(spki: Data) throws -> Data {
@@ -646,7 +646,7 @@ nonisolated enum X509Builder {
         let content = try ASN1Parser.contentOf(bitString)
         // First content byte is "unused bits" — skip it.
         guard let first = content.first else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Empty BIT STRING"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Empty BIT STRING"))
         }
         _ = first
         return content.dropFirst()
@@ -822,7 +822,7 @@ nonisolated private struct ASN1Parser {
 
     mutating func peekTag() throws -> UInt8 {
         guard offset < data.endIndex else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Unexpected end of data"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Unexpected end of data"))
         }
         return data[offset]
     }
@@ -833,18 +833,18 @@ nonisolated private struct ASN1Parser {
 
     mutating func readNextWithHeader(expectedTag: UInt8?) throws -> Data {
         guard offset < data.endIndex else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Unexpected end of data"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Unexpected end of data"))
         }
         let tag = data[offset]
         if let expected = expectedTag, tag != expected {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Tag mismatch: expected \(expected), got \(tag)"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Tag mismatch: expected \(expected), got \(tag)"))
         }
         let start = offset
         let (length, lengthBytes) = try parseLength(at: offset + 1)
         let total = 1 + lengthBytes + length
         let end = start + total
         guard end <= data.endIndex else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Length overrun"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Length overrun"))
         }
         offset = end
         return data[start..<end]
@@ -872,7 +872,7 @@ nonisolated private struct ASN1Parser {
 
     private func parseLength(at start: Int) throws -> (length: Int, bytes: Int) {
         guard start < data.endIndex else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Length truncated"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Length truncated"))
         }
         let first = data[start]
         if first & 0x80 == 0 {
@@ -881,7 +881,7 @@ nonisolated private struct ASN1Parser {
         let count = Int(first & 0x7F)
         // 0x80 alone is BER indefinite-length (invalid DER); cap length bytes at 4.
         guard count > 0, count <= 4, start + count < data.endIndex else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "Length encoding invalid"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "Length encoding invalid"))
         }
         // Accumulate in UInt64 — a 4-byte length can overflow a 32-bit `Int`.
         var length: UInt64 = 0
@@ -891,7 +891,7 @@ nonisolated private struct ASN1Parser {
         // Bound to remaining buffer; a huge length would overflow Int in readNextWithHeader.
         let remaining = data.endIndex - (start + 1 + count)
         guard length <= UInt64(Int.max), length <= UInt64(remaining) else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail:
+            throw TurnError.certificate(.asn1ParseFailed(detail:
                 "Length \(length) exceeds remaining buffer \(remaining)"
             ))
         }
@@ -901,7 +901,7 @@ nonisolated private struct ASN1Parser {
     /// Returns the content bytes of a TLV blob (strips the tag and length header).
     static func contentOf(_ tlv: Data) throws -> Data {
         guard tlv.count >= 2 else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "TLV too short"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "TLV too short"))
         }
         let lengthByte = tlv[tlv.startIndex + 1]
         let lengthHeaderBytes: Int
@@ -912,7 +912,7 @@ nonisolated private struct ASN1Parser {
         }
         let prefix = 1 + lengthHeaderBytes
         guard tlv.count >= prefix else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "TLV truncated"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "TLV truncated"))
         }
         return tlv.suffix(from: tlv.startIndex + prefix)
     }

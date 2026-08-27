@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-               BuildableName = "Anywhere.app"
-               BlueprintName = "Anywhere"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn.app"
+               BlueprintName = "Turn"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "78B6DF992FE7B70D0084897A"
-               BuildableName = "Anywhere Tests.xctest"
-               BlueprintName = "Anywhere Tests"
-               ReferencedContainer = "container:Anywhere.xcodeproj">
+               BuildableName = "Turn Tests.xctest"
+               BlueprintName = "Turn Tests"
+               ReferencedContainer = "container:Turn.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -58,13 +58,13 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-            BuildableName = "Anywhere.app"
-            BlueprintName = "Anywhere"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn.app"
+            BlueprintName = "Turn"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../Anywhere/Products.storekit">
+         identifier = "../../Turn/Products.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
@@ -78,9 +78,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CB1C10642F23B81500B74CD8"
-            BuildableName = "Anywhere.app"
-            BlueprintName = "Anywhere"
-            ReferencedContainer = "container:Anywhere.xcodeproj">
+            BuildableName = "Turn.app"
+            BlueprintName = "Turn"
+            ReferencedContainer = "container:Turn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

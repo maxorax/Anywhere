@@ -1,6 +1,6 @@
 //
 //  RoutingRuleSetStore.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 3/1/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Observation
 
-nonisolated private let logger = AnywhereLogger(category: "RoutingRuleSetStore")
+nonisolated private let logger = TurnLogger(category: "RoutingRuleSetStore")
 
 nonisolated struct RoutingRuleSet: Identifiable, Equatable {
     let id: String   // built-in: name, custom: UUID string
@@ -419,7 +419,7 @@ class RoutingRuleSetStore {
             let data = try JSONEncoder().encode(customRuleSets + customTombstones)
             JSONBlobStore.shared.save(.customRuleSets, data: data)
         } catch {
-            logger.report(AnywhereError.store(.saveFailed(.routingRuleSets, underlying: error)))
+            logger.report(TurnError.store(.saveFailed(.routingRuleSets, underlying: error)))
         }
         scheduleSyncToAppGroup()
     }

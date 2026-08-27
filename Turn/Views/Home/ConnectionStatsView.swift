@@ -1,6 +1,6 @@
 //
 //  ConnectionStatsView.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/7/26.
 //
@@ -314,7 +314,7 @@ private struct PressureGauge: View {
                 .font(.system(size: 14))
                 .foregroundStyle(.primary.opacity(0.6))
         }
-        .gaugeStyle(AnywhereLinearGaugeStyle())
+        .gaugeStyle(TurnLinearGaugeStyle())
     }
 }
 
@@ -498,7 +498,7 @@ private struct RouteLegend: View {
 
 // MARK: - Gauge style
 
-struct AnywhereLinearGaugeStyle: GaugeStyle {
+struct TurnLinearGaugeStyle: GaugeStyle {
     var color: Color = .cyan
 
     func makeBody(configuration: Configuration) -> some View {
@@ -521,7 +521,7 @@ struct AnywhereLinearGaugeStyle: GaugeStyle {
     }
 }
 
-struct AnywhereRingGaugeStyle: GaugeStyle {
+struct TurnRingGaugeStyle: GaugeStyle {
     var color: Color = .cyan
 
     func makeBody(configuration: Configuration) -> some View {

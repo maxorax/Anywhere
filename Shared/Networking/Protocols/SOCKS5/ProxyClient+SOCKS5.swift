@@ -1,6 +1,6 @@
 //
 //  ProxyClient+SOCKS5.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/15/26.
 //
@@ -14,7 +14,7 @@ extension ProxyClient {
         destinationPort: UInt16
     ) async throws -> ProxyConnection {
         guard case .socks5(let username, let password) = configuration.outbound else {
-            throw AnywhereError.proxy(.socks5, .protocolViolation(detail: "SOCKS5 outbound expected"))
+            throw TurnError.proxy(.socks5, .protocolViolation(detail: "SOCKS5 outbound expected"))
         }
 
         let transport: any ByteTransport

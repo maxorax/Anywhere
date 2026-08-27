@@ -1,6 +1,6 @@
 //
 //  QUICConnection+Streams.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -10,7 +10,7 @@ import Network
 import CryptoKit
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "QUICConnection")
+nonisolated private let logger = TurnLogger(category: "QUICConnection")
 
 extension QUICConnection {
 
@@ -79,7 +79,7 @@ extension QUICConnection {
     nonisolated func writeStream(_ streamId: Int64, data: Data, fin: Bool = false) async throws {
         try await bridge.runParkedThrowing(host: self) { me, continuation in
             guard me.connectionOpaquePointer != nil, me.state == .connected else {
-                continuation.resume(throwing: AnywhereError.quic(.closed(graceful: false)))
+                continuation.resume(throwing: TurnError.quic(.closed(graceful: false)))
                 return
             }
             me.appendStreamWrite(streamId, data: data, fin: fin, continuation: continuation)
@@ -98,7 +98,7 @@ extension QUICConnection {
     nonisolated func writeDatagrams(_ datagrams: [Data]) async throws {
         try await bridge.runParkedThrowing(host: self) { me, continuation in
             guard me.connectionOpaquePointer != nil, me.state == .connected else {
-                continuation.resume(throwing: AnywhereError.quic(.closed(graceful: false)))
+                continuation.resume(throwing: TurnError.quic(.closed(graceful: false)))
                 return
             }
             if datagrams.isEmpty { continuation.resume(); return }
@@ -111,7 +111,7 @@ extension QUICConnection {
     nonisolated func writeDatagramsAtomically(_ datagrams: [Data]) async throws {
         try await bridge.runParkedThrowing(host: self) { me, continuation in
             guard me.connectionOpaquePointer != nil, me.state == .connected else {
-                continuation.resume(throwing: AnywhereError.quic(.closed(graceful: false)))
+                continuation.resume(throwing: TurnError.quic(.closed(graceful: false)))
                 return
             }
             if datagrams.isEmpty { continuation.resume(); return }
@@ -119,7 +119,7 @@ extension QUICConnection {
                 pendingCount: me.pendingDatagrams.count,
                 batchCount: datagrams.count
             ) else {
-                continuation.resume(throwing: AnywhereError.quic(.datagramQueueFull))
+                continuation.resume(throwing: TurnError.quic(.datagramQueueFull))
                 return
             }
             let latch = DatagramBatchLatch(count: datagrams.count, continuation: continuation)
@@ -144,7 +144,7 @@ extension QUICConnection {
             didWarnDatagramOverflow = true
             logger.warning("[QUIC] Datagram send queue overflowed (cap \(Self.maxPendingDatagrams)); dropping oldest")
         }
-        let overflowError = AnywhereError.quic(.connectionFailed(detail: "Datagram send queue overflowed"))
+        let overflowError = TurnError.quic(.connectionFailed(detail: "Datagram send queue overflowed"))
         for d in dropped { d.latch?.settle(overflowError) }
     }
     
@@ -183,7 +183,7 @@ extension QUICConnection {
             streamSendQueues[streamId] = queue
         }
         guard !queue.finQueued else {
-            continuation?.resume(throwing: AnywhereError.quic(.closed(graceful: false)))
+            continuation?.resume(throwing: TurnError.quic(.closed(graceful: false)))
             return
         }
         queue.append(
@@ -260,7 +260,7 @@ extension QUICConnection {
                     if code == NGTCP2_ERR_STREAM_NOT_FOUND || code == NGTCP2_ERR_STREAM_SHUT_WR {
                         failStreamSendQueue(
                             streamId: id,
-                            error: AnywhereError.quic(.closed(graceful: false))
+                            error: TurnError.quic(.closed(graceful: false))
                         )
                         continue outer
                     }

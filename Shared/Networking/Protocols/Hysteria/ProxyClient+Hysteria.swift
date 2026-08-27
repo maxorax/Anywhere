@@ -1,6 +1,6 @@
 //
 //  ProxyClient+Hysteria.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 4/15/26.
 //
@@ -18,7 +18,7 @@ extension ProxyClient {
         destinationPort: UInt16
     ) async throws -> ProxyConnection {
         guard case .hysteria(let password, let congestionControl, let uploadMbps, let downloadMbps, let obfuscation, let sni) = configuration.outbound else {
-            throw AnywhereError.proxy(.hysteria, .protocolViolation(detail: "Hysteria password not set"))
+            throw TurnError.proxy(.hysteria, .protocolViolation(detail: "Hysteria password not set"))
         }
 
         let hysteriaConfiguration = HysteriaConfiguration(

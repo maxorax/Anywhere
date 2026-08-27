@@ -1,6 +1,6 @@
 //
 //  RealityProxyConnection.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 1/26/26.
 //
@@ -28,11 +28,11 @@ nonisolated final class RealityProxyConnection: ProxyConnection {
     func receiveRaw() async throws -> Data? {
         do {
             return try await realityConnection.receive()
-        } catch AnywhereError.tls(.record(.authenticationFailed)) {
+        } catch TurnError.tls(.record(.authenticationFailed)) {
             // AEAD auth failure means the record no longer decrypts with the derived
             // keys — the server may have switched to Vision direct-copy. Only that
             // case maps to the Reality-specific error; everything else propagates.
-            throw AnywhereError.tls(.reality(.decryptionFailed))
+            throw TurnError.tls(.reality(.decryptionFailed))
         }
     }
 

@@ -1,6 +1,6 @@
 //
 //  MITMRequestLog.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/14/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMRequestLog")
+nonisolated private let logger = TurnLogger(category: "MITMRequestLog")
 
 nonisolated final class MITMRequestLog: Sendable {
 
@@ -34,7 +34,7 @@ nonisolated final class MITMRequestLog: Sendable {
     /// Well above the spec-default SETTINGS_MAX_CONCURRENT_STREAMS (100) so live streams aren't evicted.
     private static let maxHTTP2Streams = 512
 
-    /// Cap on per-record synthAfter so pipelined `Anywhere.respond` bursts can't
+    /// Cap on per-record synthAfter so pipelined `Turn.respond` bursts can't
     /// exhaust memory; excess bytes are dropped with a warning.
     private static let maxSynthAfterBytes: Int = 1 * 1024 * 1024
 

@@ -1,13 +1,13 @@
 //
 //  ResolvedHostFetcher.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/24/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "ResolvedHostFetcher")
+nonisolated private let logger = TurnLogger(category: "ResolvedHostFetcher")
 
 nonisolated enum ResolvedHostFetcher {
     static let deadline: Duration = .seconds(30)
@@ -24,13 +24,13 @@ nonisolated enum ResolvedHostFetcher {
 
         while true {
             guard let url = request.url, let host = url.host, !host.isEmpty else {
-                throw AnywhereError.subscription(.invalidURL)
+                throw TurnError.subscription(.invalidURL)
             }
             guard let scheme = url.scheme?.lowercased(), scheme == "https" || scheme == "http" else {
-                throw AnywhereError.subscription(.invalidURL)
+                throw TurnError.subscription(.invalidURL)
             }
             guard let address = try await resolveAddress(host) else {
-                throw AnywhereError.dns(.noAddresses(host: host))
+                throw TurnError.dns(.noAddresses(host: host))
             }
 
             let port = UInt16(url.port ?? (scheme == "https" ? 443 : 80))
@@ -40,13 +40,13 @@ nonisolated enum ResolvedHostFetcher {
             guard let location = redirectTarget(result), redirects < maxRedirects else {
                 guard let response = HTTPURLResponse(url: url, statusCode: result.status,
                                                      httpVersion: "HTTP/1.1", headerFields: result.headers) else {
-                    throw AnywhereError.dns(.malformedResponse)
+                    throw TurnError.dns(.malformedResponse)
                 }
                 return (result.body, response)
             }
 
             guard let next = URL(string: location, relativeTo: url)?.absoluteURL else {
-                throw AnywhereError.subscription(.invalidURL)
+                throw TurnError.subscription(.invalidURL)
             }
             redirects += 1
             logger.debug("[ResolvedHostFetcher] \(result.status) → \(next.host ?? "?")")
@@ -80,7 +80,7 @@ nonisolated enum ResolvedHostFetcher {
         return try await withDialDeadline(deadline) {
             transport.cancel()
         } error: {
-            AnywhereError.transport(.timedOut(.receive, endpoint: "\(host) (\(address))", detail: "HTTP exchange"))
+            TurnError.transport(.timedOut(.receive, endpoint: "\(host) (\(address))", detail: "HTTP exchange"))
         } operation: {
             try await transport.send(head)
             return try await readResponse(from: transport)
@@ -140,12 +140,12 @@ nonisolated enum ResolvedHostFetcher {
             case .bytes(let data):
                 buffer.append(data)
                 guard buffer.count <= maxResponseBytes else {
-                    throw AnywhereError.subscription(.fetchFailed(underlying: AnywhereError.dns(.malformedResponse)))
+                    throw TurnError.subscription(.fetchFailed(underlying: TurnError.dns(.malformedResponse)))
                 }
             case .end:
                 guard let head, let exchange = try body(head, buffer: buffer, cursor: &cursor,
                                                         chunked: &chunked, atEOF: true) else {
-                    throw AnywhereError.transport(.terminated)
+                    throw TurnError.transport(.terminated)
                 }
                 return exchange
             }
@@ -155,11 +155,11 @@ nonisolated enum ResolvedHostFetcher {
     private static func parseHead(_ data: Data) throws -> Head {
         let headText = String(decoding: data, as: UTF8.self)
         var lines = headText.components(separatedBy: "\r\n")
-        guard !lines.isEmpty else { throw AnywhereError.dns(.malformedResponse) }
+        guard !lines.isEmpty else { throw TurnError.dns(.malformedResponse) }
 
         let statusLine = lines.removeFirst().split(separator: " ", maxSplits: 2, omittingEmptySubsequences: false)
         guard statusLine.count >= 2, let status = Int(statusLine[1]) else {
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
         }
 
         var headers: [String: String] = [:]
@@ -199,11 +199,11 @@ nonisolated enum ResolvedHostFetcher {
             try chunked.consume(buffer, from: &cursor)
             if chunked.finished { return exchange(chunked.body) }
             guard atEOF else { return nil }
-            throw AnywhereError.dns(.malformedResponse)
+            throw TurnError.dns(.malformedResponse)
 
         case .length(let length):
             guard buffer.distance(from: cursor, to: buffer.endIndex) >= length else {
-                if atEOF { throw AnywhereError.transport(.terminated) }
+                if atEOF { throw TurnError.transport(.terminated) }
                 return nil
             }
             return exchange(Data(buffer[cursor..<buffer.index(cursor, offsetBy: length)]))
@@ -240,7 +240,7 @@ nonisolated enum ResolvedHostFetcher {
                 // Chunk extensions follow a semicolon and are ignored.
                 let sizeField = sizeText.split(separator: ";", maxSplits: 1).first.map(String.init) ?? sizeText
                 guard let size = Int(sizeField.trimmingCharacters(in: .whitespaces), radix: 16), size >= 0 else {
-                    throw AnywhereError.dns(.malformedResponse)
+                    throw TurnError.dns(.malformedResponse)
                 }
 
                 cursor = lineEnd.upperBound

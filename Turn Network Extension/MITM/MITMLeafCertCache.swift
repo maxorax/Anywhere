@@ -1,6 +1,6 @@
 //
 //  MITMLeafCertCache.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/3/26.
 //
@@ -10,7 +10,7 @@ import CryptoKit
 @preconcurrency import Security
 import Synchronization
 
-nonisolated private let logger = AnywhereLogger(category: "MITMLeafCertCache")
+nonisolated private let logger = TurnLogger(category: "MITMLeafCertCache")
 
 nonisolated final class MITMLeafCertCache: Sendable {
 
@@ -41,7 +41,7 @@ nonisolated final class MITMLeafCertCache: Sendable {
         var lastAccess: Date
     }
 
-    init(store: MITMCertificateStore) throws(AnywhereError) {
+    init(store: MITMCertificateStore) throws(TurnError) {
         self.store = store
         let key = P256.Signing.PrivateKey()
         self.leafPrivateKey = key
@@ -85,7 +85,7 @@ nonisolated final class MITMLeafCertCache: Sendable {
 
     private func mintLeaf(for hostname: String) throws -> Leaf {
         guard let (caKey, caCertDER) = store.loadCA() else {
-            throw AnywhereError.certificate(.missingCAComponents)
+            throw TurnError.certificate(.missingCAComponents)
         }
 
         let now = Date()
@@ -101,7 +101,7 @@ nonisolated final class MITMLeafCertCache: Sendable {
         )
 
         guard let secCert = SecCertificateCreateWithData(nil, der as CFData) else {
-            throw AnywhereError.certificate(.asn1ParseFailed(detail: "SecCertificateCreateWithData failed"))
+            throw TurnError.certificate(.asn1ParseFailed(detail: "SecCertificateCreateWithData failed"))
         }
 
         return Leaf(
@@ -123,7 +123,7 @@ nonisolated final class MITMLeafCertCache: Sendable {
         }
     }
 
-    private static func importSoftwareP256(_ key: P256.Signing.PrivateKey) throws(AnywhereError) -> SecKey {
+    private static func importSoftwareP256(_ key: P256.Signing.PrivateKey) throws(TurnError) -> SecKey {
         let attributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
             kSecAttrKeyClass as String: kSecAttrKeyClassPrivate,
@@ -132,7 +132,7 @@ nonisolated final class MITMLeafCertCache: Sendable {
         var error: Unmanaged<CFError>?
         guard let secKey = SecKeyCreateWithData(key.x963Representation as CFData, attributes as CFDictionary, &error) else {
             let reason = error.map { ($0.takeRetainedValue() as Error).localizedDescription } ?? "SecKeyCreateWithData failed"
-            throw AnywhereError.certificate(.keyGenerationFailed(detail: "leaf key import: \(reason)"))
+            throw TurnError.certificate(.keyGenerationFailed(detail: "leaf key import: \(reason)"))
         }
         return secKey
     }

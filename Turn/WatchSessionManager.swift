@@ -1,6 +1,6 @@
 //
 //  WatchSessionManager.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/4/26.
 //
@@ -9,7 +9,7 @@ import Foundation
 import NetworkExtension
 import WatchConnectivity
 
-nonisolated private let logger = AnywhereLogger(category: "WatchSessionManager")
+nonisolated private let logger = TurnLogger(category: "WatchSessionManager")
 
 @MainActor
 final class WatchSessionManager: NSObject {

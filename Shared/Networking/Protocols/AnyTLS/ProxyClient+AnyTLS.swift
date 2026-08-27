@@ -1,13 +1,13 @@
 //
 //  ProxyClient+AnyTLS.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/16/26.
 //
 
 import Foundation
 
-nonisolated private let logger = AnywhereLogger(category: "ProxyClient+AnyTLS")
+nonisolated private let logger = TurnLogger(category: "ProxyClient+AnyTLS")
 
 extension ProxyClient {
     /// Connects through an AnyTLS server: TCP → TLS → AnyTLS handshake → stream + destination.
@@ -23,11 +23,11 @@ extension ProxyClient {
         guard case .anytls(let password, _, _, _, let securityLayer) = configuration.outbound, !password.isEmpty,
               let tlsConfig = securityLayer.tlsConfiguration else {
             logger.debug("[AnyTLS] reject: password not set")
-            throw AnywhereError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS password not set"))
+            throw TurnError.proxy(.anyTLS, .protocolViolation(detail: "AnyTLS password not set"))
         }
         if command == .mux {
             logger.debug("[AnyTLS] reject: mux not supported")
-            throw AnywhereError.proxy(.anyTLS, .protocolViolation(detail: "Mux is not supported with AnyTLS"))
+            throw TurnError.proxy(.anyTLS, .protocolViolation(detail: "Mux is not supported with AnyTLS"))
         }
         logger.debug("[AnyTLS] sni=\(tlsConfig.serverName) alpn=\(tlsConfig.alpn?.joined(separator: ",") ?? "<none>") fp=\(tlsConfig.fingerprint.rawValue)")
 
@@ -52,13 +52,13 @@ extension ProxyClient {
 
         guard let pool = AnyTLSMultiplexerRegistry.shared.pool(for: configuration, dialOut: dialOut) else {
             logger.debug("[AnyTLS] AnyTLSMultiplexerRegistry returned nil pool (outbound type mismatch?)")
-            throw AnywhereError.proxy(.anyTLS, .notReady)
+            throw TurnError.proxy(.anyTLS, .notReady)
         }
 
         let stream = try await pool.acquireStream()
         guard !isCancelled else {
             stream.cancel()
-            throw AnywhereError.transport(.terminated)
+            throw TurnError.transport(.terminated)
         }
         logger.debug("[AnyTLS] stream opened sid=\(stream.sid) cmd=\(command)")
 
@@ -98,7 +98,7 @@ extension ProxyClient {
         case .mux:
             // Already rejected above; here for switch exhaustiveness.
             stream.cancel()
-            throw AnywhereError.proxy(.anyTLS, .protocolViolation(detail: "Mux is not supported with AnyTLS"))
+            throw TurnError.proxy(.anyTLS, .protocolViolation(detail: "Mux is not supported with AnyTLS"))
         }
     }
 }

@@ -1,6 +1,6 @@
 //
 //  MITMScriptTransform.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 5/9/26.
 //
@@ -45,7 +45,7 @@ nonisolated enum MITMScriptTransform {
 
     enum Outcome {
         case message(HTTPMessage)
-        /// Request-phase `Anywhere.respond(...)` — drop the upstream request and send this to the client.
+        /// Request-phase `Turn.respond(...)` — drop the upstream request and send this to the client.
         case synthesizedResponse(MITMScriptEngine.SynthesizedResponse)
     }
 
@@ -117,7 +117,7 @@ nonisolated enum MITMScriptTransform {
     }
 
     /// Applies all matching `.bodyJSON` then `.bodyReplace` rules; JSON runs first so the replacement
-    /// regex sees the re-serialized JSON. Both run before any `.script` and survive `Anywhere.exit`.
+    /// regex sees the re-serialized JSON. Both run before any `.script` and survive `Turn.exit`.
     /// `.bodyReplace` awaits the ReDoS-bounded substitution; neither op touches JSC, so this runs on
     /// the caller's executor rather than `scriptQueue`.
     private static func applyNativeBodyEdits(
@@ -242,7 +242,7 @@ nonisolated enum MITMScriptTransform {
         let bypass: Bool
     }
 
-    /// Runs the last matching `.streamScript` rule against one frame. `Anywhere.done`/`exit`
+    /// Runs the last matching `.streamScript` rule against one frame. `Turn.done`/`exit`
     /// both set `cursor.bypass`; exit additionally reverts to the original frame data.
     static func applyFrame(
         _ frame: Data,

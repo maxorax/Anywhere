@@ -1,6 +1,6 @@
 //
 //  MITMHTTP1Serializer.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 6/15/26.
 //
@@ -85,4 +85,4 @@ nonisolated enum MITMHTTP1Serializer {
     static let chunkTerminator = Data([0x30, 0x0D, 0x0A, 0x0D, 0x0A])
 }
 
-nonisolated private let logger = AnywhereLogger(category: "MITMH1Serializer")
+nonisolated private let logger = TurnLogger(category: "MITMH1Serializer")

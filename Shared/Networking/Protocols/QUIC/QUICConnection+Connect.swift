@@ -1,6 +1,6 @@
 //
 //  QUICConnection+Connect.swift
-//  Anywhere
+//  Turn
 //
 //  Created by NodePassProject on 7/18/26.
 //
@@ -23,7 +23,7 @@ extension QUICConnection {
         let resolvedIPs: [String] = transport == nil ? await DNSResolver.shared.resolveAll(host) : []
         try await bridge.runParkedThrowing(host: self) { me, continuation in
             guard me.state == .idle else {
-                continuation.resume(throwing: AnywhereError.quic(.connectionFailed(detail: "Invalid state")))
+                continuation.resume(throwing: TurnError.quic(.connectionFailed(detail: "Invalid state")))
                 return
             }
             QUICCrypto.registerCallbacks()
@@ -42,10 +42,10 @@ extension QUICConnection {
     
     nonisolated func exportKeyingMaterial(label: String, context: Data, length: Int) async throws -> Data {
         let result: Result<Data, Error> = await bridge.run { [weak self] in
-            guard let self else { return .failure(AnywhereError.quic(.closed(graceful: false))) }
+            guard let self else { return .failure(TurnError.quic(.closed(graceful: false))) }
             return self.assumeIsolated { connection in
                 guard connection.state == .connected, let tls = connection.tlsHandler else {
-                    return .failure(AnywhereError.quic(.closed(graceful: false)))
+                    return .failure(TurnError.quic(.closed(graceful: false)))
                 }
                 return Result { try tls.exportKeyingMaterial(label: label, context: context, length: length) }
             }
@@ -68,7 +68,7 @@ extension QUICConnection {
         do {
             populateRemoteAddr(resolvedIPs: resolvedIPs)
             guard remoteAddr.ss_family != 0 else {
-                throw AnywhereError.quic(.connectionFailed(detail: "DNS lookup failed for \(host)"))
+                throw TurnError.quic(.connectionFailed(detail: "DNS lookup failed for \(host)"))
             }
             let carrier = QUICDatagramCarrier(bridge: bridge, obfuscator: obfuscator)
             let remote = remoteAddr
@@ -188,7 +188,7 @@ extension QUICConnection {
     }
 
     func handleTransportClosed(_ error: Error?) {
-        let err = error ?? AnywhereError.quic(.closed(graceful: false))
+        let err = error ?? TurnError.quic(.closed(graceful: false))
         finishConnect(err)
         close(error: err)
     }
@@ -344,7 +344,7 @@ extension QUICConnection {
             params: &parameters, connRef: &connRefStorage
         )
         guard rv == 0, let connectionOpaquePointer = conn else {
-            throw AnywhereError.quic(.connectionFailed(detail: "ngtcp2_conn_client_new: \(rv)"))
+            throw TurnError.quic(.connectionFailed(detail: "ngtcp2_conn_client_new: \(rv)"))
         }
         self.connectionOpaquePointer = connectionOpaquePointer
         
