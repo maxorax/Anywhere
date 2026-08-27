@@ -141,8 +141,11 @@ class VPNViewModel {
         status.localizedText
     }
 
+    /// Only `.disconnecting` disables the button: every other transition has a
+    /// meaningful tap behind it, and locking the control mid-connect left users
+    /// with no way to abandon an attempt that had stalled.
     func isButtonDisabled(hasConfigurations: Bool) -> Bool {
-        !isManagerReady || !hasConfigurations || vpnStatus.isTransitioning
+        !isManagerReady || !hasConfigurations || vpnStatus == .disconnecting
     }
 
     // MARK: - Chain Selection
@@ -449,7 +452,10 @@ class VPNViewModel {
 
     func toggleVPN() {
         switch vpnStatus {
-        case .connected, .connecting:
+        case .connected, .connecting, .reasserting:
+            // Bringing a tunnel up can take minutes — a VK relay waiting on a
+            // captcha is the worst of it — so the button has to be able to call
+            // the attempt off, not just start one.
             disconnectVPN()
         case .disconnected, .invalid:
             connectVPN()
