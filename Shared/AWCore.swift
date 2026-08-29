@@ -722,7 +722,10 @@ nonisolated final class AWCore {
 /// compiled into every target, and those models are not.
 nonisolated enum TurnStreamCount {
     static let minimum = 1
-    static let maximum = 40
+    /// Not a VK limit — a memory one. Every lane carries its own smux and KCP
+    /// buffers inside a tunnel process that gets about fifty megabytes in total,
+    /// and forty of them cannot fit however small the buffers are cut.
+    static let maximum = 20
     /// Matches what the subscriptions ship in `turn.defaults.num_streams`.
     static let `default` = 10
 

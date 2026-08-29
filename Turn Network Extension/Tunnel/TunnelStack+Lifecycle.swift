@@ -30,6 +30,10 @@ extension TunnelStack {
             case .error: logLevel = .error
             }
             self?.appendLog(message, level: logLevel)
+            // Same line to disk: the in-memory journal above is unreachable once
+            // this process is gone, and a killed extension is exactly the case
+            // worth reading afterwards.
+            TunnelLogFile.shared.append(message, level: logLevel)
         }
     }
 

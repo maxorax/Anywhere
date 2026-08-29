@@ -5,6 +5,7 @@
 
 import Foundation
 import Mobile
+import Synchronization
 import UserNotifications
 
 /// Owns the single VK TURN proxy instance living inside the tunnel process.
@@ -19,6 +20,44 @@ actor TurnCore {
     /// How often the phase monitor re-reads core state. Short enough that a
     /// captcha prompt reaches the journal while the user is still watching.
     private static let pollInterval = Duration.milliseconds(500)
+
+    /// Whether the core is asked to narrate what its lanes are doing.
+    ///
+    /// Which credential cache a lane took, which TURN server it landed on, when
+    /// it rotated away from one, when a lane's session came up — all of it sits
+    /// behind the core's debug flag, and it is the only view into the lanes
+    /// there is. Debug builds get it. Release stays quiet on purpose: the
+    /// journal is meant to be shareable, and these lines carry relay addresses.
+#if DEBUG
+    private static let coreDebugLogging = true
+#else
+    private static let coreDebugLogging = false
+#endif
+
+    /// The KCP window the core is held to, in packets each way.
+    ///
+    /// With lanes no longer bonded, this is what caps a single connection: 128
+    /// packets at a 1200-byte MTU is 154 KB in flight, about 1.5 MB/s per
+    /// connection at the 100 ms it takes to reach a VK relay. It also scales with
+    /// lane count — 307 KB a lane across both directions — so widening it and
+    /// adding lanes pull on the same budget.
+    ///
+    /// 256 was tried and taken back out. The relay's own numbers barely moved —
+    /// 13.6 Mbit/s against 11.8 at peak — but the core runs KCP with congestion
+    /// control off, so the window is less a limit on data in flight than on the
+    /// size of a burst, and doubling it doubled what lands on one VK allocation
+    /// at once. Individual connections stalled while the aggregate still looked
+    /// healthy. Widening this again means turning congestion control on with it
+    /// (`VK_TURN_KCP_NC=0`), not on its own.
+    ///
+    /// The core's smux buffers — four megabytes of receive and one of stream per
+    /// lane — are left at their own defaults. They were cut for a while and the
+    /// cut was reverted: the tunnel stopped being killed the moment bond went
+    /// away, and nothing since has shown the buffers mattering on their own.
+    private static let coreMemoryBudget = [
+        "VK_TURN_KCP_SNDWND": "128",
+        "VK_TURN_KCP_RCVWND": "128",
+    ]
 
     /// Floor for how long to wait on the listener.
     ///
@@ -87,7 +126,14 @@ actor TurnCore {
                     + "solver=\(configuration.captchaSolver) timeout=\(configuration.resolvedReadyTimeout)s")
         logger.info("[TURN] vk link=\(maskLink(configuration.link))")
 
-        let json = try configuration.makeCoreConfigJSON()
+        // Set before the core builds its first session — that is when it reads
+        // them — and re-applied on every activation so a relay that outlives a
+        // configuration change cannot end up on stale numbers.
+        for (name, value) in Self.coreMemoryBudget {
+            setenv(name, value, 1)
+        }
+
+        let json = try configuration.makeCoreConfigJSON(debug: Self.coreDebugLogging)
         let seconds = max(configuration.resolvedReadyTimeout, Self.minimumReadyTimeout)
         let timeout = seconds * 1000
 
@@ -144,7 +190,16 @@ actor TurnCore {
         guard let json = turn?.stateJSON(), let data = json.data(using: .utf8) else {
             return .idle
         }
-        return (try? JSONDecoder().decode(TurnState.self, from: data)) ?? .idle
+        guard var snapshot = try? JSONDecoder().decode(TurnState.self, from: data) else { return .idle }
+
+        // The bridge reports a phase but says nothing about the lanes, and
+        // `ready` only means the listener accepts — it can accept while half the
+        // lanes are still failing to allocate. So the counts are attached here:
+        // what was asked for, and what the core last said was up.
+        let asked = (active ?? starting ?? pending)?.streams ?? 0
+        snapshot.streams = asked > 0 ? asked : nil
+        snapshot.activeStreams = logSink?.activeStreams.withLock { $0 }
+        return snapshot
     }
 
     /// Pins the relay's own sockets to a physical interface so they leave the
@@ -242,6 +297,9 @@ actor TurnCore {
         monitor?.cancel()
         monitor = nil
         turn?.stop()
+        // Nothing is carrying traffic once the core is down, and the sink
+        // outlives it — a stale count would otherwise sit in Settings.
+        logSink?.activeStreams.withLock { $0 = 0 }
         starting = nil
         active = nil
         pending = nil
@@ -273,11 +331,47 @@ actor TurnCore {
 /// witness to whether traffic actually left through a VK relay, so losing its
 /// narration would defeat the point of having it.
 private final class TurnLogSink: NSObject, IosCallbackProtocol {
+    /// How many lanes the core last reported as carrying traffic.
+    ///
+    /// Scraped rather than asked for: the core publishes its session pool only
+    /// in `[session 3] connected (active: 7)` and the matching `disconnected`
+    /// line, and neither the bridge's `State` nor any other call exposes it.
+    /// Written from Go's own threads, so it lives behind a lock.
+    let activeStreams = Mutex<Int>(0)
+
     private let logger = TurnLogger(category: "TurnCore")
 
     func onLog(_ message: String?) {
         guard let message, !message.isEmpty else { return }
+        guard let message = Self.redacted(message) else { return }
         logger.info("[TURN] \(message)")
+        if let count = Self.laneCount(in: message) {
+            activeStreams.withLock { $0 = count }
+        }
+    }
+
+    /// Strips the captcha proxy's payloads out of the journal.
+    ///
+    /// The core narrates every request the captcha WebView makes, headers and
+    /// bodies included — which means VK session tokens and cookies, in a file
+    /// meant to be shared. The proxy's own progress is worth keeping, so the
+    /// lines survive with everything after the payload marker cut off. Returns
+    /// `nil` for a line that is nothing but headers.
+    private static func redacted(_ message: String) -> String? {
+        guard message.contains("[Captcha Proxy]") else { return message }
+        if message.contains("] Header (") { return nil }
+        for marker in [" data: ", " data:"] where message.contains(marker) {
+            guard let cut = message.range(of: marker) else { continue }
+            return message[..<cut.lowerBound] + " data: <redacted>"
+        }
+        return message
+    }
+
+    /// Reads the `(active: N)` the core prints whenever a lane comes up or drops.
+    private static func laneCount(in message: String) -> Int? {
+        guard let marker = message.range(of: "(active: ") else { return nil }
+        let digits = message[marker.upperBound...].prefix { $0.isNumber }
+        return digits.isEmpty ? nil : Int(digits)
     }
 
     func onStatus(_ status: String?) {

@@ -20,6 +20,16 @@ nonisolated struct TurnState: Codable, Sendable, Equatable {
     var listenAddr: String?
     var captchaUrl: String?
     var error: String?
+    /// Lanes the relay was asked for.
+    var streams: Int?
+    /// Lanes actually carrying traffic right now.
+    ///
+    /// Neither figure comes from `vkturn.State` — the bridge does not report
+    /// them. The extension fills both in: the ask is its own configuration, and
+    /// the live count is read out of the core's `(active: N)` log lines, the
+    /// only place the session pool is published. `nil` means the core has not
+    /// said anything about its lanes yet.
+    var activeStreams: Int?
 
     static let idle = TurnState(phase: .idle, running: false)
 
@@ -32,6 +42,7 @@ nonisolated struct TurnState: Codable, Sendable, Equatable {
     /// Everything the core reports, for the journal.
     var summary: String {
         var parts = ["phase=\(phase.rawValue)", "running=\(running)"]
+        if let activeStreams { parts.append("lanes=\(activeStreams)/\(streams.map(String.init) ?? "?")") }
         if let listenAddr { parts.append("listen=\(listenAddr)") }
         if let captchaUrl { parts.append("captcha=\(captchaUrl)") }
         if let error, !error.isEmpty { parts.append("error=\(error)") }

@@ -17,6 +17,10 @@ struct TurnSettingsView: View {
     @State private var autoCaptcha = AWCore.getTurnAutoCaptcha()
     @State private var solver = AWCore.getTurnCaptchaSolver()
     @State private var streams = Double(AWCore.getTurnStreams())
+    /// The relay's own report, polled by the model that also watches for
+    /// captchas — the relay runs in the tunnel process, so this is the only way
+    /// the app learns anything about it.
+    @State private var relay = TurnCaptchaModel.shared
 
     var body: some View {
         Form {
@@ -51,6 +55,13 @@ struct TurnSettingsView: View {
             }
 
             Section {
+                if let live = relay.lastState.activeStreams, relay.lastState.running {
+                    LabeledContent("Active") {
+                        Text(verbatim: "\(live) / \(relay.lastState.streams ?? Int(streams))")
+                            .font(.body.monospacedDigit().weight(.medium))
+                            .foregroundStyle(live == 0 ? .secondary : .primary)
+                    }
+                }
                 LabeledContent("Streams") {
                     Text(verbatim: "\(Int(streams))")
                         .font(.body.monospacedDigit().weight(.medium))
@@ -64,7 +75,7 @@ struct TurnSettingsView: View {
             } header: {
                 Text("Streams")
             } footer: {
-                Text("Each stream joins the VK call as a separate participant, and the more of them the more traffic they carry. The first ten come up on one trip for credentials. Every further ten needs its own trip, and VK may answer that one with a captcha — until it is solved those streams stay down. Default is 10.")
+                Text("Each stream joins the VK call as a separate participant, and the more of them the more traffic they carry. All of them share one trip for credentials, so raising the count costs no extra captcha — but VK caps how many streams one trip is good for, and anything past that cap never comes up. While the relay is running, Active shows how many of them are actually carrying traffic. Default is 10.")
             }
 
             Section {

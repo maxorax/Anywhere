@@ -1627,6 +1627,17 @@
         }
       }
     },
+    "Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активные"
+          }
+        }
+      }
+    },
     "Add": {
       "localizations": {
         "ar": {
@@ -5817,13 +5828,13 @@
     "ECH Config": {
       "shouldTranslate": false
     },
-    "Each stream joins the VK call as a separate participant, and the more of them the more traffic they carry. The first ten come up on one trip for credentials. Every further ten needs its own trip, and VK may answer that one with a captcha — until it is solved those streams stay down. Default is 10.": {
+    "Each stream joins the VK call as a separate participant, and the more of them the more traffic they carry. All of them share one trip for credentials, so raising the count costs no extra captcha — but VK caps how many streams one trip is good for, and anything past that cap never comes up. While the relay is running, Active shows how many of them are actually carrying traffic. Default is 10.": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Каждый поток заходит в звонок VK как отдельный участник, и чем их больше, тем выше пропускная способность. Первые десять поднимаются одним заходом за кредами. Каждая следующая десятка требует нового захода, а на нём VK может показать капчу — пока она не пройдена, эти потоки не поднимутся. По умолчанию 10."
+            "value": "Каждый поток заходит в звонок VK как отдельный участник, и чем их больше, тем выше пропускная способность. Все они пользуются одним заходом за кредами, поэтому увеличение числа потоков не стоит лишней капчи — но VK ограничивает, сколько потоков вытянет один заход, и всё сверх этого предела не поднимется. Пока релей работает, «Активные» показывают, сколько из них реально несут трафик. По умолчанию 10."
           }
         }
       }

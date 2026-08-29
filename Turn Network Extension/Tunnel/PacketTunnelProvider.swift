@@ -30,6 +30,9 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// that changes nothing does not re-bind and re-log.
     private let boundInterface = Mutex<String?>(nil)
 
+    /// Slow tick that writes the process footprint to the journal.
+    private let memoryWatch = Mutex<Task<Void, Never>?>(nil)
+
     // MARK: - Tunnel Lifecycle
     
     override func startTunnel(options: [String : NSObject]? = nil) async throws {
@@ -63,10 +66,6 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         // `shouldRelay` would classify every cold start as an unidentified
         // network and probe the direct path even on Wi-Fi.
         //
-        // Binding happens here, after the settings are applied, so the relay is
-        // pinned to the physical interface with the utun already in existence —
-        // the situation the gomobile header describes.
-        //
         // Apple's guidance is to leave `setTunnelNetworkSettings` until the
         // provider can forward packets, which would put this whole block first.
         // Tried, and it broke the relay: its sockets are established before the
@@ -80,7 +79,6 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                 isCellular: context.isCellular,
                 ssid: context.ssid
             )
-            await bindRelay(to: path)
         } else {
             logger.warning("[VPN] Path monitor did not report in time — deciding on an unidentified network")
         }
@@ -93,6 +91,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
             task = Task { await self.run() }
         }
         
+        startMemoryWatch()
+
         statsRecorder.start { [tunnelStack] in
             return StatsRecorder.RawValues(
                 byteCounts: tunnelStack.byteCounts.withLock { $0 },
@@ -245,6 +245,10 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 #endif
         
         statsRecorder.stop()
+        memoryWatch.withLock { watch in
+            watch?.cancel()
+            watch = nil
+        }
         
         let task = rootTask.withLock { task -> Task<Void, Never>? in
             defer { task = nil }
@@ -317,13 +321,26 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         // Stream count is the user's dial too: the subscription only suggests one.
         relay.streams = AWCore.getTurnStreams()
-        // Derived, not a second dial: every set of credentials is its own trip to
-        // VK and any trip can be met with a captcha, so pack as many streams as
-        // the core is known to get from one set. Ten is the core's own default;
-        // asking for more per set buys nothing if VK will not issue that many
-        // channels for one allocation.
-        relay.streamsPerCred = min(relay.streams, TurnConfiguration.streamsPerCredentialSet)
-        logger.info("[TURN] Streams: \(relay.streams), \(relay.streamsPerCred) per credential set")
+        // Bond off. It splits a single TCP connection across every lane, which is
+        // the right trade for one big download and the wrong one for everything
+        // else: the journal caught a speedtest opening 35 connections in three
+        // seconds, each fanned across all twenty lanes — seven hundred smux
+        // streams at once, and the process was killed a second later. Traffic
+        // that opens its own parallel connections needs no help being parallel,
+        // and without the fan-out each connection takes one lane instead of
+        // twenty.
+        relay.bond = false
+
+        // One set of credentials for every lane, however many are asked for.
+        // Each set is another guest joining the VK call, and VK meets a join with
+        // a captcha — not only at startup, since credentials last nine minutes and
+        // every set goes back for its own. At the default ten this is exactly the
+        // layout Cascade LTE ships and has always run on; above ten the extra
+        // lanes reuse these credentials instead of buying a second captcha, and
+        // any that VK's allocation quota turns away simply never come up. The
+        // count in Settings is what tells them apart.
+        relay.streamsPerCred = relay.streams
+        logger.info("[TURN] Streams: \(relay.streams), all on one set of credentials")
 
         do {
             let endpoint = try await TurnCore.shared.activate(relay)
@@ -424,6 +441,36 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         }
     }
     
+    /// How often the footprint is written to the journal.
+    ///
+    /// Slow on purpose: this is a trajectory, not a profiler, and every line
+    /// costs memory in the process it is measuring.
+    private static let memoryWatchInterval = Duration.seconds(5)
+
+    /// Narrates the process footprint and the relay's lane count on a slow tick.
+    ///
+    /// An extension killed for memory leaves no note — `stopTunnel` never runs,
+    /// so the journal simply stops mid-sentence, which is exactly what the last
+    /// speedtest produced. A footprint every few seconds turns that silence into
+    /// evidence: the final line before the gap says how close the process was to
+    /// the 50 MB an extension gets.
+    private func startMemoryWatch() {
+        let task = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                let footprint = Self.memoryFootprint()
+                let relay = await TurnCore.shared.state
+                let lanes = relay.activeStreams.map { "\($0)/\(relay.streams ?? 0)" } ?? "none"
+                logger.info("[VPN] Footprint \(footprint / 1024 / 1024) MB, relay lanes \(lanes)")
+                try? await Task.sleep(for: Self.memoryWatchInterval)
+            }
+        }
+        memoryWatch.withLock { watch in
+            watch?.cancel()
+            watch = task
+        }
+    }
+
     private static func memoryFootprint() -> UInt64 {
         var info = task_vm_info_data_t()
         var count = mach_msg_type_number_t(
@@ -471,9 +518,17 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     ///
     /// The gomobile header asks for this on every network change so the relay's
     /// own reconnects leave the device instead of looping into the utun this
-    /// process serves. Skipped so far, which held up only because the relay was
-    /// never forced through the tunnel — `includeAllNetworks` turns that risk
-    /// into a certainty.
+    /// process serves.
+    ///
+    /// **Currently not called.** Turning it on and the streams-per-credential
+    /// change landed the same afternoon, and the speedtest through the relay
+    /// broke somewhere in that pair — so binding is parked to see how the relay
+    /// behaves without it. Two things have to be settled before it comes back:
+    /// the interface is picked by position in `availableInterfaces` rather than
+    /// by the type the path reports, and `setBindInterface` only reaches sockets
+    /// created after it, so re-binding mid-session splits the lanes across two
+    /// interfaces. It must come back before `includeAllNetworks` is switched on:
+    /// that setting forces the relay's own sockets into the tunnel they feed.
     private func bindRelay(to path: Network.NWPath) async {
         guard let name = Self.physicalInterfaceName(for: path) else { return }
         let changed = boundInterface.withLock { stored -> Bool in
@@ -510,7 +565,6 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         let previous = await tunnelStack.networkContext
         let context = await networkContext(for: path)
-        await bindRelay(to: path)
         await tunnelStack.updateNetworkContext(
             isWiFi: context.isWiFi,
             isCellular: context.isCellular,

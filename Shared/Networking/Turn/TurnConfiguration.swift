@@ -44,12 +44,6 @@ nonisolated struct TurnConfiguration: Hashable, Codable, Sendable {
     /// hand. The subscription has no say in this — it is the user's call.
     var manualCaptcha: Bool
 
-    /// How many streams the core gets from one set of VK credentials.
-    ///
-    /// Matches `streamsPerCache` in the Go core. Streams beyond this need another
-    /// set, which is another request to VK and another chance of a captcha.
-    static let streamsPerCredentialSet = 10
-
     static let defaultListenPort: UInt16 = 9000
     static let defaultReadyTimeout = 45
 
