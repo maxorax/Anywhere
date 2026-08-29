@@ -157,10 +157,17 @@ nonisolated struct SubscriptionFetcher {
 
         var request = URLRequest(url: requestURL)
         request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
-        request.timeoutInterval = 15
+        // Short on purpose: this is one HTTP call to the panel that answers in
+        // milliseconds when it is well, and the import waits on it before the
+        // servers appear. Fifteen seconds only bought a longer stare at a
+        // spinner when the endpoint was unreachable — and the fallback, the
+        // subscription's own shared link, is perfectly usable.
+        request.timeoutInterval = 5
 
+        let started = ContinuousClock.now
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
+            logger.info("Call-link endpoint answered in \(Self.elapsedMilliseconds(since: started)) ms")
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             guard status == 200 else {
                 // 409 means the pool ran dry; the user can still paste their own
@@ -175,9 +182,15 @@ nonisolated struct SubscriptionFetcher {
             logger.info("Pinned a VK call link for this subscription")
             return configurations.map { $0.withTurnLink(pinned.vk_link) }
         } catch {
-            logger.warning("Call-link endpoint unreachable (\(error.localizedDescription)); keeping the subscription's shared link")
+            logger.warning("Call-link endpoint unreachable after \(Self.elapsedMilliseconds(since: started)) ms "
+                           + "(\(error.localizedDescription)); keeping the subscription's shared link")
             return configurations
         }
+    }
+
+    private static func elapsedMilliseconds(since start: ContinuousClock.Instant) -> Int {
+        let components = start.duration(to: .now).components
+        return Int(components.seconds * 1_000 + components.attoseconds / 1_000_000_000_000_000)
     }
 
     /// How the app identifies itself when fetching a subscription.
