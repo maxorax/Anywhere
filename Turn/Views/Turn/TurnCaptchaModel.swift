@@ -21,9 +21,23 @@ import UserNotifications
 final class TurnCaptchaModel {
     static let shared = TurnCaptchaModel()
 
+    /// The connection sequence as the main screen's chart reads it.
+    var flow: StageFlow {
+        StageFlow(stage: stage, path: path, relay: lastState, captchaSeen: captchaSeen)
+    }
+
     /// Non-nil while the core is waiting on a captcha.
     private(set) var captchaURL: URL?
     private(set) var lastState: TurnState = .idle
+    /// How far the provider has got, and which way it routed. The main screen's
+    /// flow chart is drawn from these, so they travel with the relay state
+    /// rather than through a second poll.
+    private(set) var stage: TunnelStage = .idle
+    private(set) var path: TunnelPath?
+    /// Whether VK asked for a captcha during this attempt. The phase itself only
+    /// says what is happening now, and the chart needs to show a solved captcha
+    /// as behind us rather than as never touched.
+    private(set) var captchaSeen = false
 
     /// Backstop for a missed notification — the app may have been suspended when
     /// the relay changed phase.
@@ -68,6 +82,9 @@ final class TurnCaptchaModel {
         captchaURL = nil
         suppressed = false
         lastState = .idle
+        stage = .idle
+        path = nil
+        captchaSeen = false
     }
 
     /// Closes the sheet without touching the relay. The core keeps waiting, but
@@ -107,6 +124,13 @@ final class TurnCaptchaModel {
         guard let session = await resolveSession() else {
             captchaURL = nil
             suppressed = false
+            // The whole picture goes with the tunnel. Keeping the last phase
+            // left the main screen offering a captcha for a relay that no
+            // longer exists.
+            lastState = .idle
+            stage = .idle
+            path = nil
+            captchaSeen = false
             return
         }
         guard let data = try? JSONEncoder().encode(TunnelMessage.fetchTurnState),
@@ -115,6 +139,10 @@ final class TurnCaptchaModel {
         else { return }
 
         lastState = payload.state
+        stage = payload.stage ?? .idle
+        path = payload.path
+        if payload.state.phase == .captcha { captchaSeen = true }
+        if stage == .idle { captchaSeen = false }
         apply(payload.state)
     }
 

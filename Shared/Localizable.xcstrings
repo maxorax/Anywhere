@@ -1794,6 +1794,17 @@
         }
       }
     },
+    "Add Manually": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить вручную"
+          }
+        }
+      }
+    },
     "Add Proxy": {
       "localizations": {
         "ar": {
@@ -2158,6 +2169,17 @@
         }
       }
     },
+    "Added by Hand": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавленные вручную"
+          }
+        }
+      }
+    },
     "Address": {
       "localizations": {
         "ar": {
@@ -2206,6 +2228,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "地址"
+          }
+        }
+      }
+    },
+    "Ads and trackers are dropped at the network level, in every app rather than only in the browser.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Реклама и трекеры отсекаются на уровне сети — во всех приложениях, а не только в браузере."
           }
         }
       }
@@ -2802,6 +2835,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "App 图标"
+          }
+        }
+      }
+    },
+    "Asked": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрошено"
           }
         }
       }
@@ -3761,6 +3805,17 @@
         }
       }
     },
+    "Captcha": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Капча"
+          }
+        }
+      }
+    },
     "ChaCha20-Poly1305": {
       "shouldTranslate": false
     },
@@ -4281,6 +4336,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在通过 VK 连接"
+          }
+        }
+      }
+    },
+    "Connecting…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключение…"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Соединение"
           }
         }
       }
@@ -9360,6 +9437,17 @@
       "comment": "Key for Sudoku protocol",
       "shouldTranslate": false
     },
+    "Lanes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полосы"
+          }
+        }
+      }
+    },
     "Leave empty to use the link from your subscription. Set your own to replace it — useful when the subscription's call is exhausted.": {
       "localizations": {
         "ru": {
@@ -9575,6 +9663,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "加载中…"
+          }
+        }
+      }
+    },
+    "Local sites go straight out instead of through the tunnel — faster, and banks stop objecting to a foreign address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальные сайты пойдут напрямую, минуя туннель — быстрее, и банки перестанут ругаться на иностранный адрес."
           }
         }
       }
@@ -12394,6 +12493,28 @@
         }
       }
     },
+    "Probe": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проба"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Профиль"
+          }
+        }
+      }
+    },
     "Protocol": {
       "localizations": {
         "ar": {
@@ -13656,6 +13777,17 @@
         }
       }
     },
+    "Relay": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Реле"
+          }
+        }
+      }
+    },
     "Relay ready": {
       "localizations": {
         "ar": {
@@ -14646,6 +14778,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "根证书"
+          }
+        }
+      }
+    },
+    "Route": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Маршрут"
           }
         }
       }
@@ -16035,6 +16178,17 @@
         }
       }
     },
+    "Solve the captcha": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пройти капчу"
+          }
+        }
+      }
+    },
     "Solver": {
       "localizations": {
         "ru": {
@@ -16953,6 +17107,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "TLS（上行）"
+          }
+        }
+      }
+    },
+    "Tap to connect": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите, чтобы подключиться"
           }
         }
       }

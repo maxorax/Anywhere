@@ -121,4 +121,26 @@ enum SettingsItem: String {
             backgroundStyle: backgroundColor.gradient
         )
     }
+
+    /// The same row in the redesigned style: the tile is the tint at low alpha
+    /// and the symbol is the tint itself, rather than white on a solid block of
+    /// colour. Kept beside ``label`` rather than replacing it, so the old look
+    /// is one call away.
+    ///
+    /// `iCloudSync` is the odd one out in the old scheme, painting a white tile
+    /// with a blue glyph, so the tint is whichever of the two is not white.
+    var tileLabel: some View {
+        let tint = backgroundColor == .white ? foregroundColor : backgroundColor
+        return HStack(spacing: 12) {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(tint)
+                .frame(width: 30, height: 30)
+                .background(
+                    RoundedRectangle(cornerRadius: MainScreen.iconTileRadius)
+                        .fill(tint.opacity(0.26))
+                )
+            Text(String(localized: title))
+        }
+    }
 }

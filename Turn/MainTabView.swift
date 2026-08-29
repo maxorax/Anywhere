@@ -30,7 +30,10 @@ struct MainTabView: View {
     }
     
     var body: some View {
-        tabView
+        ZStack(alignment: .bottom) {
+            tabView
+            MainScreenTabBar(selection: $selectedTab, showsProxies: settings.proMode)
+        }
             .onChange(of: deepLinkManager.url) { _, newValue in
                 if let url = newValue {
                     // Outside pro mode there is no Proxies tab to land on.
@@ -61,19 +64,6 @@ struct MainTabView: View {
             }
             .sheet(isPresented: $showingImportRuleSetsSheet, onDismiss: { pendingRuleSetLinks = [] }) {
                 ImportRuleSetsView(links: pendingRuleSetLinks)
-            }
-            // Bringing the tunnel up through a VK relay is several seconds of
-            // invisible work; the toast narrates it and doubles as the way back
-            // into a captcha the user closed.
-            .overlay(alignment: .top) {
-                ConnectionStageToast(
-                    stage: ConnectionStage.current(
-                        vpn: viewModel.status,
-                        relay: captchaModel.lastState
-                    )
-                ) {
-                    captchaModel.present()
-                }
             }
             .alert(String(localized: "Routing Rules Updated"), isPresented: showOrphanedAlert) {
                 Button(String(localized: "OK")) {}
@@ -120,11 +110,8 @@ struct MainTabView: View {
                 Tab(value: .home) {
                     NavigationStack {
                         HomeView()
-                            .toolbarColorScheme(
-                                settings.homeColorScheme.colorSceme,
-                                for: .tabBar
-                            )
                     }
+                    .toolbar(.hidden, for: .tabBar)
                 } label: {
                     Image("TabIcon")
                 }
@@ -134,6 +121,8 @@ struct MainTabView: View {
                         NavigationStack {
                             ProxiesPageView()
                         }
+                        .toolbar(.hidden, for: .tabBar)
+                        .preferredColorScheme(.dark)
                     } label: {
                         Image(systemName: "network")
                     }
@@ -143,6 +132,8 @@ struct MainTabView: View {
                     NavigationStack {
                         SettingsView()
                     }
+                    .toolbar(.hidden, for: .tabBar)
+                    .preferredColorScheme(.dark)
                 } label: {
                     Image(systemName: "gearshape")
                 }
@@ -154,6 +145,7 @@ struct MainTabView: View {
                         HomeView()
                     }
                     .colorScheme(settings.homeColorScheme == .light ? .light : .dark)
+                    .toolbar(.hidden, for: .tabBar)
                 } label: {
                     Label("Home", image: "TabIcon")
                 }
@@ -163,6 +155,8 @@ struct MainTabView: View {
                         NavigationStack {
                             ProxiesPageView()
                         }
+                        .toolbar(.hidden, for: .tabBar)
+                        .preferredColorScheme(.dark)
                     } label: {
                         Label("Proxies", systemImage: "network")
                     }
@@ -172,6 +166,8 @@ struct MainTabView: View {
                     NavigationStack {
                         SettingsView()
                     }
+                    .toolbar(.hidden, for: .tabBar)
+                    .preferredColorScheme(.dark)
                 } label: {
                     Label("Settings", systemImage: "gearshape")
                 }
@@ -180,6 +176,6 @@ struct MainTabView: View {
     }
 }
 
-private enum AppTab: Hashable {
+enum AppTab: Hashable {
     case home, proxies, settings
 }

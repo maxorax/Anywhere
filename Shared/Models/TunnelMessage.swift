@@ -39,6 +39,11 @@ nonisolated enum TunnelMessage: Codable, Sendable {
 
 nonisolated struct TurnStateResponse: Codable, Sendable {
     var state: TurnState
+    /// How far the provider has got in bringing the tunnel up. Optional so a
+    /// reply from an older extension still decodes.
+    var stage: TunnelStage?
+    /// Which way this connection was routed, once that is decided.
+    var path: TunnelPath?
 }
 
 nonisolated struct RouteTrafficEntry: Codable, Sendable, Identifiable, Hashable {

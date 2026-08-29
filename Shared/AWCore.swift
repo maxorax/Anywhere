@@ -64,6 +64,7 @@ nonisolated final class AWCore {
         static let blockUDP = "blockUDP"
         static let blockWebRTC = "blockWebRTC"
         static let bypassCountryCode = "bypassCountryCode"
+        static let onboardingCompleted = "onboardingCompleted"
         static let chainLatencyResults = "chainLatencyResults"
         static let echDNSDoHURL = "echDNSDoHURL"
         static let echDNSMode = "echDNSMode"
@@ -240,6 +241,16 @@ nonisolated final class AWCore {
     
     static func setProxyMode(_ proxyMode: ProxyMode) {
         userDefaults.set(proxyMode.rawValue, forKey: UserDefaultsKey.proxyMode)
+    }
+
+    /// Whether the first-run flow has been through. Absent means "not yet",
+    /// which is what a fresh install wants.
+    static func getOnboardingCompleted() -> Bool {
+        userDefaults.bool(forKey: UserDefaultsKey.onboardingCompleted)
+    }
+
+    static func setOnboardingCompleted(_ value: Bool) {
+        userDefaults.set(value, forKey: UserDefaultsKey.onboardingCompleted)
     }
 
     static func getBypassCountryCode() -> String {
@@ -723,9 +734,10 @@ nonisolated final class AWCore {
 nonisolated enum TurnStreamCount {
     static let minimum = 1
     /// Not a VK limit — a memory one. Every lane carries its own smux and KCP
-    /// buffers inside a tunnel process that gets about fifty megabytes in total,
-    /// and forty of them cannot fit however small the buffers are cut.
-    static let maximum = 20
+    /// buffers inside a tunnel process that gets about fifty megabytes in total.
+    /// Thirty is the ceiling with the bond off and the KCP window at 128; watch
+    /// the `[VPN] Footprint` line in the journal before going higher.
+    static let maximum = 30
     /// Matches what the subscriptions ship in `turn.defaults.num_streams`.
     static let `default` = 10
 

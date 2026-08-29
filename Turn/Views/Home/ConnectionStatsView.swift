@@ -13,6 +13,10 @@ struct ConnectionStatsView: View {
     @Environment(ConfigurationStore.self) private var configStore
     @Environment(ChainStore.self) private var chainStore
 
+    /// The relay's own report. Only interesting while traffic actually goes
+    /// through VK, which is why the lane card comes and goes with it.
+    @State private var relay = TurnCaptchaModel.shared
+
     private static let tcpConnectionCeiling = Double(TunnelLimits.tcpMaxConnections)
     private static let udpConnectionCeiling = Double(TunnelLimits.udpMaxFlows)
     private static let memoryCeiling: Double = 50 * 1024 * 1024
@@ -56,6 +60,8 @@ struct ConnectionStatsView: View {
         case sleepWake
         case dial
         case handshake
+        /// How many VK relay lanes are carrying traffic, out of those asked for.
+        case lanes
 
         var size: StatCardSize {
             switch self {
@@ -66,7 +72,9 @@ struct ConnectionStatsView: View {
     }
 
     private var rows: [[StatUnit]] {
-        let units: [StatUnit] = [.upload, .download, .route, .tcp, .udp, .memory, .sleepWake, .dial, .handshake]
+        var units: [StatUnit] = [.upload, .download, .route, .tcp, .udp, .memory, .sleepWake, .dial, .handshake]
+        // Only while the traffic is actually going through VK.
+        if relay.flow.usesRelay { units.insert(.lanes, at: 2) }
         return Self.packRows(units, columns: Self.columnCount(for: availableWidth))
     }
 
@@ -149,6 +157,12 @@ struct ConnectionStatsView: View {
                 StatValue(Self.formatBytes(Int64(stats.memoryBytes)))
                 Spacer()
                 PressureGauge(value: Double(stats.memoryBytes), ceiling: Self.memoryCeiling)
+            }
+        case .lanes:
+            StatCard("Lanes", systemImage: "point.3.filled.connected.trianglepath.dotted") {
+                StatValue("\(relay.lastState.activeStreams ?? 0)")
+                Spacer()
+                StatDetailRow(label: "Asked", value: "\(relay.lastState.streams ?? 0)")
             }
         case .sleepWake:
             SleepWakeCard(wakeSeconds: stats.wakeSeconds, sleepSeconds: stats.sleepSeconds)

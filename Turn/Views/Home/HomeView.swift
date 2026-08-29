@@ -49,14 +49,14 @@ struct HomeView: View {
             BackgroundGradient(isConnected: isConnected)
                 .ignoresSafeArea()
 
+            // The redesigned screen, and the same one in both modes. The three
+            // layouts below are left intact rather than deleted — they are the
+            // way back, and pro mode will want parts of them again.
             Group {
-                if !settings.proMode {
-                    simpleLayout
-                } else if isConnected && Self.allowsSideBySide(contentWidth: contentWidth) {
-                    sideBySideLayout
-                } else {
-                    stackedLayout
-                }
+                MainScreenView(
+                    showingAddSheet: $showingAddSheet,
+                    showingManualAddSheet: $showingManualAddSheet
+                )
             }
             .animation(connectionEffectsEnabled ? Animation.bouncy : nil, value: isConnected)
             .sensoryFeedback(trigger: isConnected) { _, _ in
@@ -85,6 +85,9 @@ struct HomeView: View {
                 configStore.update(updated)
             }
         }
+        // The redesigned screen draws its own header with the same two buttons;
+        // leaving the navigation bar on top of it showed both.
+        .toolbar(.hidden, for: .navigationBar)
         .toolbar {
             // Pro mode keeps proxy management on its own tab; without it this
             // is the only way to add one.
@@ -220,11 +223,9 @@ struct HomeView: View {
             Spacer()
         } else if configStore.configurations.isEmpty {
             Spacer()
-            ContentUnavailableView {
-                Label("No Proxies", systemImage: "network")
-            } actions: {
-                Button("Add a Configuration") { showingAddSheet = true }
-            }
+            AddConfigurationCapsule { showingAddSheet = true }
+                .frame(maxWidth: Self.maxControlPaneWidth)
+                .padding(.horizontal, Self.horizontalPadding)
             Spacer()
         } else {
             List {
@@ -574,9 +575,32 @@ private struct ConfigurationCapsule: View {
     }
 
     private var emptyCapsule: some View {
-        Button {
-            showingAddSheet = true
-        } label: {
+        AddConfigurationCapsule { showingAddSheet = true }
+    }
+    
+    private var loadingCapsule: some View {
+        ProminentCapsule {
+            HStack(spacing: 12) {
+                ProgressView()
+                Text("Loading…")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+        }
+    }
+}
+
+/// The empty-state call to action.
+///
+/// Shared by both home layouts: the plain one shows it in place of the server
+/// list, pro mode in place of the configuration capsule. One definition so the
+/// two cannot drift apart.
+private struct AddConfigurationCapsule: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
             ProminentCapsule {
                 HStack(spacing: 12) {
                     Image(systemName: "plus.circle.fill")
@@ -592,18 +616,6 @@ private struct ConfigurationCapsule: View {
             }
         }
         .buttonStyle(.plain)
-    }
-    
-    private var loadingCapsule: some View {
-        ProminentCapsule {
-            HStack(spacing: 12) {
-                ProgressView()
-                Text("Loading…")
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-        }
     }
 }
 

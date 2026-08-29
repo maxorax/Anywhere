@@ -9,9 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var deepLinkManager = DeepLinkManager()
+    @State private var onboardingCompleted = AWCore.getOnboardingCompleted()
 
     var body: some View {
-        MainTabView()
+        Group {
+            if onboardingCompleted {
+                MainTabView()
+            } else {
+                OnboardingView(completed: $onboardingCompleted)
+            }
+        }
             .onOpenURL { url in
                 deepLinkManager.handle(url: url)
             }

@@ -28,7 +28,19 @@ struct SettingsView: View {
             utilitiesSection
             diagnosisSection
             aboutSection
+            footer
         }
+        // Styled to match the redesigned main screen rather than rebuilt: the
+        // rows, their destinations and their icon colours are the ones that were
+        // already here, on the new surfaces.
+        .listRowBackground(MainScreen.surface(0.035))
+        .listRowSeparatorTint(MainScreen.surface(0.05))
+        .scrollContentBackground(.hidden)
+        .background {
+            LinearGradient(colors: MainScreen.backgroundStops, startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+        }
+        .tint(MainScreen.accent)
         .navigationTitle("Settings")
         .onChange(of: adBlockEnabled) { _, newValue in
             if let adBlockRuleSet = RoutingRuleSetStore.shared.adBlockRuleSet {
@@ -56,21 +68,39 @@ struct SettingsView: View {
         }
     }
     
+    /// Version line closing the list, as on the handoff's settings tab.
+    private var footer: some View {
+        Section {
+        } footer: {
+            Text(verbatim: Self.versionLine)
+                .font(.system(size: 11.5, design: .monospaced))
+                .foregroundStyle(MainScreen.surface(0.25))
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
+    private static var versionLine: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+        return "Turn \(version) (\(build))"
+    }
+
     @ViewBuilder
     private var appSection: some View {
         @Bindable var settings = settings
         Section("App") {
             Toggle(isOn: $settings.proMode) {
-                SettingsItem.proMode.label
+                SettingsItem.proMode.tileLabel
             }
             if settings.proMode {
                 Toggle(isOn: $settings.iCloudSyncEnabled) {
-                    SettingsItem.iCloudSync.label
+                    SettingsItem.iCloudSync.tileLabel
                 }
                 NavigationLink {
                     PersonalizationSettingsView()
                 } label: {
-                    SettingsItem.personalization.label
+                    SettingsItem.personalization.tileLabel
                 }
             }
             Picker(selection: $subscriptionRefreshInterval) {
@@ -78,7 +108,7 @@ struct SettingsView: View {
                     Text(option.title).tag(option)
                 }
             } label: {
-                SettingsItem.subscriptionUpdate.label
+                SettingsItem.subscriptionUpdate.tileLabel
             }
             .onChange(of: subscriptionRefreshInterval) {
                 AWCore.setSubscriptionRefreshInterval(subscriptionRefreshInterval)
@@ -93,7 +123,7 @@ struct SettingsView: View {
         if settings.proMode {
             Section("VPN") {
                 Toggle(isOn: $settings.alwaysOnEnabled) {
-                    SettingsItem.alwaysOn.label
+                    SettingsItem.alwaysOn.tileLabel
                 }
                 .disabled(viewModel.pendingReconnect)
             }
@@ -109,23 +139,23 @@ struct SettingsView: View {
             Section("Routing") {
                 if settings.proMode {
                     Toggle(isOn: $settings.isGlobalMode) {
-                        SettingsItem.globalMode.label
+                        SettingsItem.globalMode.tileLabel
                     }
                     .onChange(of: settings.isGlobalMode) {
                         ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
                     }
                 }
                 if !settings.isGlobalMode {
-                    if settings.proMode {
-                        Toggle(isOn: $adBlockEnabled) {
-                            SettingsItem.adBlocking.label
-                        }
-                        countryBypassPicker
+                    // Not pro-only: both are asked about in the onboarding, so
+                    // hiding them afterwards left no way to change the answer.
+                    Toggle(isOn: $adBlockEnabled) {
+                        SettingsItem.adBlocking.tileLabel
                     }
+                    countryBypassPicker
                     NavigationLink {
                         RuleSetListView()
                     } label: {
-                        SettingsItem.routingRules.label
+                        SettingsItem.routingRules.tileLabel
                     }
                 }
             }
@@ -141,7 +171,7 @@ struct SettingsView: View {
                 Text(countryLabel(for: code)).tag(code)
             }
         } label: {
-            SettingsItem.countryBypass.label
+            SettingsItem.countryBypass.tileLabel
         }
     }
 
@@ -159,23 +189,23 @@ struct SettingsView: View {
                         }
                     }
                 )) {
-                    SettingsItem.allowInsecure.label
+                    SettingsItem.allowInsecure.tileLabel
                 }
                 .tint(.red)
                 NavigationLink {
                     TrustedCertificatesView()
                 } label: {
-                    SettingsItem.trustedCertificates.label
+                    SettingsItem.trustedCertificates.tileLabel
                 }
                 NavigationLink {
                     TrustedNetworkSettingsView()
                 } label: {
-                    SettingsItem.trustedNetwork.label
+                    SettingsItem.trustedNetwork.tileLabel
                 }
                 NavigationLink {
                     TurnSettingsView()
                 } label: {
-                    SettingsItem.turn.label
+                    SettingsItem.turn.tileLabel
                 }
             }
         }
@@ -188,17 +218,17 @@ struct SettingsView: View {
                 NavigationLink {
                     PurifySettingsView()
                 } label: {
-                    SettingsItem.purify.label
+                    SettingsItem.purify.tileLabel
                 }
                 NavigationLink {
                     ReflectionSettingsView()
                 } label: {
-                    SettingsItem.reflection.label
+                    SettingsItem.reflection.tileLabel
                 }
                 NavigationLink {
                     MITMSettingsView()
                 } label: {
-                    SettingsItem.mitm.label
+                    SettingsItem.mitm.tileLabel
                 }
             }
         }
@@ -210,12 +240,12 @@ struct SettingsView: View {
             NavigationLink {
                 LogListView()
             } label: {
-                SettingsItem.logs.label
+                SettingsItem.logs.tileLabel
             }
             NavigationLink {
                 RequestsView()
             } label: {
-                SettingsItem.requests.label
+                SettingsItem.requests.tileLabel
             }
         }
     }
@@ -226,7 +256,7 @@ struct SettingsView: View {
             NavigationLink {
                 AboutView()
             } label: {
-                SettingsItem.about.label
+                SettingsItem.about.tileLabel
             }
         } footer: {
             if settings.proMode {

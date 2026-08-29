@@ -75,6 +75,15 @@ struct ProxiesPageView: View {
                 ContentUnavailableView("No Chains", systemImage: "point.bottomleft.forward.to.point.topright.scurvepath.fill")
             }
         }
+        // Same surfaces as the redesigned main screen and settings.
+        .listRowBackground(MainScreen.surface(0.035))
+        .listRowSeparatorTint(MainScreen.surface(0.05))
+        .scrollContentBackground(.hidden)
+        .background {
+            LinearGradient(colors: MainScreen.backgroundStops, startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+        }
+        .tint(MainScreen.accent)
         .navigationTitle("Proxies")
         .toolbar {
             ToolbarItem {
@@ -338,7 +347,9 @@ struct ProxiesPageView: View {
 
     @ViewBuilder
     private func proxyRow(_ item: ProxyListItem, editingDisabled: Bool) -> some View {
-        ProxyRowView(
+        // ``ProxyRowView`` is the original row and still builds; this is the
+        // redesigned one. Swapping the name back restores the old look.
+        ProxyRowTile(
             item: item,
             editingDisabled: editingDisabled,
             onSelect: { if let configuration = config(item.id) { viewModel.selectedConfiguration = configuration } },

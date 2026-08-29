@@ -33,6 +33,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// Slow tick that writes the process footprint to the journal.
     private let memoryWatch = Mutex<Task<Void, Never>?>(nil)
 
+    /// How far this start has got, and which way it went. The main screen draws
+    /// the sequence, so the steps that used to happen in silence — resolving the
+    /// configuration, probing the direct path, choosing the route — are reported
+    /// rather than inferred from `VPNStatus`.
+    private let stage = Mutex<TunnelStage>(.idle)
+    private let path = Mutex<TunnelPath?>(nil)
+
     // MARK: - Tunnel Lifecycle
     
     override func startTunnel(options: [String : NSObject]? = nil) async throws {
@@ -60,6 +67,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         ControlCenter.shared.reloadControls(ofKind: "com.maxorax.turn.Widget.VPNToggle")
 #endif
 
+        report(.profile)
+
         // Seed the network context before the first relay decision. The path
         // monitor starts with `run()` below, and `updateNetworkContext` drops
         // anything that arrives before the stack is up — so without this,
@@ -85,6 +94,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         let effective = await prepared(configuration)
         await tunnelStack.start(packetFlow: packetFlow, configuration: effective)
+        report(.connected)
         
         rootTask.withLock { task in
             guard task == nil else { return }
@@ -245,6 +255,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 #endif
         
         statsRecorder.stop()
+        report(.idle)
+        path.withLock { $0 = nil }
         memoryWatch.withLock { watch in
             watch?.cancel()
             watch = nil
@@ -260,6 +272,18 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         
         await tunnelStack.stop()
         await TurnCore.shared.deactivate()
+    }
+
+    /// Publishes the stage and wakes the app, which redraws the chart from it.
+    private func report(_ next: TunnelStage, path routed: TunnelPath? = nil) {
+        let changed = stage.withLock { current -> Bool in
+            guard current != next else { return false }
+            current = next
+            return true
+        }
+        if let routed { path.withLock { $0 = routed } }
+        guard changed || routed != nil else { return }
+        AWNotificationCenter.notifyTurnStateChanged()
     }
 
     // MARK: - TURN
@@ -282,6 +306,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         baseConfiguration.withLock { $0 = configuration }
 
         guard let turn = configuration.turn else {
+            report(.route, path: .direct)
             logger.warning("[TURN] No relay for \"\(configuration.name)\" — connecting DIRECTLY to \(target). "
                            + "The subscription carries no turn entry for this server.")
             await TurnCore.shared.deactivate()
@@ -289,9 +314,11 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         }
 
         guard await shouldRelay(configuration) else {
+            report(.route, path: .direct)
             await TurnCore.shared.deactivate()
             return configuration
         }
+        report(.route, path: .turn)
 
         // A link the user entered in Settings replaces the subscription's, so an
         // exhausted or expired call can be swapped without reissuing the
@@ -308,6 +335,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         // subscription may ship one without a link on purpose, expecting the user
         // to supply their own.
         guard !relay.link.isEmpty else {
+            report(.route, path: .direct)
             logger.warning("[TURN] No VK call link — neither the subscription nor Settings has one. "
                            + "Connecting DIRECTLY to \(target). Add a link in Settings → VK TURN.")
             await TurnCore.shared.deactivate()
@@ -342,6 +370,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         relay.streamsPerCred = relay.streams
         logger.info("[TURN] Streams: \(relay.streams), all on one set of credentials")
 
+        report(.relay)
+
         do {
             let endpoint = try await TurnCore.shared.activate(relay)
             let redirected = configuration.withRedirectedServer(address: endpoint.host, port: endpoint.port)
@@ -349,6 +379,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                         + "TLS server name stays \(redirected.xraySecurityLayer.serverName(fallback: configuration.serverAddress))")
             return redirected
         } catch {
+            report(.route, path: .direct)
             logger.report("[TURN] Relay unavailable — FALLING BACK to a direct connection to \(target)", error: error)
             return configuration
         }
@@ -381,6 +412,7 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
             let interface = network.isCellular ? "cellular" : "an unidentified network"
             logger.info("[TURN] On \(interface) — probing the direct path before relaying")
+            report(.probe)
 
             // LatencyTester rebuilds the configuration from scratch and keeps no
             // relay, so this measures the direct path even for a relayed proxy.
@@ -411,7 +443,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         switch message {
         case .setConfiguration(let configuration):
+            // Switching servers on a live tunnel never re-enters `startTunnel`,
+            // so the chart has to be driven from here too: back to the start,
+            // through `prepared` as usual, and told when it is over. Without the
+            // last line it sat on Route for good.
+            report(.profile)
             await tunnelStack.switchConfiguration(await prepared(configuration))
+            report(.connected)
             return nil
 
         case .testLatency(let configuration):
@@ -428,7 +466,11 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
             return encodeReply(RequestsResponse(requests: tunnelStack.requestLog.snapshot()))
 
         case .fetchTurnState:
-            return encodeReply(TurnStateResponse(state: await TurnCore.shared.state))
+            return encodeReply(TurnStateResponse(
+                state: await TurnCore.shared.state,
+                stage: stage.withLock { $0 },
+                path: path.withLock { $0 }
+            ))
         }
     }
     
