@@ -17,6 +17,13 @@ nonisolated struct SubscriptionFetcher {
         let download: Int64?
         let total: Int64?
         let expire: Date?
+        /// Whether the response carried a `subscription-userinfo` header at all.
+        ///
+        /// A panel that reports no limit and no expiry sends the header with
+        /// those fields absent, which is a fact worth storing. A panel that
+        /// sends no header at all has told us nothing, and the figures already
+        /// on record should stand.
+        var hasUserInfo = false
     }
 
     static func fetch(url urlString: String, withRemnawaveHWID: Bool = false) async throws -> Result {
@@ -83,7 +90,8 @@ nonisolated struct SubscriptionFetcher {
                 upload: userInfo.upload,
                 download: userInfo.download,
                 total: userInfo.total,
-                expire: userInfo.expire
+                expire: userInfo.expire,
+                hasUserInfo: userInfo.present
             )
         }
 
@@ -98,7 +106,8 @@ nonisolated struct SubscriptionFetcher {
                 upload: userInfo.upload,
                 download: userInfo.download,
                 total: userInfo.total,
-                expire: userInfo.expire
+                expire: userInfo.expire,
+                hasUserInfo: userInfo.present
             )
         }
 
@@ -118,7 +127,8 @@ nonisolated struct SubscriptionFetcher {
             upload: userInfo.upload,
             download: userInfo.download,
             total: userInfo.total,
-            expire: userInfo.expire
+            expire: userInfo.expire,
+            hasUserInfo: userInfo.present
         )
     }
 
@@ -235,9 +245,10 @@ nonisolated struct SubscriptionFetcher {
         return trimmed.isEmpty ? nil : decoded
     }
 
-    private static func parseSubscriptionUserInfo(from response: HTTPURLResponse?) -> (upload: Int64?, download: Int64?, total: Int64?, expire: Date?) {
+    private static func parseSubscriptionUserInfo(from response: HTTPURLResponse?)
+        -> (upload: Int64?, download: Int64?, total: Int64?, expire: Date?, present: Bool) {
         guard let value = response?.value(forHTTPHeaderField: "subscription-userinfo") else {
-            return (nil, nil, nil, nil)
+            return (nil, nil, nil, nil, false)
         }
 
         var upload: Int64?
@@ -261,7 +272,10 @@ nonisolated struct SubscriptionFetcher {
             case "total":
                 total = Int64(valueString)
             case "expire":
-                if let timestamp = TimeInterval(valueString) {
+                // Panels send `expire=0` for a subscription that never runs out.
+                // Taken literally that is 1 January 1970, and the screen then
+                // reported an unlimited subscription as long expired.
+                if let timestamp = TimeInterval(valueString), timestamp > 0 {
                     expire = Date(timeIntervalSince1970: timestamp)
                 }
             default:
@@ -269,7 +283,7 @@ nonisolated struct SubscriptionFetcher {
             }
         }
 
-        return (upload, download, total, expire)
+        return (upload, download, total, expire, true)
     }
 }
 

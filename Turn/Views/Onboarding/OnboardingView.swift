@@ -16,20 +16,10 @@ struct OnboardingView: View {
     @Binding var completed: Bool
 
     @State private var bypassCountryCode = AWCore.getBypassCountryCode()
-    @State private var adBlockEnabled = false
-    @State private var page = 0
-
-    private static let lastPage = 1
 
     var body: some View {
         VStack(spacing: 0) {
-            Group {
-                switch page {
-                case 0: countryPage
-                default: adBlockPage
-                }
-            }
-            .animation(.easeInOut(duration: 0.25), value: page)
+            countryPage
 
             bottomBar
                 .padding(.horizontal, 24)
@@ -81,45 +71,6 @@ struct OnboardingView: View {
                 .padding(.horizontal, 24)
             }
             .scrollIndicators(.hidden)
-        }
-    }
-
-    private var adBlockPage: some View {
-        VStack(spacing: 20) {
-            header(
-                symbol: "shield.lefthalf.filled",
-                tint: MainScreen.red,
-                title: String(localized: "AD Blocking"),
-                subtitle: String(localized: "Ads and trackers are dropped at the network level, in every app rather than only in the browser.")
-            )
-
-            Button {
-                adBlockEnabled.toggle()
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: adBlockEnabled ? "checkmark.shield.fill" : "shield.slash")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(adBlockEnabled ? MainScreen.accent : MainScreen.surface(0.4))
-                        .frame(width: 30, height: 30)
-                        .background(
-                            RoundedRectangle(cornerRadius: MainScreen.iconTileRadius)
-                                .fill((adBlockEnabled ? MainScreen.accent : MainScreen.surface(0.3)).opacity(0.26))
-                        )
-                    Text("Enable AD Blocking")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(MainScreen.rowTitle)
-                    Spacer()
-                    Toggle("", isOn: $adBlockEnabled)
-                        .labelsHidden()
-                        .tint(MainScreen.accent)
-                }
-                .padding(14)
-                .background(card)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 24)
-
-            Spacer()
         }
     }
 
@@ -181,21 +132,13 @@ struct OnboardingView: View {
 
     private var bottomBar: some View {
         HStack {
-            if page > 0 {
-                Button { page -= 1 } label: {
-                    Text("Back")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(MainScreen.surface(0.5))
-                }
-                .buttonStyle(.plain)
-            }
-
             Spacer()
 
-            Button {
-                if page < Self.lastPage { page += 1 } else { finish() }
-            } label: {
-                Text(page < Self.lastPage ? "Next" : "Get Started")
+            // Ad blocking is not asked here any more: it is one toggle in
+            // Settings, and a second page for it made a first launch feel like a
+            // questionnaire.
+            Button(action: finish) {
+                Text("Get Started")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(MainScreen.onAccent)
                     .padding(.horizontal, 26)
@@ -210,9 +153,6 @@ struct OnboardingView: View {
     // MARK: - Actions
 
     private func finish() {
-        if adBlockEnabled, let adBlock = ruleSetStore.adBlockRuleSet {
-            ruleSetStore.updateAssignment(adBlock, configurationId: "REJECT")
-        }
         ruleSetStore.bypassCountryCode = bypassCountryCode
         AWCore.setOnboardingCompleted(true)
         withAnimation { completed = true }

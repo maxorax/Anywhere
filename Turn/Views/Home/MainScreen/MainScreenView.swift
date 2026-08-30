@@ -23,6 +23,10 @@ struct MainScreenView: View {
     @State private var refreshing: UUID?
     @State private var failure: String?
     @State private var showingStats = false
+    @State private var renaming: Subscription?
+    @State private var renamedTo = ""
+    /// Shown for a moment after a refresh, so a successful one is not silent.
+    @State private var note: String?
 
     /// The id standing in for servers added by hand, which have no subscription.
     private static let standaloneGroup = UUID()
@@ -71,6 +75,39 @@ struct MainScreenView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .preferredColorScheme(.dark)
+        }
+        .overlay(alignment: .bottom) {
+            if let note {
+                Text(note)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(MainScreen.rowTitle)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(MainScreen.surface(0.11))
+                            .overlay(Capsule().stroke(MainScreen.surface(0.09), lineWidth: 1))
+                    )
+                    .padding(.bottom, 110)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: note)
+        .alert(String(localized: "Rename"), isPresented: Binding(
+            get: { renaming != nil },
+            set: { if !$0 { renaming = nil } }
+        )) {
+            TextField(String(localized: "Name"), text: $renamedTo)
+            Button(String(localized: "Cancel"), role: .cancel) { renaming = nil }
+            Button(String(localized: "Save")) {
+                if let renaming, !renamedTo.isEmpty {
+                    subscriptionStore.rename(renaming, to: renamedTo)
+                }
+                renaming = nil
+            }
+        }
+        .onChange(of: renaming?.id) { _, _ in
+            renamedTo = renaming?.name ?? ""
         }
         .alert(String(localized: "Subscription Update Failed"),
                isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } })) {
@@ -176,6 +213,9 @@ struct MainScreenView: View {
         ForEach(subscriptionStore.subscriptions) { subscription in
             ServerGroupCard(
                 title: subscription.name,
+                traffic: Self.traffic(of: subscription),
+                expiry: Self.expiry(of: subscription),
+                expired: Self.isExpired(subscription),
                 configurations: configStore.configurations(for: subscription),
                 selectedID: viewModel.selectedConfiguration?.id,
                 latencies: viewModel.latencyResults,
@@ -184,7 +224,9 @@ struct MainScreenView: View {
                 isExpanded: expansion(for: subscription.id),
                 onSelect: { viewModel.selectedConfiguration = $0 },
                 onRefresh: { refresh(subscription) },
-                onTestLatency: { viewModel.testLatencies(for: configStore.configurations(for: subscription)) }
+                onTestLatency: { viewModel.testLatencies(for: configStore.configurations(for: subscription)) },
+                onRename: { renaming = subscription },
+                onDelete: { subscriptionStore.delete(subscription, configurationStore: configStore) }
             )
         }
 
@@ -203,6 +245,45 @@ struct MainScreenView: View {
                 onTestLatency: { viewModel.testLatencies(for: standalone) }
             )
         }
+    }
+
+    /// Spent over the allowance. A panel that sets no limit sends no total, and
+    /// then there is nothing to divide by — the infinity says so.
+    private static func traffic(of subscription: Subscription) -> String? {
+        let used = (subscription.upload ?? 0) + (subscription.download ?? 0)
+        if let total = subscription.total, total > 0 {
+            return "\(format(used)) / \(format(total))"
+        }
+        return used > 0 ? "\(format(used)) / ∞" : nil
+    }
+
+    private static func expiry(of subscription: Subscription) -> String? {
+        guard let expire = validExpiry(of: subscription) else { return nil }
+        if expire < .now { return String(localized: "Expired") }
+        return String(localized: "until \(expire.formatted(.dateTime.day().month().year()))")
+    }
+
+    private static func isExpired(_ subscription: Subscription) -> Bool {
+        guard let expire = validExpiry(of: subscription) else { return false }
+        return expire < .now
+    }
+
+    /// A subscription that never runs out arrives as `expire=0`, which is 1970
+    /// once it becomes a date. The fetcher drops it now, but subscriptions
+    /// imported before that still carry it, so anything from before the app
+    /// could plausibly exist is read as "no expiry" rather than long expired.
+    private static func validExpiry(of subscription: Subscription) -> Date? {
+        guard let expire = subscription.expire,
+              expire.timeIntervalSince1970 > 946_684_800  // 2000-01-01
+        else { return nil }
+        return expire
+    }
+
+    private static func format(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .binary
+        formatter.allowsNonnumericFormatting = false
+        return formatter.string(fromByteCount: bytes)
     }
 
     private func expansion(for id: UUID) -> Binding<Bool> {
@@ -224,10 +305,22 @@ struct MainScreenView: View {
         Task {
             do {
                 try await subscriptionStore.refresh(subscription)
+                // Announced rather than silent: a refresh that says nothing is
+                // indistinguishable from a button that does nothing, and success
+                // is the case that happens most.
+                show(String(localized: "Subscription updated"))
             } catch {
                 failure = error.localizedDescription
             }
             refreshing = nil
+        }
+    }
+
+    private func show(_ text: String) {
+        note = text
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            if note == text { note = nil }
         }
     }
 }

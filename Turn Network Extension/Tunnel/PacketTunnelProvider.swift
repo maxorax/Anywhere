@@ -295,7 +295,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     ///
     /// A relay that fails to start degrades to a direct connection rather than to
     /// no connection at all — the log says which path was taken.
-    private func prepared(_ configuration: ProxyConfiguration) async -> ProxyConfiguration {
+    private func prepared(_ configuration: ProxyConfiguration,
+                          forceRelay: Bool = false) async -> ProxyConfiguration {
         let target = "\(configuration.serverAddress):\(configuration.serverPort)"
         logger.info("[TURN] Selected proxy \"\(configuration.name)\" → \(target), "
                     + "protocol=\(configuration.outboundProtocol.rawValue), "
@@ -313,7 +314,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
             return configuration
         }
 
-        guard await shouldRelay(configuration) else {
+        // `forceRelay` skips the decision rather than repeating it. A tunnel
+        // already on the relay is not asking whether to start relaying; it is
+        // being moved to another interface, and re-running the choice there
+        // would answer "Wi-Fi, go direct" and take the relay down.
+        // Evaluated apart from the guard: `await` cannot sit to the right of `||`.
+        let relaying = forceRelay ? true : await shouldRelay(configuration)
+        guard relaying else {
             report(.route, path: .direct)
             await TurnCore.shared.deactivate()
             return configuration
@@ -411,21 +418,27 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
             }
 
             let interface = network.isCellular ? "cellular" : "an unidentified network"
-            logger.info("[TURN] On \(interface) — probing the direct path before relaying")
+            logger.info("[TURN] On \(interface) — probing the network before relaying")
             report(.probe)
 
-            // LatencyTester rebuilds the configuration from scratch and keeps no
-            // relay, so this measures the direct path even for a relayed proxy.
-            switch await LatencyTester.test(configuration) {
-            case .success(let milliseconds):
-                logger.info("[TURN] Direct path answered in \(milliseconds) ms — no relay needed")
+            // What replaced `LatencyTester` here, and why: that probe dialled our
+            // own server through a full Reality handshake, which cost the whole
+            // ten-second budget every time the answer was "blocked" — and on this
+            // network that is the answer. It also could not tell a blocked path
+            // from a dead one. Three well-known hosts settle both in a second.
+            switch await ReachabilityProbe.run() {
+            case .open:
+                logger.info("[TURN] Network is open — connecting directly, no relay needed")
                 return false
-            case .insecure:
-                logger.info("[TURN] Direct path answered but failed verification — relaying")
+            case .censored:
+                logger.info("[TURN] Network is filtered — switching to the VK relay")
                 return true
-            case .failed, .testing:
-                logger.warning("[TURN] Direct path unreachable on \(interface) — switching to the VK relay")
-                return true
+            case .offline:
+                // Relaying needs VK, and VK is on the network that just failed to
+                // answer. Spending a call and a captcha on that is worse than
+                // useless: neither is refundable when the attempt dies.
+                logger.warning("[TURN] No network on \(interface) — nothing to relay over; connecting directly")
+                return false
             }
         }
     }
@@ -503,7 +516,14 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                 let footprint = Self.memoryFootprint()
                 let relay = await TurnCore.shared.state
                 let lanes = relay.activeStreams.map { "\($0)/\(relay.streams ?? 0)" } ?? "none"
-                logger.info("[VPN] Footprint \(footprint / 1024 / 1024) MB, relay lanes \(lanes)")
+                // Bytes and open connections alongside the footprint: a journal
+                // that only records failures cannot tell "nothing worked" from
+                // "nothing was tried", and that is exactly the question a
+                // connection which looks up but carries nothing raises.
+                let counts = tunnelStack.byteCounts.withLock { $0 }
+                logger.info("[VPN] Footprint \(footprint / 1024 / 1024) MB, relay lanes \(lanes), "
+                            + "tcp \(FlowGauge.tcpTable), udp \(FlowGauge.udpTable), "
+                            + "up \(Self.formatBytes(counts.totalBytesOut)), down \(Self.formatBytes(counts.totalBytesIn))")
                 try? await Task.sleep(for: Self.memoryWatchInterval)
             }
         }
@@ -511,6 +531,17 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
             watch?.cancel()
             watch = task
         }
+    }
+
+    private static func formatBytes(_ bytes: Int64) -> String {
+        let units = ["B", "KB", "MB", "GB"]
+        var value = Double(bytes)
+        var unit = 0
+        while value >= 1024, unit < units.count - 1 {
+            value /= 1024
+            unit += 1
+        }
+        return unit == 0 ? "\(Int(value)) B" : String(format: "%.1f %@", value, units[unit])
     }
 
     private static func memoryFootprint() -> UInt64 {
@@ -627,7 +658,30 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
 
         let where_ = current.isWiFi ? "Wi-Fi" : current.isCellular ? "cellular" : "an unidentified network"
         logger.info("[TURN] Network changed to \(where_) — re-deciding whether to relay")
-        await tunnelStack.switchConfiguration(await prepared(base))
+
+        // Deliberately one-way: once traffic is on the relay it stays there until
+        // the user reconnects. Deciding to leave is cheap, but undoing that
+        // decision is not — coming back needs fresh VK credentials and very
+        // likely a captcha, and until that finishes there is no working path at
+        // all. Staying costs a detour; leaving costs the connection.
+        let relaying = TurnCore.relaying.load(ordering: .relaxed)
+        if relaying {
+            // Staying is not enough on its own: the relay's sessions to VK were
+            // opened on the interface that just went away, and the core does not
+            // rebuild them. Its listener survives and accepts connections it can
+            // no longer carry, which reads as a dead internet rather than a lost
+            // one. So rebuild on the new interface, and never re-run the
+            // direct/relay decision while doing it.
+            logger.info("[TURN] Network moved while relaying — rebuilding the relay on the new interface")
+            await TurnCore.shared.deactivate()
+        }
+
+        await tunnelStack.switchConfiguration(await prepared(base, forceRelay: relaying))
+        // `prepared` walks the chart through Probe and Route on its way to a
+        // verdict, which is right while something is coming up and wrong here:
+        // the tunnel is already carrying traffic. Without this the chart parks on
+        // Route while the connection is plainly up.
+        report(.connected)
     }
 
     private func logTunnelStop(reason: NEProviderStopReason) {

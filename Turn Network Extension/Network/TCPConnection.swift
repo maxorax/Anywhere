@@ -68,6 +68,19 @@ actor TCPConnection: MITMSessionHost {
 
     private var stream: TCPStreamConcurrencyBridge?
 
+    // MARK: Establishment stopwatch
+
+    /// Where the ten-second establishment budget went, stage by stage.
+    ///
+    /// A timeout used to report only the phase the connection sat in when the
+    /// deadline fired, which is not the same as the phase that spent the time —
+    /// rule matching can burn four seconds and still hand a connection to the
+    /// dial in time to be blamed for the loss. Each stage gets its own reading,
+    /// so the failure line names the stage to answer for it.
+    private var sniffElapsed: Duration?
+    private var rulesElapsed: Duration?
+    private var dialBegan: ContinuousClock.Instant?
+
     // MARK: - Idle timer
 
     private var idleActive = false
@@ -200,24 +213,73 @@ actor TCPConnection: MITMSessionHost {
         failureReporter.report(
             operation: "Handshake",
             endpoint: endpointDescription,
-            error: TurnError.transport(.timedOut(.connect, endpoint: nil, detail: phase))
+            error: TurnError.transport(.timedOut(.connect, endpoint: nil,
+                                                 detail: "\(phase); \(stageSummary)"))
         )
         abort()
     }
 
     private func establishAndDial() async -> Establishment {
+        let clock = ContinuousClock()
+        let sniffBegan = clock.now
         await runSniffPhase()
+        sniffElapsed = clock.now - sniffBegan
         guard !closed else { return .done }
+        let rulesBegan = clock.now
         await applyIPRuleMatch()
+        rulesElapsed = clock.now - rulesBegan
         guard !closed else { return .done }
+        dialBegan = clock.now
         return await beginConnecting()
     }
+
+    /// The stopwatch as one line, for the timeout report. A stage that never ran
+    /// says so rather than reading zero — "the dial never started" and "the dial
+    /// returned instantly" are opposite findings.
+    private var stageSummary: String {
+        func reading(_ elapsed: Duration?) -> String {
+            guard let elapsed else { return "not reached" }
+            return "\(elapsed.milliseconds)ms"
+        }
+        let dial = dialBegan.map { "\((ContinuousClock.now - $0).milliseconds)ms" } ?? "not reached"
+        return "sniff \(reading(sniffElapsed)), rules \(reading(rulesElapsed)), dial \(dial)"
+    }
     
+    /// Keeps a rule-selected proxy on the relay when the relay is serving it.
+    ///
+    /// `resolveConfiguration` answers from the stored configurations, which carry
+    /// the real server address, while the stack's default has been redirected to
+    /// the relay's local listener. Taking the rule's copy therefore dials the
+    /// very address the relay exists to get around — and on a network that
+    /// blocks it, every matched connection dies at the handshake deadline while
+    /// unmatched ones sail through. The journal caught the split exactly:
+    /// seventy-one dials to the real address against five to the relay, the
+    /// five being hosts no rule set covers.
+    private func keepingRelay(_ resolved: ProxyConfiguration) -> ProxyConfiguration {
+        // `udpConfig()` is the nonisolated snapshot of the stack's default, which
+        // is the redirected copy once the relay is up.
+        guard let relayed = stack?.udpConfig().configuration, relayed.id == resolved.id
+        else { return resolved }
+        return relayed
+    }
+
     private func applyIPRuleMatch() async {
         guard hostIsResolvedDomain, !ruleMatched, !closed,
-              let stack, !stack.connectionRouter.preventDNSLeak.load(ordering: .relaxed),
-              let ip = await RuleResolver.shared.resolveIPv4(for: dstHost),
-              !closed, let match = stack.domainRouter.matchIP(ip)
+              let stack, !stack.connectionRouter.preventDNSLeak.load(ordering: .relaxed)
+        else { return }
+
+        // Through the relay this lookup is cache-only. `resolveIPv4` blocks for
+        // up to four of the connection's ten seconds, before the dial has even
+        // started, and it spends them whether or not a rule ends up matching.
+        // The journal caught connections dying at the deadline having never
+        // reached the core: forty in five minutes, all of them reported as a
+        // proxy dial that never happened. A rule that needs a fresh resolution
+        // to match is worth less than the connection it costs.
+        let resolved = TurnCore.relaying.load(ordering: .relaxed)
+            ? RuleResolver.shared.cachedIPv4(for: dstHost)
+            : await RuleResolver.shared.resolveIPv4(for: dstHost)
+
+        guard let ip = resolved, !closed, let match = stack.domainRouter.matchIP(ip)
         else { return }
 
         let router = stack.domainRouter
@@ -242,7 +304,7 @@ actor TCPConnection: MITMSessionHost {
             ruleMatched = true
             ruleSetName = match.ruleSetName
             routeTarget = .proxy(id)
-            configuration = resolved
+            configuration = keepingRelay(resolved)
         }
     }
 
@@ -382,7 +444,7 @@ actor TCPConnection: MITMSessionHost {
             ruleMatched = true
             ruleSetName = match.ruleSetName
             routeTarget = .proxy(id)
-            configuration = resolved
+            configuration = keepingRelay(resolved)
         }
     }
 
@@ -483,6 +545,13 @@ actor TCPConnection: MITMSessionHost {
 
         let host = dstHost
         let port = dstPort
+
+        // Printed before the dial, not after, because the interesting case never
+        // gets an "after": the connection is killed at the deadline. Pairing this
+        // against the core's own `TCP accept` is what says whether the dial ever
+        // arrived at the relay's listener.
+        logger.info("[TCP] Dial → \(configuration.serverAddress):\(configuration.serverPort) "
+                    + "for \(host):\(port)")
 
         let result: Result<ProxyConnection, Error>
         do {
@@ -1222,5 +1291,12 @@ actor TCPConnection: MITMSessionHost {
         
         rootTask?.cancel()
         rootTask = nil
+    }
+}
+
+private extension Duration {
+    nonisolated var milliseconds: Int {
+        let components = self.components
+        return Int(components.seconds * 1_000 + components.attoseconds / 1_000_000_000_000_000)
     }
 }

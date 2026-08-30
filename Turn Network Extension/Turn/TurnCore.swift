@@ -67,9 +67,19 @@ actor TurnCore {
     /// than that path can meet.
     private static let minimumReadyTimeout = 120
 
+    /// Whether traffic is going through the relay right now.
+    ///
+    /// The TCP path has to know this while deciding a route, and it cannot wait
+    /// on this actor to ask — so the answer lives outside the isolation and
+    /// mirrors `active`, which is the only thing that means "the listener is
+    /// serving this configuration".
+    nonisolated static let relaying = Atomic<Bool>(false)
+
     private let turn = IosNewTurn()
     /// The configuration the relay is serving, once its listener accepts.
-    private var active: TurnConfiguration?
+    private var active: TurnConfiguration? {
+        didSet { Self.relaying.store(active != nil, ordering: .relaxed) }
+    }
     /// A configuration whose core is still starting after a wait timed out. It is
     /// left running on purpose, so a retry can adopt it instead of discarding the
     /// credentials it has already collected.
@@ -134,6 +144,10 @@ actor TurnCore {
         }
 
         let json = try configuration.makeCoreConfigJSON(debug: Self.coreDebugLogging)
+        // Stated rather than assumed: a session with no per-lane narration is
+        // ambiguous — either the core was told to stay quiet, or the traffic
+        // never reached it. This line settles which.
+        logger.info("[TURN] Core debug logging: \(Self.coreDebugLogging ? "on" : "off")")
         let seconds = max(configuration.resolvedReadyTimeout, Self.minimumReadyTimeout)
         let timeout = seconds * 1000
 

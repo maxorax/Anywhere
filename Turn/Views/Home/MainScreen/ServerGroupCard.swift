@@ -12,6 +12,12 @@ import SwiftUI
 /// readable at a glance instead of a wall of badges.
 struct ServerGroupCard: View {
     let title: String
+    /// Traffic spent over what is left, and when the subscription runs out.
+    /// Both come from the panel's `subscription-userinfo` header; a group of
+    /// hand-added servers has neither.
+    var traffic: String?
+    var expiry: String?
+    var expired = false
     let configurations: [ProxyConfiguration]
     let selectedID: UUID?
     let latencies: [UUID: LatencyResult]
@@ -22,12 +28,34 @@ struct ServerGroupCard: View {
     /// Nil for groups that have nothing to refresh — servers added by hand.
     var onRefresh: (() -> Void)?
     var onTestLatency: () -> Void
-
-    @SwiftUI.State private var spinning = false
+    /// Nil for groups that are not subscriptions — nothing to rename or drop.
+    var onRename: (() -> Void)?
+    var onDelete: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
             header
+            // Its own line rather than a subtitle squeezed under the name: it is
+            // what a subscription is judged by.
+            if traffic != nil || expiry != nil {
+                Divider().overlay(MainScreen.surface(0.05))
+                HStack {
+                    if let traffic {
+                        Text(traffic)
+                            .font(.system(size: 12))
+                            .monospacedDigit()
+                            .foregroundStyle(MainScreen.surface(0.55))
+                    }
+                    Spacer()
+                    if let expiry {
+                        Text(expiry)
+                            .font(.system(size: 12, weight: expired ? .medium : .regular))
+                            .foregroundStyle(expired ? MainScreen.amber : MainScreen.surface(0.55))
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
             if isExpanded {
                 ForEach(configurations) { configuration in
                     Divider().overlay(MainScreen.surface(0.05))
@@ -59,30 +87,42 @@ struct ServerGroupCard: View {
                 .foregroundStyle(MainScreen.title)
                 .lineLimit(1)
 
-            Text(configurations.count.formatted())
-                .font(.system(size: 11))
-                .monospacedDigit()
-                .foregroundStyle(MainScreen.surface(0.5))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(RoundedRectangle(cornerRadius: 8).fill(MainScreen.surface(0.07)))
-
             Spacer(minLength: 4)
 
             if let onRefresh {
                 iconButton(systemImage: "arrow.trianglehead.clockwise", tint: MainScreen.blue, busy: isRefreshing) {
                     onRefresh()
                 }
-                .rotationEffect(.degrees(isRefreshing && spinning ? 360 : 0))
-                .onChange(of: isRefreshing) { _, refreshing in
-                    spinning = false
-                    guard refreshing else { return }
-                    withAnimation(.linear(duration: 0.9).repeatForever(autoreverses: false)) { spinning = true }
-                }
             }
 
             iconButton(systemImage: "speedometer", tint: MainScreen.accent, busy: isTestingLatency) {
                 onTestLatency()
+            }
+
+            // Renaming and removing a subscription lived on the old list's group
+            // header; without them here the only thing a tap on the header did
+            // was collapse the group, and a subscription could not be removed at
+            // all.
+            if onRename != nil || onDelete != nil {
+                Menu {
+                    if let onRename {
+                        Button {
+                            onRename()
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                    }
+                    if let onDelete {
+                        Button(role: .destructive, action: onDelete) {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(MainScreen.surface(0.5))
+                        .frame(width: 26, height: 30)
+                }
             }
 
             Image(systemName: "chevron.down")
@@ -98,16 +138,29 @@ struct ServerGroupCard: View {
         }
     }
 
+    /// A spinner while it works, rather than a spinning icon.
+    ///
+    /// The icon used to be rotated by a `repeatForever` animation started on
+    /// every change of the busy flag. Tapping refresh a few times stacked those
+    /// animations — the arrow span faster and faster and never stopped, because
+    /// setting the flag back does not cancel a repeating animation.
     private func iconButton(systemImage: String, tint: Color, busy: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(tint)
-                .frame(width: 30, height: 30)
-                .background(RoundedRectangle(cornerRadius: MainScreen.iconTileRadius).fill(tint.opacity(0.22)))
+            Group {
+                if busy {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .tint(tint)
+                } else {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(tint)
+                }
+            }
+            .frame(width: 30, height: 30)
+            .background(RoundedRectangle(cornerRadius: MainScreen.iconTileRadius).fill(tint.opacity(0.22)))
         }
         .buttonStyle(.plain)
-        .opacity(busy ? 0.5 : 1)
         .disabled(busy)
     }
 

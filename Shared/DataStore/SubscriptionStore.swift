@@ -208,10 +208,17 @@ extension SubscriptionStore {
 
         var updated = subscription
         updated.lastUpdate = Date()
-        updated.upload = result.upload ?? subscription.upload
-        updated.download = result.download ?? subscription.download
-        updated.total = result.total ?? subscription.total
-        updated.expire = result.expire ?? subscription.expire
+        // Taken verbatim when the panel reported them, kept when it said
+        // nothing at all. The old `??` could not tell those apart, so a
+        // subscription that lost its limit — or never had an expiry, which
+        // arrives as `expire=0` — kept whatever it was first imported with, and
+        // no amount of refreshing would clear it.
+        if result.hasUserInfo {
+            updated.upload = result.upload
+            updated.download = result.download
+            updated.total = result.total
+            updated.expire = result.expire
+        }
         if let name = result.name, !updated.isNameCustomized {
             updated.name = name
         }

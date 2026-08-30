@@ -172,7 +172,16 @@ extension TunnelStack {
             routeTarget = target
             ruleSetName = matchedRuleSet
             if let configuration {
-                connectionConfiguration = configuration
+                // A rule that points at the proxy already being relayed must not
+                // undo the relay. `resolveConfiguration` answers from the stored
+                // configurations, which carry the real server address, while the
+                // default has been redirected to the relay's local listener — so
+                // taking the rule's copy dials the address the relay exists to
+                // get around, and on a network that blocks it every such
+                // connection dies at the handshake deadline.
+                connectionConfiguration = configuration.id == defaultConfiguration.id
+                    ? defaultConfiguration
+                    : configuration
             }
         case .routeViaDefault:
             break
