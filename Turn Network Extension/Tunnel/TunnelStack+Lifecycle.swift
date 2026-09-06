@@ -21,6 +21,18 @@ extension TunnelStack {
     /// bringing the VK TURN relay online, above all — has to be visible too, and
     /// anything logged before this runs reaches only the system log.
     /// Installing twice is harmless; the sink is simply replaced.
+    /// Nothing in here runs on the thread that logged the line.
+    ///
+    /// Five crash reports say why, and they agree on everything except the
+    /// caller: the same stack overflow on `com.maxorax.turn.lwip`, a
+    /// packet-handling thread with a small stack, reached once through
+    /// `connectProxy`, once through `suspendOutbound` under `sleep()`, once from
+    /// the Go core's own log callback, and twice through `appendLog` below. No
+    /// single log line was at fault — the sink itself is expensive, a dozen
+    /// reabstraction frames before any work starts, and `Data(line.utf8)` then
+    /// reaches through `swift_dynamicCast` into dyld's conformance walk. Taking
+    /// all of it to a serial queue moves the depth somewhere that has room for
+    /// it and keeps the lines in order.
     nonisolated func installLogSink() {
         TurnLogger.installLogSink { [weak self] message, level in
             let logLevel: TunnelLogLevel
@@ -29,13 +41,23 @@ extension TunnelStack {
             case .warning: logLevel = .warning
             case .error: logLevel = .error
             }
-            self?.appendLog(message, level: logLevel)
-            // Same line to disk: the in-memory journal above is unreachable once
-            // this process is gone, and a killed extension is exactly the case
-            // worth reading afterwards.
-            TunnelLogFile.shared.append(message, level: logLevel)
+            // Stamped here so the file records when the line happened rather
+            // than when the queue reached it.
+            let moment = Date()
+            Self.logWriter.async {
+                self?.appendLog(message, level: logLevel)
+                // Same line to disk: the in-memory journal above is unreachable
+                // once this process is gone, and a killed extension is exactly
+                // the case worth reading afterwards.
+                TunnelLogFile.shared.append(message, level: logLevel, at: moment)
+            }
         }
     }
+
+    private static let logWriter = DispatchQueue(
+        label: "com.maxorax.turn.TunnelStack.logWriter",
+        qos: .utility
+    )
 
     func start(packetFlow: NEPacketTunnelFlow, configuration: ProxyConfiguration) async {
         installLogSink()

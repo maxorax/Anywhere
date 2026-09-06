@@ -50,10 +50,13 @@ actor TurnCore {
     /// healthy. Widening this again means turning congestion control on with it
     /// (`VK_TURN_KCP_NC=0`), not on its own.
     ///
-    /// The core's smux buffers — four megabytes of receive and one of stream per
-    /// lane — are left at their own defaults. They were cut for a while and the
-    /// cut was reverted: the tunnel stopped being killed the moment bond went
-    /// away, and nothing since has shown the buffers mattering on their own.
+    /// None of this reaches the core. Proven on device: Go copies the environment
+    /// when the framework loads, which is before any of this runs, so `os.Getenv`
+    /// reads a copy that will never contain it — the core has always used its own
+    /// defaults, a 512-packet window included. Left in place because the values
+    /// are the ones we want and the plumbing is what has to change: a setter on
+    /// the gomobile bridge, or a field in the config JSON the core already parses.
+    /// Until then, treat every number here as a wish rather than a setting.
     private static let coreMemoryBudget = [
         "VK_TURN_KCP_SNDWND": "128",
         "VK_TURN_KCP_RCVWND": "128",

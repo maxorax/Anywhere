@@ -546,13 +546,6 @@ actor TCPConnection: MITMSessionHost {
         let host = dstHost
         let port = dstPort
 
-        // Printed before the dial, not after, because the interesting case never
-        // gets an "after": the connection is killed at the deadline. Pairing this
-        // against the core's own `TCP accept` is what says whether the dial ever
-        // arrived at the relay's listener.
-        logger.info("[TCP] Dial → \(configuration.serverAddress):\(configuration.serverPort) "
-                    + "for \(host):\(port)")
-
         let result: Result<ProxyConnection, Error>
         do {
             result = .success(try await client.connect(to: host, port: port, initialData: initialData))

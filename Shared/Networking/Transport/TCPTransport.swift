@@ -9,8 +9,6 @@ import Foundation
 import Network
 import Synchronization
 
-nonisolated private let logger = TurnLogger(category: "TCPTransport")
-
 nonisolated protocol TCPTransportEngine: AnyObject, Sendable {
     func send(_ data: Data) async throws
     func receive(atMost maxLength: Int) async throws -> (content: Data, endOfStream: Bool)
@@ -32,9 +30,6 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         var cancelled = false
         var failure: TurnError?
         var eofLatched = false
-        /// When the engine was handed the endpoint.
-        var dialBegan: ContinuousClock.Instant?
-        var firstWriteReported = false
     }
 
     private let state = Mutex(State())
@@ -83,7 +78,6 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
             guard !state.cancelled else { return false }
             state.flowSlot = slot
             state.engine = engine
-            state.dialBegan = ContinuousClock.now
             return true
         }
         guard live else {
@@ -98,27 +92,8 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
                 cancel()
                 throw latchedFailure() ?? TurnError.networkFailure(error, operation: .connect)
             }
-            reportFirstWrite()
         }
         state.withLock { $0.ready = true }
-    }
-
-    /// How long the socket took to reach the far end, reported once.
-    ///
-    /// The modern engine dials lazily — `connect` only hands it the endpoint, and
-    /// the TCP connect itself happens on the first write. So this is the only
-    /// place that can time it, and the number matters: a dial to the VK relay's
-    /// own listener on 127.0.0.1 that takes seconds is a different failure from
-    /// one that connects instantly and then waits on the far side.
-    private func reportFirstWrite() {
-        let began: ContinuousClock.Instant? = state.withLock { state in
-            guard !state.firstWriteReported, let began = state.dialBegan else { return nil }
-            state.firstWriteReported = true
-            return began
-        }
-        guard let began else { return }
-        logger.info("[TCP] \(endpointDescription) took the first write after "
-                    + "\((ContinuousClock.now - began).milliseconds)ms")
     }
 
     // MARK: - ByteTransport
@@ -130,7 +105,6 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         } catch {
             throw latchedFailure() ?? TurnError.networkFailure(error, operation: .send)
         }
-        reportFirstWrite()
     }
 
     func receive() async throws -> TransportChunk {
@@ -210,12 +184,5 @@ nonisolated final class ModernTCPEngine: TCPTransportEngine, Sendable {
     func receive(atMost maxLength: Int) async throws -> (content: Data, endOfStream: Bool) {
         let message = try await connection.receive(atLeast: 1, atMost: maxLength)
         return (message.content, message.metadata.endOfStream)
-    }
-}
-
-private extension Duration {
-    nonisolated var milliseconds: Int {
-        let components = self.components
-        return Int(components.seconds * 1_000 + components.attoseconds / 1_000_000_000_000_000)
     }
 }

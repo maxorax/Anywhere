@@ -189,6 +189,7 @@ struct MainScreenView: View {
         HeroBlock(
             flow: relay.flow,
             orbState: orbState,
+            caption: caption,
             serverFlag: nil,
             serverName: viewModel.selectedConfiguration?.name,
             connectedSince: viewModel.connectedSince,
@@ -196,6 +197,16 @@ struct MainScreenView: View {
             onCaptcha: { relay.present() },
             onStatus: { showingStats = true }
         )
+    }
+
+    /// The words under the button. Disconnecting has its own, rather than
+    /// borrowing the ones for connecting.
+    private var caption: String {
+        switch viewModel.status {
+        case .disconnecting: String(localized: "Disconnecting…")
+        case .connecting, .reasserting: String(localized: "Connecting…")
+        case .connected, .disconnected, .invalid: String(localized: "Tap to connect")
+        }
     }
 
     private var orbState: ConnectionOrb.State {

@@ -57,8 +57,10 @@ nonisolated final class TunnelLogFile: Sendable {
         rotated = directory?.appendingPathComponent("turn.log.1")
     }
 
-    func append(_ message: String, level: TunnelLogLevel) {
-        let line = "\(Self.stamp.format(Date())) \(Self.tag(level)) \(message)\n"
+    /// Already off the logging thread — the sink dispatches before calling this
+    /// — so the write is synchronous here and keeps its place in the order.
+    func append(_ message: String, level: TunnelLogLevel, at moment: Date) {
+        let line = "\(Self.stamp.format(moment)) \(Self.tag(level)) \(message)\n"
         let data = Data(line.utf8)
 
         sink.withLock { sink in

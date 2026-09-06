@@ -14,6 +14,15 @@ import SwiftUI
 struct HeroBlock: View {
     let flow: StageFlow
     let orbState: ConnectionOrb.State
+    /// What the button says under itself while it is busy.
+    ///
+    /// The orb has three looks — off, busy, on — and both connecting and
+    /// disconnecting wear the busy one, which is right. The words are not the
+    /// same thing: reading "Connecting…" while the tunnel is being torn down
+    /// says the opposite of what is happening. So the caption comes from the
+    /// side that knows the actual status, rather than being inferred from a
+    /// state that deliberately conflates the two.
+    let caption: String
     /// Emoji flag and name of the server the button would connect to.
     let serverFlag: String?
     let serverName: String?
@@ -99,9 +108,7 @@ struct HeroBlock: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Text(orbState == .connecting
-                     ? String(localized: "Connecting…")
-                     : String(localized: "Tap to connect"))
+                Text(caption)
             }
         }
         .font(.system(size: 15, weight: .semibold, design: .monospaced))
