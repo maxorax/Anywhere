@@ -434,11 +434,16 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                 logger.info("[TURN] Network is filtered — switching to the VK relay")
                 return true
             case .offline:
-                // Relaying needs VK, and VK is on the network that just failed to
-                // answer. Spending a call and a captcha on that is worse than
-                // useless: neither is refundable when the attempt dies.
-                logger.warning("[TURN] No network on \(interface) — nothing to relay over; connecting directly")
-                return false
+                // Relay anyway. This was the other way round and it cost a
+                // session: a phone that had just moved to cellular answered
+                // nothing for the whole budget, was called offline, and went
+                // direct — down a path the carrier blocks. When nothing answers
+                // there is nothing for a direct connection to do either, so the
+                // cheaper mistake is to try the relay: VK's servers may well be
+                // reachable where the three canaries are not, and if the network
+                // really is gone the relay simply fails to come up.
+                logger.warning("[TURN] Nothing answered on \(interface) — trying the VK relay anyway")
+                return true
             }
         }
     }

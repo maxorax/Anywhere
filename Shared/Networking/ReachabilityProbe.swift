@@ -52,9 +52,30 @@ nonisolated enum ReachabilityProbe {
 
     private static let queue = DispatchQueue(label: "com.maxorax.turn.ReachabilityProbe")
 
+    /// How many times "nothing answers" is retried before it is believed.
+    ///
+    /// The probe runs on the network having just changed, and a radio that has
+    /// only now come up answers nothing at all — on device, a switch to cellular
+    /// produced three silent hosts for the whole one-second budget, a verdict of
+    /// "no network", and a session committed to a direct path that this carrier
+    /// blocks. Only the negative answer is retried: whatever answered is
+    /// reachable now, but nothing answering may only mean not yet.
+    private static let offlineRetries = 2
+    private static let retryDelay: Duration = .milliseconds(700)
+
     // MARK: - Probe
 
     static func run() async -> Verdict {
+        for _ in 0..<offlineRetries {
+            let verdict = await probeOnce()
+            guard verdict == .offline else { return verdict }
+            logger.info("[Probe] nothing answered; the network may still be settling, retrying")
+            try? await Task.sleep(for: retryDelay)
+        }
+        return await probeOnce()
+    }
+
+    private static func probeOnce() async -> Verdict {
         let answers = await withTaskGroup(of: (host: String, alive: Bool).self) { group in
             for host in [canary] + controls {
                 group.addTask { (host, await reachable(host)) }
