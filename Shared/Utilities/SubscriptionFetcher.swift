@@ -47,25 +47,9 @@ nonisolated struct SubscriptionFetcher {
         // alive far longer than anyone watches a spinner. So the whole fetch
         // gets a deadline of its own.
         request.timeoutInterval = Self.requestIdleTimeout
-        let prepared = request
-        let allowInsecure = AWCore.getAllowInsecure()
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await withDialDeadline(
-                Self.fetchDeadline,
-                onExpiry: {},
-                error: { URLError(.timedOut) }
-            ) {
-                if let viaUpstream = try await fetchViaConfiguredDNS(prepared, allowInsecure: allowInsecure) {
-                    return viaUpstream
-                } else if allowInsecure {
-                    let session = URLSession(configuration: .default, delegate: InsecureSessionDelegate(), delegateQueue: nil)
-                    defer { session.finishTasksAndInvalidate() }
-                    return try await session.data(for: prepared)
-                } else {
-                    return try await URLSession.shared.data(for: prepared)
-                }
-            }
+            (data, response) = try await download(request, deadline: Self.fetchDeadline)
         } catch is CancellationError {
             throw CancellationError()
         } catch let error as URLError where error.code == .cancelled {
@@ -79,14 +63,7 @@ nonisolated struct SubscriptionFetcher {
         let profileTitle = parseProfileTitle(from: httpResponse)
         let userInfo = parseSubscriptionUserInfo(from: httpResponse)
 
-        let bodyString: String
-        if let decoded = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
-           let decodedString = String(data: decoded, encoding: .utf8),
-           ProxyConfiguration.parsableURLPrefixes.contains(where: { decodedString.contains($0) }) {
-            bodyString = decodedString
-        } else if let rawString = String(data: data, encoding: .utf8) {
-            bodyString = rawString
-        } else {
+        guard let bodyString = decodeBody(data) else {
             throw TurnError.subscription(.noConfigurations)
         }
 
@@ -96,11 +73,12 @@ nonisolated struct SubscriptionFetcher {
             let parsed = try TurnSubscription.parse(json: bodyString)
             let relayed = parsed.configurations.filter { $0.turn != nil }.count
             logger.info("Parsed \(parsed.configurations.count) sing-box outbound(s), \(relayed) with a VK TURN relay")
-            let configurations = await pinCallLink(
+            let pinned = await pinCallLink(
                 in: parsed.configurations,
                 endpoint: parsed.linkEndpoint,
                 subscriptionURL: url
             )
+            let configurations = pinned + (await linkOnlyServers(from: request, besides: pinned))
             return Result(
                 configurations: configurations,
                 name: profileTitle ?? parsed.suggestedName,
@@ -128,11 +106,7 @@ nonisolated struct SubscriptionFetcher {
             )
         }
 
-        let configurations = bodyString
-            .components(separatedBy: .newlines)
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { ProxyConfiguration.canParseURL($0) }
-            .compactMap { try? ProxyConfiguration.parse(url: $0) }
+        let configurations = parseShareLinks(bodyString)
 
         guard !configurations.isEmpty else {
             throw TurnError.subscription(.noConfigurations)
@@ -147,6 +121,91 @@ nonisolated struct SubscriptionFetcher {
             expire: userInfo.expire,
             hasUserInfo: userInfo.present
         )
+    }
+
+    // MARK: - Download and decoding
+
+    private static func download(_ request: URLRequest, deadline: Duration) async throws -> (Data, URLResponse) {
+        let allowInsecure = AWCore.getAllowInsecure()
+        return try await withDialDeadline(deadline, onExpiry: {}, error: { URLError(.timedOut) }) {
+            if let viaUpstream = try await fetchViaConfiguredDNS(request, allowInsecure: allowInsecure) {
+                return viaUpstream
+            } else if allowInsecure {
+                let session = URLSession(configuration: .default, delegate: InsecureSessionDelegate(), delegateQueue: nil)
+                defer { session.finishTasksAndInvalidate() }
+                return try await session.data(for: request)
+            } else {
+                return try await URLSession.shared.data(for: request)
+            }
+        }
+    }
+
+    /// The body as text: base64-wrapped share links unwrapped, anything else as is.
+    private static func decodeBody(_ data: Data) -> String? {
+        if let decoded = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
+           let decodedString = String(data: decoded, encoding: .utf8),
+           ProxyConfiguration.parsableURLPrefixes.contains(where: { decodedString.contains($0) }) {
+            return decodedString
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private static func parseShareLinks(_ body: String) -> [ProxyConfiguration] {
+        body
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { ProxyConfiguration.canParseURL($0) }
+            .compactMap { try? ProxyConfiguration.parse(url: $0) }
+    }
+
+    // MARK: - Servers only the share-link format carries
+
+    /// Identifies the subscription as an ordinary client — one the panel answers
+    /// with share links. It must not contain "Turn": that is what the panel's
+    /// rule for the sing-box template matches.
+    private static let linksUserAgent = "v2rayN/7.13"
+
+    /// How long the second request may take. It is a bonus on top of a
+    /// subscription that has already been fetched, so it gets less.
+    private static let linksDeadline: Duration = .seconds(12)
+
+    /// Fetches the subscription again as a share-link client and returns the
+    /// servers the sing-box answer left out.
+    ///
+    /// The panel answers this app with its sing-box template, because only that
+    /// format carries the `turn` block. sing-box has no XHTTP transport, so a
+    /// host that uses it — the CDN hosts, which need XHTTP to get past a CDN that
+    /// only passes GET — is not in that answer at all, and the app never showed
+    /// it. The share-link answer has it, with every XHTTP setting in `extra`.
+    /// Any failure here returns nothing: the sing-box servers stand on their own.
+    private static func linkOnlyServers(from request: URLRequest,
+                                        besides primary: [ProxyConfiguration]) async -> [ProxyConfiguration] {
+        var linksRequest = request
+        linksRequest.setValue(linksUserAgent, forHTTPHeaderField: "User-Agent")
+        do {
+            let (data, _) = try await download(linksRequest, deadline: linksDeadline)
+            guard let body = decodeBody(data), !TurnSubscription.looksLikeSingBox(body) else { return [] }
+            let extras = mergingLinkOnly(primary, parseShareLinks(body))
+            if !extras.isEmpty {
+                logger.info("Added \(extras.count) server(s) the sing-box answer lacks: \(extras.map(\.name).joined(separator: ", "))")
+            }
+            return extras
+        } catch {
+            logger.warning("Share-link fetch for extra servers failed: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    /// The share-link servers not already in `primary`, matched by address and
+    /// port — the same server in both answers keeps its sing-box form, which
+    /// carries the VK TURN relay.
+    static func mergingLinkOnly(_ primary: [ProxyConfiguration],
+                                _ links: [ProxyConfiguration]) -> [ProxyConfiguration] {
+        let known = Set(primary.map { "\($0.serverAddress.lowercased()):\($0.serverPort)" })
+        var seen = known
+        return links.filter { link in
+            seen.insert("\(link.serverAddress.lowercased()):\(link.serverPort)").inserted
+        }
     }
 
     // MARK: - Per-subscriber call link

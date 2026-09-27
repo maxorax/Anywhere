@@ -55,14 +55,14 @@ struct TurnSubscriptionTests {
 
     @Test("Only VLESS outbounds become proxies")
     func skipsNonProxyOutbounds() throws {
-        let configs = try TurnSubscription.parse(json: Self.body)
+        let configs = try TurnSubscription.parse(json: Self.body).configurations
         #expect(configs.count == 2)
         #expect(configs.map(\.name) == ["RU", "JP"])
     }
 
     @Test("A relayed server gets its front attached")
     func attachesRelay() throws {
-        let config = try #require(try TurnSubscription.parse(json: Self.body).first { $0.name == "RU" })
+        let config = try #require(try TurnSubscription.parse(json: Self.body).configurations.first { $0.name == "RU" })
         let turn = try #require(config.turn)
 
         #expect(turn.peerAddress == "203.0.113.10:56000")
@@ -80,13 +80,13 @@ struct TurnSubscriptionTests {
 
     @Test("supported:false means dial directly")
     func honoursUnsupported() throws {
-        let config = try #require(try TurnSubscription.parse(json: Self.body).first { $0.name == "JP" })
+        let config = try #require(try TurnSubscription.parse(json: Self.body).configurations.first { $0.name == "JP" })
         #expect(config.turn == nil)
     }
 
     @Test("Reality survives the mapping, including the browser fingerprint")
     func mapsReality() throws {
-        let config = try #require(try TurnSubscription.parse(json: Self.body).first)
+        let config = try #require(try TurnSubscription.parse(json: Self.body).configurations.first)
         guard case .vless(_, _, let flow, let transport, let security) = config.outbound else {
             Issue.record("expected a VLESS outbound"); return
         }
@@ -103,7 +103,7 @@ struct TurnSubscriptionTests {
 
     @Test("Redirecting to the relay leaves the Reality handshake alone")
     func redirectKeepsHandshake() throws {
-        let config = try #require(try TurnSubscription.parse(json: Self.body).first { $0.name == "RU" })
+        let config = try #require(try TurnSubscription.parse(json: Self.body).configurations.first { $0.name == "RU" })
         let turn = try #require(config.turn)
         let redirected = config.withRedirectedServer(address: "127.0.0.1", port: turn.resolvedListenPort)
 
@@ -115,7 +115,7 @@ struct TurnSubscriptionTests {
 
     @Test("The core is started in VLESS mode on the relay's local port")
     func coreConfigJSON() throws {
-        let config = try #require(try TurnSubscription.parse(json: Self.body).first { $0.name == "RU" })
+        let config = try #require(try TurnSubscription.parse(json: Self.body).configurations.first { $0.name == "RU" })
         let turn = try #require(config.turn)
         let decoded = try #require(
             try JSONSerialization.jsonObject(with: Data(turn.makeCoreConfigJSON().utf8)) as? [String: Any]
