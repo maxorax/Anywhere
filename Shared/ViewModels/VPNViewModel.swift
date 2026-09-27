@@ -165,12 +165,28 @@ class VPNViewModel {
     // MARK: - Latency Testing
 
     @ObservationIgnored private var latencyTask: Task<Void, Never>?
+    /// Configurations marked `.testing` by the current run and not yet answered.
+    @ObservationIgnored private var latencyPending: Set<UUID> = []
 
     nonisolated private static let maxConcurrentLatencyTests = 8
 
-    func testLatency(for configuration: ProxyConfiguration) {
+    /// Cancels the run in flight and puts back what its unanswered rows showed
+    /// before. A cancelled run records nothing, so without this every row it had
+    /// not reached stayed `.testing` — a spinner for as long as the app was open.
+    /// Tapping one server during a "test all" was enough.
+    private func cancelLatencyRun() {
         latencyTask?.cancel()
+        latencyTask = nil
+        for id in latencyPending where latencyResults[id] == .testing {
+            latencyResults[id] = storedLatencyResults[id]
+        }
+        latencyPending.removeAll()
+    }
+
+    func testLatency(for configuration: ProxyConfiguration) {
+        cancelLatencyRun()
         let configurationId = configuration.id
+        latencyPending = [configurationId]
         latencyResults[configurationId] = .testing
         let useIPC = vpnStatus == .connected
         latencyTask = Task { [weak self] in
@@ -183,10 +199,11 @@ class VPNViewModel {
     }
 
     func testLatencies(for targets: [ProxyConfiguration]) {
-        latencyTask?.cancel()
+        cancelLatencyRun()
         for config in targets {
             latencyResults[config.id] = .testing
         }
+        latencyPending = Set(targets.map(\.id))
         let useIPC = vpnStatus == .connected
         let session = useIPC ? providerSession : nil
         latencyTask = Task { [weak self] in
@@ -202,14 +219,26 @@ class VPNViewModel {
     // MARK: - Chain Latency Testing
 
     @ObservationIgnored private var chainLatencyTask: Task<Void, Never>?
+    @ObservationIgnored private var chainLatencyPending: Set<UUID> = []
+
+    /// Same as `cancelLatencyRun`, for chains.
+    private func cancelChainLatencyRun() {
+        chainLatencyTask?.cancel()
+        chainLatencyTask = nil
+        for id in chainLatencyPending where chainLatencyResults[id] == .testing {
+            chainLatencyResults[id] = storedChainLatencyResults[id]
+        }
+        chainLatencyPending.removeAll()
+    }
 
     func testChainLatency(for chain: ProxyChain, configurations: [ProxyConfiguration]) {
         guard let resolved = chain.resolveComposite(from: configurations) else { return }
+        cancelChainLatencyRun()
         chainLatencyResults[chain.id] = .testing
+        chainLatencyPending = [chain.id]
         let chainId = chain.id
         let useIPC = vpnStatus == .connected
         let session = useIPC ? providerSession : nil
-        chainLatencyTask?.cancel()
         chainLatencyTask = Task { [weak self] in
             let result = await Self.runSingleLatencyTest(for: resolved, viaIPC: useIPC, session: session)
             await MainActor.run {
@@ -220,11 +249,12 @@ class VPNViewModel {
     }
 
     func testAllChainLatencies(chains: [ProxyChain], configurations: [ProxyConfiguration]) {
-        chainLatencyTask?.cancel()
+        cancelChainLatencyRun()
         var chainData: [(UUID, ProxyConfiguration)] = []
         for chain in chains {
             if let resolved = chain.resolveComposite(from: configurations) {
                 chainLatencyResults[chain.id] = .testing
+                chainLatencyPending.insert(chain.id)
                 chainData.append((chain.id, resolved))
             }
         }
@@ -256,6 +286,7 @@ class VPNViewModel {
     }
 
     private func recordLatencyResult(_ result: LatencyResult, for configurationId: UUID) {
+        latencyPending.remove(configurationId)
         latencyResults[configurationId] = result
         storedLatencyResults[configurationId] = result
         if let data = Self.encodeLatencyResults(storedLatencyResults) {
@@ -264,6 +295,7 @@ class VPNViewModel {
     }
 
     private func recordChainLatencyResult(_ result: LatencyResult, for chainId: UUID) {
+        chainLatencyPending.remove(chainId)
         chainLatencyResults[chainId] = result
         storedChainLatencyResults[chainId] = result
         if let data = Self.encodeLatencyResults(storedChainLatencyResults) {

@@ -26,6 +26,11 @@ nonisolated struct SubscriptionFetcher {
         var hasUserInfo = false
     }
 
+    /// No byte for this long ends the request.
+    private static let requestIdleTimeout: TimeInterval = 15
+    /// The whole download, however it trickles.
+    private static let fetchDeadline: Duration = .seconds(25)
+
     static func fetch(url urlString: String, withRemnawaveHWID: Bool = false) async throws -> Result {
         guard let url = URL(string: urlString) else {
             throw TurnError.subscription(.invalidURL)
@@ -37,17 +42,29 @@ nonisolated struct SubscriptionFetcher {
             request.setValue(AWCore.getRemnawaveHWID(), forHTTPHeaderField: "x-hwid")
         }
 
+        // A request's own timeout only counts silence, and a panel that trickles
+        // bytes — or a tunnel that has stopped carrying anything — can keep it
+        // alive far longer than anyone watches a spinner. So the whole fetch
+        // gets a deadline of its own.
+        request.timeoutInterval = Self.requestIdleTimeout
+        let prepared = request
         let allowInsecure = AWCore.getAllowInsecure()
         let (data, response): (Data, URLResponse)
         do {
-            if let viaUpstream = try await fetchViaConfiguredDNS(request, allowInsecure: allowInsecure) {
-                (data, response) = viaUpstream
-            } else if allowInsecure {
-                let session = URLSession(configuration: .default, delegate: InsecureSessionDelegate(), delegateQueue: nil)
-                defer { session.finishTasksAndInvalidate() }
-                (data, response) = try await session.data(for: request)
-            } else {
-                (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await withDialDeadline(
+                Self.fetchDeadline,
+                onExpiry: {},
+                error: { URLError(.timedOut) }
+            ) {
+                if let viaUpstream = try await fetchViaConfiguredDNS(prepared, allowInsecure: allowInsecure) {
+                    return viaUpstream
+                } else if allowInsecure {
+                    let session = URLSession(configuration: .default, delegate: InsecureSessionDelegate(), delegateQueue: nil)
+                    defer { session.finishTasksAndInvalidate() }
+                    return try await session.data(for: prepared)
+                } else {
+                    return try await URLSession.shared.data(for: prepared)
+                }
             }
         } catch is CancellationError {
             throw CancellationError()
