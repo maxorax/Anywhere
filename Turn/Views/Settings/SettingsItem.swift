@@ -32,7 +32,7 @@ enum SettingsItem: String {
         switch self {
         case .iCloudSync: "iCloud Sync"
         case .personalization: "Personalization"
-        case .subscriptionUpdate: "Update Subscriptions"
+        case .subscriptionUpdate: "Update Subscriptions on Open"
         case .alwaysOn: "Always On"
         case .globalMode: "Global Mode"
         case .adBlocking: "AD Blocking"

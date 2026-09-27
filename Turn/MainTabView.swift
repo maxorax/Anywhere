@@ -86,13 +86,13 @@ struct MainTabView: View {
             }
             .task {
                 captchaModel.start()
-                SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
+                SubscriptionAutoUpdater.shared.refreshOnOpen()
             }
             .onChange(of: scenePhase) { _, phase in
                 // iOS grants a VPN app no reliable periodic wake-up, so coming
                 // back to the foreground is the moment to catch up.
                 if phase == .active {
-                    SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
+                    SubscriptionAutoUpdater.shared.refreshOnOpen()
                 }
             }
     }

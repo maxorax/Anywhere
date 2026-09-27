@@ -42,6 +42,7 @@ nonisolated final class AWCore {
             UserDefaultsKey.reflectionAddresses: ["10.7.0.1"],
             UserDefaultsKey.remnawaveHWID: UUID().uuidString,
             UserDefaultsKey.subscriptionAutoUpdateHours: SubscriptionRefreshInterval.daily.rawValue,
+            UserDefaultsKey.subscriptionRefreshOnOpen: true,
             UserDefaultsKey.turnAutoCaptcha: true,
             UserDefaultsKey.turnCaptchaSolver: "v2",
             UserDefaultsKey.turnStreams: TurnStreamCount.default,
@@ -97,6 +98,7 @@ nonisolated final class AWCore {
         static let selectedChainId = "selectedChainId"
         static let selectedConfigurationId = "selectedConfigurationId"
         static let subscriptionAutoUpdateHours = "subscriptionAutoUpdateHours"
+        static let subscriptionRefreshOnOpen = "subscriptionRefreshOnOpen"
         static let subscriptionDNSDoHURL = "subscriptionDNSDoHURL"
         static let subscriptionDNSMode = "subscriptionDNSMode"
         static let subscriptionDNSPlainServer = "subscriptionDNSPlainServer"
@@ -269,6 +271,16 @@ nonisolated final class AWCore {
 
     static func setSubscriptionRefreshInterval(_ value: SubscriptionRefreshInterval) {
         userDefaults.set(value.rawValue, forKey: UserDefaultsKey.subscriptionAutoUpdateHours)
+    }
+
+    /// Whether subscriptions are re-fetched each time the app is opened. On by
+    /// default: servers and keys change, and the app is opened to connect.
+    static func getSubscriptionRefreshOnOpen() -> Bool {
+        userDefaults.bool(forKey: UserDefaultsKey.subscriptionRefreshOnOpen)
+    }
+
+    static func setSubscriptionRefreshOnOpen(_ value: Bool) {
+        userDefaults.set(value, forKey: UserDefaultsKey.subscriptionRefreshOnOpen)
     }
 
     // MARK: - VK TURN

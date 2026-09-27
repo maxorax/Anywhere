@@ -4,6 +4,22 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Update Subscriptions on Open" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Subscriptions on Open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновлять подписки при запуске"
+          }
+        }
+      }
+    },
     "VK captcha passed" : {
       "localizations" : {
         "en" : {

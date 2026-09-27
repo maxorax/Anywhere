@@ -238,7 +238,8 @@ struct MainScreenView: View {
                 configurations: configStore.configurations(for: subscription),
                 selectedID: viewModel.selectedConfiguration?.id,
                 latencies: viewModel.latencyResults,
-                isRefreshing: refreshing == subscription.id,
+                isRefreshing: refreshing == subscription.id
+                    || SubscriptionAutoUpdater.shared.refreshing.contains(subscription.id),
                 isTestingLatency: isTestingLatency(configStore.configurations(for: subscription)),
                 isExpanded: expansion(for: subscription.id),
                 onSelect: { viewModel.selectedConfiguration = $0 },

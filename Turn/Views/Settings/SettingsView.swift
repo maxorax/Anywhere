@@ -15,7 +15,7 @@ struct SettingsView: View {
 
     @State private var adBlockEnabled = RoutingRuleSetStore.shared.adBlockRuleSet?.assignedConfigurationId == "REJECT"
 
-    @State private var subscriptionRefreshInterval = AWCore.getSubscriptionRefreshInterval()
+    @State private var subscriptionRefreshOnOpen = AWCore.getSubscriptionRefreshOnOpen()
     @State private var showICloudRestartAlert = false
     @State private var showInsecureAlert = false
 
@@ -103,16 +103,12 @@ struct SettingsView: View {
                     SettingsItem.personalization.tileLabel
                 }
             }
-            Picker(selection: $subscriptionRefreshInterval) {
-                ForEach(SubscriptionRefreshInterval.allCases) { option in
-                    Text(option.title).tag(option)
-                }
-            } label: {
+            Toggle(isOn: $subscriptionRefreshOnOpen) {
                 SettingsItem.subscriptionUpdate.tileLabel
             }
-            .onChange(of: subscriptionRefreshInterval) {
-                AWCore.setSubscriptionRefreshInterval(subscriptionRefreshInterval)
-                SubscriptionAutoUpdater.shared.refreshStaleSubscriptions()
+            .onChange(of: subscriptionRefreshOnOpen) {
+                AWCore.setSubscriptionRefreshOnOpen(subscriptionRefreshOnOpen)
+                SubscriptionAutoUpdater.shared.refreshOnOpen()
             }
         }
     }
