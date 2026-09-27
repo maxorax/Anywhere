@@ -141,8 +141,13 @@ struct ConnectionOrb: View {
 /// Traced from the handoff's own path in a 24-unit box — `M12 3.5 L12 11` and
 /// an arc of radius 7.5 taking the long way round from upper-left to
 /// upper-right, which is what leaves the 90° gap at the top.
+// `nonisolated` because the conformance is otherwise inferred as main-actor
+// isolated, which Xcode 27 rejects: `Shape` may be rasterised off the main
+// actor. Nothing here touches shared state — it is arithmetic on a rect.
 private struct PowerGlyph: Shape {
-    func path(in rect: CGRect) -> Path {
+    nonisolated init() {}
+
+    nonisolated func path(in rect: CGRect) -> Path {
         let unit = min(rect.width, rect.height) / 24
         var path = Path()
         path.move(to: CGPoint(x: 12 * unit, y: 3.5 * unit))
