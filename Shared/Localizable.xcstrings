@@ -4,6 +4,38 @@
     "" : {
       "shouldTranslate" : false
     },
+    "VK captcha passed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK captcha passed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Капча VK пройдена"
+          }
+        }
+      }
+    },
+    "VK captcha passed automatically" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VK captcha passed automatically"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Капча VK пройдена автоматически"
+          }
+        }
+      }
+    },
     "·" : {
       "shouldTranslate" : false
     },

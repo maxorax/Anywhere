@@ -106,6 +106,13 @@ struct MainScreenView: View {
                 renaming = nil
             }
         }
+        // An automatic solve is otherwise invisible: the connection just takes
+        // a few seconds longer.
+        .onChange(of: relay.captchaPasses) { _, _ in
+            show(relay.lastPassAutomatic
+                 ? String(localized: "VK captcha passed automatically")
+                 : String(localized: "VK captcha passed"))
+        }
         .onChange(of: renaming?.id) { _, _ in
             renamedTo = renaming?.name ?? ""
         }

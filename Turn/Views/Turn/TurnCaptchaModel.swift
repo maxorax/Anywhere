@@ -38,6 +38,12 @@ final class TurnCaptchaModel {
     /// says what is happening now, and the chart needs to show a solved captcha
     /// as behind us rather than as never touched.
     private(set) var captchaSeen = false
+    /// Bumped once per captcha VK accepted, for the main screen's note; with
+    /// `lastPassAutomatic` saying whether a solver or the user passed it.
+    private(set) var captchaPasses = 0
+    private(set) var lastPassAutomatic = true
+    /// The core's own count as last seen, to tell a new pass from a repeat.
+    private var solvedSeen = 0
 
     /// Backstop for a missed notification — the app may have been suspended when
     /// the relay changed phase.
@@ -131,6 +137,7 @@ final class TurnCaptchaModel {
             stage = .idle
             path = nil
             captchaSeen = false
+            solvedSeen = 0
             return
         }
         guard let data = try? JSONEncoder().encode(TunnelMessage.fetchTurnState),
@@ -142,6 +149,17 @@ final class TurnCaptchaModel {
         stage = payload.stage ?? .idle
         path = payload.path
         if payload.state.phase == .captcha { captchaSeen = true }
+        // An automatic solve happens inside the core and never enters the
+        // captcha phase — so without this the chart drew the step as untouched
+        // next to a relay that had plainly needed one.
+        let solved = payload.state.captchasSolved ?? 0
+        if solved < solvedSeen { solvedSeen = 0 } // a new core counts from zero
+        if solved > solvedSeen {
+            solvedSeen = solved
+            captchaSeen = true
+            lastPassAutomatic = payload.state.lastCaptcha != "manual"
+            captchaPasses += 1
+        }
         if stage == .idle { captchaSeen = false }
         apply(payload.state)
     }

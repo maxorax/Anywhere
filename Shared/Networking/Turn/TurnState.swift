@@ -30,6 +30,11 @@ nonisolated struct TurnState: Codable, Sendable, Equatable {
     /// only place the session pool is published. `nil` means the core has not
     /// said anything about its lanes yet.
     var activeStreams: Int?
+    /// Captchas VK accepted since the core started, and how the latest was
+    /// passed — "auto" or "manual". An automatic solve never enters the
+    /// `captcha` phase, so this is the only trace of it.
+    var captchasSolved: Int?
+    var lastCaptcha: String?
 
     static let idle = TurnState(phase: .idle, running: false)
 
