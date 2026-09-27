@@ -58,12 +58,10 @@ nonisolated final class UDPTransport: DatagramTransport, Sendable {
         let endpoint = NWEndpoint.hostPort(host: endpointHost, port: nwPort)
         let slot = FlowSlot(context: "[UDP] \(endpointDescription)")
         
-        let engine: any UDPTransportEngine
-        if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, visionOS 26.0, *) {
-            engine = ModernUDPEngine(endpoint: endpoint)
-        } else {
-            engine = LegacyUDPEngine(endpoint: endpoint)
-        }
+        // NWConnection on every OS — same trap as in TCPTransport.connect: an
+        // operation reaching a NetworkConnection that already cancelled itself
+        // crashes the process instead of throwing.
+        let engine: any UDPTransportEngine = LegacyUDPEngine(endpoint: endpoint)
 
         let live: Bool = state.withLock { state in
             guard !state.cancelled else { return false }

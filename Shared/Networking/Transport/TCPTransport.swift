@@ -67,12 +67,14 @@ nonisolated final class TCPTransport: ByteTransport, Sendable {
         let endpoint = NWEndpoint.hostPort(host: endpointHost, port: nwPort)
         let slot = FlowSlot(context: "[TCP] \(endpointDescription)")
         
-        let engine: any TCPTransportEngine
-        if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, visionOS 26.0, *) {
-            engine = ModernTCPEngine(endpoint: endpoint, connectTimeout: Self.connectTimeout)
-        } else {
-            engine = LegacyTCPEngine(endpoint: endpoint, connectTimeout: Self.connectTimeout)
-        }
+        // NWConnection on every OS, not NetworkConnection on 26. Send and receive
+        // run from different tasks; once one is cancelled, NetworkConnection
+        // cancels itself, and the other operation arriving after that does not
+        // fail — it traps inside Network.framework ("Neither nw nor nwGroup is
+        // initialized", Connection.swift:5833) and takes the extension with it.
+        // Caught on device 2026-09-25 as a tunnel dying mid-download with
+        // "Plugin failed". NWConnection answers the same race with ECANCELED.
+        let engine: any TCPTransportEngine = LegacyTCPEngine(endpoint: endpoint, connectTimeout: Self.connectTimeout)
 
         let live: Bool = state.withLock { state in
             guard !state.cancelled else { return false }

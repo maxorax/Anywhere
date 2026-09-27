@@ -223,6 +223,29 @@ Routing не рисуется, если Global Mode включён вне про
 Каталог правится с сохранением исходного порядка ключей и форматирования Xcode, так что
 в диффе только добавления.
 
+## 12. TCP и UDP к прокси — через NWConnection на любой iOS
+
+`TCPTransport.connect` и `UDPTransport.connect` всегда берут `LegacyTCPEngine` /
+`LegacyUDPEngine` (`NWConnection`). Апстрим на iOS 26 выбирает `ModernTCPEngine` /
+`ModernUDPEngine` (`NetworkConnection`); сами классы оставлены, чтобы слияния не
+конфликтовали.
+
+Причина — краш расширения 25 сентября, 16:41: туннель умер посреди загрузки, в
+системном логе `Cannot set state changed handler after cancel [C510]`, затем
+`Network/Connection.swift:5833: Fatal error: Neither nw nor nwGroup is initialized`,
+SIGTRAP и `disconnected with reason Plugin failed`. Отправка и приём идут из разных
+задач; отмена одной закрывает `NetworkConnection`, и вторая операция на нём не
+бросает ошибку, а роняет процесс. `NWConnection` отвечает на то же `ECANCELED`.
+В апстриме по 2.2(378) не исправлено.
+
+Краш-отчёта на телефоне не было: iOS хранит не больше 25 отчётов на приложение и
+новые молча выбрасывает (`Report of type '309' not saved because the limit of 25 logs
+has been reached`). Поэтому часть «тихих смертей» из §9b1 и серия «~5670 строк»
+вполне могли быть этим же крашем — проверять по системному логу
+(`sudo log collect --device-udid …`), а не по наличию `.ips`.
+
+`QUICDatagramCarrier` по-прежнему на `NetworkConnection<UDP>` — тот же риск, не тронут.
+
 ---
 
 ## Как устроена история
