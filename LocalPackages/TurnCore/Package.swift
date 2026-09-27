@@ -1,8 +1,9 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-// The VK TURN proxy core, built from moroka8/vk-turn-proxy-ios via
-//   gomobile bind -target=ios -o Mobile.xcframework ./mobile/ios
+// The VK TURN proxy core, built from ~/Desktop/vk-turn-core (branch `mobile`,
+// Moroka8/vk-turn-proxy plus the mobile bridge) via
+//   scripts/build-mobile.sh ios
 // It exposes `IosTurn` (see pkg/vkturn): start the proxy, wait for its local
 // listener, read structured state. Only the Network Extension links it — the
 // tunnel process is where the proxy has to live.
