@@ -23,6 +23,7 @@ nonisolated final class BridgeExecutor: SerialExecutor, @unchecked Sendable {
         let job = UnownedJob(job)
         let executor = asUnownedSerialExecutor()
         queue.async {
+            StackHeadroom.check(.executor)
             job.runSynchronously(on: executor)
         }
     }

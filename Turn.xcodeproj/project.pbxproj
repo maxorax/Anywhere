@@ -404,6 +404,7 @@
 				Utilities/DeviceCensorship.swift,
 				Utilities/MonotonicClock.swift,
 				"Utilities/String+init.swift",
+				Utilities/StackHeadroom.swift,
 				Utilities/SubscriptionDomainHelper.swift,
 				Utilities/TurnError.swift,
 				Utilities/TurnLogger.swift,

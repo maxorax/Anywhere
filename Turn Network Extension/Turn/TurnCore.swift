@@ -359,9 +359,14 @@ private final class TurnLogSink: NSObject, IosCallbackProtocol {
     private let logger = TurnLogger(category: "TurnCore")
 
     func onLog(_ message: String?) {
+        StackHeadroom.check(.coreLog)
         guard let message, !message.isEmpty else { return }
         guard let message = Self.redacted(message) else { return }
-        logger.info("[TURN] \(message)")
+        // Straight to the journal's buffer, not through TurnLogger: this runs on
+        // Go's threads, and four crash reports end right here, in that logger's
+        // chain of closures, with the stack spent. The line no longer reaches
+        // os_log; the journal is where it is read.
+        TunnelStack.enqueueLine("[TURN] \(message)", level: .info)
         if let count = Self.laneCount(in: message) {
             activeStreams.withLock { $0 = count }
         }

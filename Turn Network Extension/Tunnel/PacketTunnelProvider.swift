@@ -580,7 +580,8 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
                     // raises.
                     logger.info("[VPN] Footprint \(mb) MB, relay lanes \(lanes), "
                                 + "tcp \(FlowGauge.tcpTable), udp \(FlowGauge.udpTable), "
-                                + "up \(Self.formatBytes(counts.totalBytesOut)), down \(Self.formatBytes(counts.totalBytesIn))")
+                                + "up \(Self.formatBytes(counts.totalBytesOut)), down \(Self.formatBytes(counts.totalBytesIn)), "
+                                + "stack min \(StackHeadroom.summary())")
                 }
                 try? await Task.sleep(for: Self.memoryWatchInterval)
             }

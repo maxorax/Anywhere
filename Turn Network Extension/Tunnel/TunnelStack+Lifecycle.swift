@@ -72,18 +72,28 @@ extension TunnelStack {
             case .warning: logLevel = .warning
             case .error: logLevel = .error
             }
-            // Stamped here so the file records when the line happened rather
-            // than when the pump reached it.
-            let line = PendingLine(message: message, level: logLevel, moment: Date())
-            let wake = Self.pendingLines.withLock { buffer -> Bool in
-                guard buffer.count < Self.maximumPending else { return false }
-                buffer.append(line)
-                // Only the line that finds the buffer empty needs to wake the
-                // pump; the rest are already covered by that signal.
-                return buffer.count == 1
-            }
-            if wake { Self.linesReady.signal() }
+            Self.enqueueLine(message, level: logLevel)
         }
+    }
+
+    /// Hands a line to the journal's pump and returns. Callable from any thread
+    /// — the Go core's own threads included, which call it directly rather than
+    /// through `TurnLogger`: that path costs a dozen reabstraction frames, an
+    /// os_log and a closure fetched from a lock, on threads whose stack has run
+    /// out in every crash report so far.
+    nonisolated static func enqueueLine(_ message: String, level: TunnelLogLevel) {
+        StackHeadroom.check(.logSink)
+        // Stamped here so the file records when the line happened rather than
+        // when the pump reached it.
+        let line = PendingLine(message: message, level: level, moment: Date())
+        let wake = pendingLines.withLock { buffer -> Bool in
+            guard buffer.count < maximumPending else { return false }
+            buffer.append(line)
+            // Only the line that finds the buffer empty needs to wake the pump;
+            // the rest are already covered by that signal.
+            return buffer.count == 1
+        }
+        if wake { linesReady.signal() }
     }
 
     private static func startLogPump() {
