@@ -21,20 +21,51 @@ extension TunnelStack {
     /// bringing the VK TURN relay online, above all — has to be visible too, and
     /// anything logged before this runs reaches only the system log.
     /// Installing twice is harmless; the sink is simply replaced.
-    /// Nothing in here runs on the thread that logged the line.
+    /// Nothing in here runs on the thread that logged the line, and nothing is
+    /// dispatched per line either.
     ///
-    /// Five crash reports say why, and they agree on everything except the
-    /// caller: the same stack overflow on `com.maxorax.turn.lwip`, a
-    /// packet-handling thread with a small stack, reached once through
-    /// `connectProxy`, once through `suspendOutbound` under `sleep()`, once from
-    /// the Go core's own log callback, and twice through `appendLog` below. No
-    /// single log line was at fault — the sink itself is expensive, a dozen
+    /// Six crash reports explain the first half: the same stack overflow on
+    /// `com.maxorax.turn.lwip`, a packet-handling thread with a small stack,
+    /// reached through four different callers. The sink is expensive — a dozen
     /// reabstraction frames before any work starts, and `Data(line.utf8)` then
-    /// reaches through `swift_dynamicCast` into dyld's conformance walk. Taking
-    /// all of it to a serial queue moves the depth somewhere that has room for
-    /// it and keeps the lines in order.
+    /// reaches through `swift_dynamicCast` into dyld's conformance walk — so it
+    /// has to happen somewhere with room for it.
+    ///
+    /// The journal explains the second half. Handing each line to a queue fixed
+    /// the overflow and bought a new failure: six sessions died silently after
+    /// 5649, 5667, 5671, 5673, 5674 and 5674 lines — a constant count, while
+    /// their durations ranged from seventeen minutes to nearly eight hours and
+    /// their rates from twelve to a hundred and eighty lines a minute. No crash
+    /// report, no jetsam event, and `phys_footprint` flat at 22–30 MB against a
+    /// limit of fifty, so whatever ran out was not memory. One dispatch per line
+    /// was the only thing counting up with the line count, so there is no longer
+    /// one: lines go into a buffer, and a single long-lived thread drains it.
+    private struct PendingLine: Sendable {
+        let message: String
+        let level: TunnelLogLevel
+        let moment: Date
+    }
+
+    /// A weak handle rather than a captured `self`: the pump outlives any one
+    /// stack, and must not be what keeps a dead one alive.
+    private struct PumpTarget: @unchecked Sendable {
+        weak var stack: TunnelStack?
+    }
+
+    private static let pendingLines = Mutex<[PendingLine]>([])
+    private static let linesReady = DispatchSemaphore(value: 0)
+    private static let pumpTarget = Mutex(PumpTarget())
+    private static let pumpStarted = Mutex(false)
+
+    /// Ceiling on the backlog. A pump that falls behind drops lines rather than
+    /// growing without bound — the journal is a diagnostic, not the tunnel.
+    private static let maximumPending = 4096
+
     nonisolated func installLogSink() {
-        TurnLogger.installLogSink { [weak self] message, level in
+        Self.pumpTarget.withLock { $0.stack = self }
+        Self.startLogPump()
+
+        TurnLogger.installLogSink { message, level in
             let logLevel: TunnelLogLevel
             switch level {
             case .debug, .info: logLevel = .info
@@ -42,22 +73,70 @@ extension TunnelStack {
             case .error: logLevel = .error
             }
             // Stamped here so the file records when the line happened rather
-            // than when the queue reached it.
-            let moment = Date()
-            Self.logWriter.async {
-                self?.appendLog(message, level: logLevel)
-                // Same line to disk: the in-memory journal above is unreachable
-                // once this process is gone, and a killed extension is exactly
-                // the case worth reading afterwards.
-                TunnelLogFile.shared.append(message, level: logLevel, at: moment)
+            // than when the pump reached it.
+            let line = PendingLine(message: message, level: logLevel, moment: Date())
+            let wake = Self.pendingLines.withLock { buffer -> Bool in
+                guard buffer.count < Self.maximumPending else { return false }
+                buffer.append(line)
+                // Only the line that finds the buffer empty needs to wake the
+                // pump; the rest are already covered by that signal.
+                return buffer.count == 1
             }
+            if wake { Self.linesReady.signal() }
         }
     }
 
-    private static let logWriter = DispatchQueue(
-        label: "com.maxorax.turn.TunnelStack.logWriter",
-        qos: .utility
-    )
+    private static func startLogPump() {
+        let shouldStart = pumpStarted.withLock { started -> Bool in
+            guard !started else { return false }
+            started = true
+            return true
+        }
+        // `installLogSink` is called twice on every start — once by the provider
+        // and once by `start` below — and the pump is process-wide.
+        guard shouldStart else { return }
+
+        let pump = Thread {
+            while true {
+                linesReady.wait()
+                while !writePendingLines().isEmpty {}
+            }
+        }
+        pump.name = "com.maxorax.turn.logPump"
+        pump.qualityOfService = .utility
+        pump.start()
+    }
+
+    /// Takes whatever is waiting and writes it. Returns what it wrote, so the
+    /// pump can keep going until the buffer is actually empty.
+    @discardableResult
+    private static func writePendingLines() -> [PendingLine] {
+        let batch = pendingLines.withLock { buffer -> [PendingLine] in
+            let out = buffer
+            buffer.removeAll(keepingCapacity: true)
+            return out
+        }
+        guard !batch.isEmpty else { return batch }
+        let stack = pumpTarget.withLock { $0.stack }
+        for line in batch {
+            stack?.appendLog(line.message, level: line.level)
+            // Same line to disk: the in-memory journal above is unreachable once
+            // this process is gone, and a killed extension is exactly the case
+            // worth reading afterwards.
+            TunnelLogFile.shared.append(line.message, level: line.level, at: line.moment)
+        }
+        return batch
+    }
+
+    /// Writes everything already logged, on the caller's thread.
+    ///
+    /// `stopTunnel` has seconds before the process ends, and the lines saying
+    /// why it stopped are exactly the ones worth keeping. Safe to call from
+    /// there — it is an ordinary async context, not the shallow packet thread
+    /// the pump exists to protect.
+    static func flushPendingLogs() {
+        writePendingLines()
+    }
 
     func start(packetFlow: NEPacketTunnelFlow, configuration: ProxyConfiguration) async {
         installLogSink()

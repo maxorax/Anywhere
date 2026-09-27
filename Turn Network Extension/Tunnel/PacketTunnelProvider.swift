@@ -272,6 +272,10 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         
         await tunnelStack.stop()
         await TurnCore.shared.deactivate()
+
+        // Last thing, and deliberately blocking: everything above is sitting in
+        // the journal's buffer, and the process may not outlive this call.
+        TunnelStack.flushPendingLogs()
     }
 
     /// Publishes the stage and wakes the app, which redraws the chart from it.
@@ -514,21 +518,54 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// speedtest produced. A footprint every few seconds turns that silence into
     /// evidence: the final line before the gap says how close the process was to
     /// the 50 MB an extension gets.
+    /// How far apart two readings must be before the later one is worth a line.
+    ///
+    /// The watch samples every five seconds and used to write all of it down:
+    /// twelve lines a minute, seventeen thousand a day, almost all of them
+    /// identical to the line above. That is most of what the journal contains
+    /// and nearly all of what a reader has to skip past — and it is what made a
+    /// ceiling on total lines reachable in a night. A sample that says the same
+    /// thing as the last one it reported says nothing.
+    private static let footprintStep: UInt64 = 3          // MB
+    private static let trafficStep: Int64 = 1024 * 1024   // bytes
+    /// Reported regardless, so a quiet tunnel still proves it was alive.
+    private static let heartbeat = Duration.seconds(300)
+
     private func startMemoryWatch() {
         let task = Task { [weak self] in
+            var lastFootprint: UInt64 = 0
+            var lastLanes = ""
+            var lastBytes: Int64 = 0
+            var lastReport = ContinuousClock.now
+
             while !Task.isCancelled {
                 guard let self else { return }
                 let footprint = Self.memoryFootprint()
                 let relay = await TurnCore.shared.state
                 let lanes = relay.activeStreams.map { "\($0)/\(relay.streams ?? 0)" } ?? "none"
-                // Bytes and open connections alongside the footprint: a journal
-                // that only records failures cannot tell "nothing worked" from
-                // "nothing was tried", and that is exactly the question a
-                // connection which looks up but carries nothing raises.
                 let counts = tunnelStack.byteCounts.withLock { $0 }
-                logger.info("[VPN] Footprint \(footprint / 1024 / 1024) MB, relay lanes \(lanes), "
-                            + "tcp \(FlowGauge.tcpTable), udp \(FlowGauge.udpTable), "
-                            + "up \(Self.formatBytes(counts.totalBytesOut)), down \(Self.formatBytes(counts.totalBytesIn))")
+                let moved = counts.totalBytesIn + counts.totalBytesOut
+
+                let mb = footprint / 1024 / 1024
+                let due = ContinuousClock.now - lastReport >= Self.heartbeat
+                let changed = lanes != lastLanes
+                    || mb.absoluteDistance(to: lastFootprint / 1024 / 1024) >= Self.footprintStep
+                    || abs(moved - lastBytes) >= Self.trafficStep
+
+                if due || changed {
+                    lastFootprint = footprint
+                    lastLanes = lanes
+                    lastBytes = moved
+                    lastReport = ContinuousClock.now
+                    // Bytes and open connections alongside the footprint: a
+                    // journal that only records failures cannot tell "nothing
+                    // worked" from "nothing was tried", and that is exactly the
+                    // question a connection which looks up but carries nothing
+                    // raises.
+                    logger.info("[VPN] Footprint \(mb) MB, relay lanes \(lanes), "
+                                + "tcp \(FlowGauge.tcpTable), udp \(FlowGauge.udpTable), "
+                                + "up \(Self.formatBytes(counts.totalBytesOut)), down \(Self.formatBytes(counts.totalBytesIn))")
+                }
                 try? await Task.sleep(for: Self.memoryWatchInterval)
             }
         }
@@ -761,5 +798,13 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         case .error:
             logger.error(message)
         }
+    }
+}
+
+private extension UInt64 {
+    /// Distance in either direction, without the trap an unsigned subtraction
+    /// springs when the later reading is the smaller one.
+    func absoluteDistance(to other: UInt64) -> UInt64 {
+        self > other ? self - other : other - self
     }
 }
