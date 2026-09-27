@@ -28,6 +28,8 @@ struct HeroBlock: View {
     let serverName: String?
     let connectedSince: Date?
     var onToggle: () -> Void
+    /// Long press on the button: connect through the VK relay.
+    var onForceRelay: () -> Void = {}
     var onCaptcha: () -> Void
     /// Tapping the running timer opens the connection statistics.
     var onStatus: () -> Void = {}
@@ -39,7 +41,7 @@ struct HeroBlock: View {
             ZStack(alignment: .topLeading) {
                 StageFlowChart(flow: flow, onCaptcha: onCaptcha)
                     .offset(x: 8, y: 4)
-                ConnectionOrb(state: orbState, action: onToggle)
+                ConnectionOrb(state: orbState, action: onToggle, onHold: onForceRelay)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 20)
             }

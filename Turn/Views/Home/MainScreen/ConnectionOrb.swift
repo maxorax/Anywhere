@@ -19,6 +19,8 @@ struct ConnectionOrb: View {
 
     let state: State
     var action: () -> Void
+    /// Holding the button connects through the VK relay, whatever the setting.
+    var onHold: () -> Void = {}
 
     private static let size: CGFloat = 158
     private static let bodyInset: CGFloat = 8
@@ -29,19 +31,17 @@ struct ConnectionOrb: View {
     @SwiftUI.State private var spinning = false
 
     var body: some View {
-        Button(action: action) {
-            ZStack {
-                contourRing
-                body_
-                hairline
-                core
-                glyph
-                if state == .connecting { spinner }
-            }
-            .frame(width: Self.size, height: Self.size)
-            .contentShape(Circle())
+        ZStack {
+            contourRing
+            body_
+            hairline
+            core
+            glyph
+            if state == .connecting { spinner }
         }
-        .buttonStyle(.plain)
+        .frame(width: Self.size, height: Self.size)
+        .contentShape(Circle())
+        .powerButtonGestures(onTap: action, onHold: onHold)
         // Not disabled while connecting on purpose. Bringing a tunnel up can
         // take minutes — a relay parked on a captcha is the worst of it — and a
         // button that ignores taps then is a dead end with no way out.
@@ -133,6 +133,52 @@ struct ConnectionOrb: View {
         case .connecting: 25
         case .on: 30
         }
+    }
+}
+
+// MARK: - Tap and hold
+
+extension View {
+    /// Tap toggles the tunnel; holding connects through the VK relay.
+    ///
+    /// Not a `Button` with a long press bolted on: a button still fires its
+    /// action when the finger lifts after a hold, so one gesture would both
+    /// force the relay and toggle the tunnel straight back off. Here the hold is
+    /// tried first and the tap only counts if the hold never completed.
+    func powerButtonGestures(onTap: @escaping () -> Void, onHold: @escaping () -> Void) -> some View {
+        modifier(PowerButtonGestures(onTap: onTap, onHold: onHold))
+    }
+}
+
+private struct PowerButtonGestures: ViewModifier {
+    private static let holdDuration: TimeInterval = 0.6
+
+    let onTap: () -> Void
+    let onHold: () -> Void
+
+    /// Bumped on every completed hold, so the haptic says "that was the other
+    /// action" before anything on screen has had time to change.
+    @State private var holds = 0
+
+    func body(content: Content) -> some View {
+        content
+            .gesture(
+                LongPressGesture(minimumDuration: Self.holdDuration)
+                    .exclusively(before: TapGesture())
+                    .onEnded { value in
+                        switch value {
+                        case .first:
+                            holds += 1
+                            onHold()
+                        case .second:
+                            onTap()
+                        }
+                    }
+            )
+            .sensoryFeedback(.impact(weight: .medium), trigger: holds)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction(.default) { onTap() }
+            .accessibilityAction(named: Text("Connect through VK")) { onHold() }
     }
 }
 

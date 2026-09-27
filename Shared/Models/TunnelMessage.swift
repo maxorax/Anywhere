@@ -12,6 +12,10 @@ nonisolated enum TunnelMessage: Codable, Sendable {
     /// Key in `startVPNTunnel(options:)` carrying an encoded `setConfiguration`.
     static let optionKey = "tunnelMessage"
 
+    /// Key in `startVPNTunnel(options:)`: `true` relays this session through VK
+    /// regardless of `TurnMode`. Sent by a long press on the power button.
+    static let forceRelayOptionKey = "forceRelay"
+
     /// Apply the configuration; used at startup and to switch proxies while running.
     case setConfiguration(ProxyConfiguration)
 

@@ -47,6 +47,9 @@ class VPNViewModel {
     @ObservationIgnored private var vpnManager: NETunnelProviderManager?
     @ObservationIgnored private var statusObserver: Task<Void, Never>?
     private(set) var pendingReconnect = false
+    /// Whether the running session was started by holding the power button, so
+    /// a reconnect after a settings change stays on the relay.
+    private(set) var relayForced = false
     /// Debounces a transient `.reasserting` (network blip) while connected so the UI keeps
     /// showing "Connected" unless the reconnect persists past ``reassertingDebounceInterval``.
     @ObservationIgnored private var reassertingDebounceTask: Task<Void, Never>?
@@ -418,7 +421,7 @@ class VPNViewModel {
                 stats.reset()
                 if pendingReconnect {
                     pendingReconnect = false
-                    connectVPN()
+                    connectVPN(forceRelay: relayForced)
                 }
             }
         }
@@ -464,9 +467,25 @@ class VPNViewModel {
         }
     }
 
-    func connectVPN() {
+    /// Long press on the power button: connect through the VK relay whatever
+    /// `TurnMode` says. A tunnel that is already up or on its way is restarted
+    /// on the relay rather than left on whatever path it chose.
+    func forceRelayVPN() {
+        switch vpnStatus {
+        case .disconnected, .invalid:
+            connectVPN(forceRelay: true)
+        case .connected, .connecting:
+            relayForced = true
+            reconnectVPN()
+        default:
+            break
+        }
+    }
+
+    func connectVPN(forceRelay: Bool = false) {
         guard let manager = vpnManager,
               let configuration = selectedConfiguration else { return }
+        relayForced = forceRelay
 
         Task { [self] in
             // Resolves on DNSResolver's worker queue, off both the main actor and
@@ -511,7 +530,11 @@ class VPNViewModel {
                 }
 
                 let messageData = try JSONEncoder().encode(TunnelMessage.setConfiguration(resolved))
-                try manager.connection.startVPNTunnel(options: [TunnelMessage.optionKey: messageData as NSObject])
+                var options: [String: NSObject] = [TunnelMessage.optionKey: messageData as NSObject]
+                if forceRelay {
+                    options[TunnelMessage.forceRelayOptionKey] = NSNumber(value: true)
+                }
+                try manager.connection.startVPNTunnel(options: options)
             } catch {
                 self.startError = error.localizedDescription
             }

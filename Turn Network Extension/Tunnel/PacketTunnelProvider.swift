@@ -26,6 +26,12 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// a network change can re-run the relay decision from the original.
     private let baseConfiguration = Mutex<ProxyConfiguration?>(nil)
 
+    /// Set when the user held the power button: this session relays through VK
+    /// whatever `TurnMode` says, without touching the saved setting. Starts from
+    /// On Demand or the system toggle carry no options, so they go back to the
+    /// setting — which is the point: a long press is a one-off.
+    private let relayForced = Mutex(false)
+
     /// Interface the relay's sockets are currently pinned to, so a path update
     /// that changes nothing does not re-bind and re-log.
     private let boundInterface = Mutex<String?>(nil)
@@ -46,6 +52,12 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
         // Before anything else, so bringing the TURN relay up is narrated in the
         // journal rather than only in the system log.
         tunnelStack.installLogSink()
+
+        let forced = (options?[TunnelMessage.forceRelayOptionKey] as? NSNumber)?.boolValue ?? false
+        relayForced.withLock { $0 = forced }
+        if forced {
+            logger.info("[TURN] Power button held — this session goes through the VK relay")
+        }
 
         guard let configuration = resolveStartConfiguration(options: options) else {
             let error = TurnError.tunnel(.invalidConfiguration)
@@ -404,6 +416,10 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// path monitor has not necessarily reported in yet when the tunnel starts,
     /// and the probe is the more truthful signal anyway.
     private func shouldRelay(_ configuration: ProxyConfiguration) async -> Bool {
+        if relayForced.withLock({ $0 }) {
+            logger.info("[TURN] Relay forced for this session")
+            return true
+        }
         switch AWCore.getTurnMode() {
         case .off:
             logger.info("[TURN] Relay turned off in Settings — connecting directly")
@@ -692,7 +708,9 @@ nonisolated class PacketTunnelProvider: NEPacketTunnelProvider, @unchecked Senda
     /// cellular. Walking out of Wi-Fi range is exactly the moment the direct path
     /// stops working, and the point of `auto` is to notice without being asked.
     private func reevaluateRelay(previous: NetworkContext) async {
-        guard AWCore.getTurnMode() == .auto else { return }
+        // A forced session is `always` in all but name, and `always` has nothing
+        // to re-decide.
+        guard !relayForced.withLock({ $0 }), AWCore.getTurnMode() == .auto else { return }
 
         let current = await tunnelStack.networkContext
         guard current.isWiFi != previous.isWiFi || current.isCellular != previous.isCellular else { return }

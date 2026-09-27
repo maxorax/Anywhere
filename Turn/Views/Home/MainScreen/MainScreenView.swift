@@ -194,6 +194,7 @@ struct MainScreenView: View {
             serverName: viewModel.selectedConfiguration?.name,
             connectedSince: viewModel.connectedSince,
             onToggle: { viewModel.toggleVPN() },
+            onForceRelay: { viewModel.forceRelayVPN() },
             onCaptcha: { relay.present() },
             onStatus: { showingStats = true }
         )

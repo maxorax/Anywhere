@@ -377,17 +377,24 @@ struct HomeView: View {
             isDisabled: isLoading
                 || (viewModel.isButtonDisabled(hasConfigurations: configStore.hasConfigurations)
                     && configStore.hasConfigurations),
-            animatesChanges: connectionEffectsEnabled
-        ) {
-            guard !isLoading else { return }
-            if configStore.hasConfigurations {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                    viewModel.toggleVPN()
+            animatesChanges: connectionEffectsEnabled,
+            action: {
+                guard !isLoading else { return }
+                if configStore.hasConfigurations {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        viewModel.toggleVPN()
+                    }
+                } else {
+                    showingAddSheet = true
                 }
-            } else {
-                showingAddSheet = true
+            },
+            onHold: {
+                guard !isLoading, configStore.hasConfigurations else { return }
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                    viewModel.forceRelayVPN()
+                }
             }
-        }
+        )
     }
 
     private var configurationCard: some View {
@@ -461,37 +468,37 @@ private struct PowerButton: View {
     let isDisabled: Bool
     let animatesChanges: Bool
     let action: () -> Void
+    /// Holding the button connects through the VK relay, whatever the setting.
+    let onHold: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            ZStack {
-                if #available(iOS 27.0, *) {
-                    Circle()
-                        .fill(.clear)
-                        .frame(width: Self.circleDiameter)
-                        .glassEffect(.regular, in: .circle)
-                } else if #available(iOS 26.0, *) {
-                    Circle()
-                        .fill(.clear)
-                        .frame(width: Self.circleDiameter)
-                        .glassEffect(.clear, in: .circle)
-                } else {
-                    Circle()
-                        .fill(.white.opacity(0.2))
-                        .frame(width: Self.circleDiameter)
-                        .shadow(color: isConnected ? .cyan.opacity(0.4) : .black.opacity(0.08), radius: isConnected ? 24 : 8)
-                }
-                if isTransitioning || isLoading {
-                    ProgressView()
-                        .controlSize(.large)
-                } else {
-                    Image(systemName: "power")
-                        .font(.system(size: 40, weight: .light))
-                }
+        ZStack {
+            if #available(iOS 27.0, *) {
+                Circle()
+                    .fill(.clear)
+                    .frame(width: Self.circleDiameter)
+                    .glassEffect(.regular, in: .circle)
+            } else if #available(iOS 26.0, *) {
+                Circle()
+                    .fill(.clear)
+                    .frame(width: Self.circleDiameter)
+                    .glassEffect(.clear, in: .circle)
+            } else {
+                Circle()
+                    .fill(.white.opacity(0.2))
+                    .frame(width: Self.circleDiameter)
+                    .shadow(color: isConnected ? .cyan.opacity(0.4) : .black.opacity(0.08), radius: isConnected ? 24 : 8)
             }
-            .contentShape(Circle())
+            if isTransitioning || isLoading {
+                ProgressView()
+                    .controlSize(.large)
+            } else {
+                Image(systemName: "power")
+                    .font(.system(size: 40, weight: .light))
+            }
         }
-        .buttonStyle(.plain)
+        .contentShape(Circle())
+        .powerButtonGestures(onTap: action, onHold: onHold)
         .disabled(isDisabled)
         .animation(animatesChanges ? Animation.easeInOut(duration: 0.6) : nil, value: isConnected)
     }

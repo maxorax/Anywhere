@@ -246,6 +246,28 @@ has been reached`). Поэтому часть «тихих смертей» из
 
 `QUICDatagramCarrier` по-прежнему на `NetworkConnection<UDP>` — тот же риск, не тронут.
 
+## 13. Долгое нажатие на кнопку — принудительно через VK TURN
+
+Удержание кнопки питания (0,6 с, с тактильным откликом) подключает через релей, что бы
+ни стояло в `TurnMode`. Сохранённая настройка не меняется — это разовое решение на сессию.
+
+- `VPNViewModel.forceRelayVPN()` — выключено → `connectVPN(forceRelay: true)`; поднято
+  или поднимается → переподключение на релей. `relayForced` переживает `reconnectVPN()`
+  после смены настроек.
+- `TunnelMessage.forceRelayOptionKey` — флаг в `startVPNTunnel(options:)`.
+- `PacketTunnelProvider.relayForced` — `shouldRelay` сразу отвечает «да»,
+  `reevaluateRelay` ничего не перерешает (как в `always`).
+- `powerButtonGestures` (в `ConnectionOrb.swift`) — `LongPressGesture.exclusively(before: TapGesture())`
+  вместо `Button`: кнопка срабатывает и на отпускание после удержания, то есть выключила бы
+  только что принудительно включённый туннель. Подключено к `ConnectionOrb` и к
+  `PowerButton` про-режима. Для VoiceOver — именованное действие «Connect through VK»
+  (ключ добавлен на все 8 языков).
+
+Запуски без опций — On Demand, переключатель в Настройках iOS, виджет — идут по
+`TurnMode`. Если релей не поднялся, сессия, как и в `always`, падает на прямое подключение.
+То же сделано в Android (`TurnVpnService.EXTRA_FORCE_RELAY`, `VpnViewModel.forceRelayVPN`,
+`combinedClickable` на обеих кнопках).
+
 ---
 
 ## Как устроена история
